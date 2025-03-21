@@ -28,7 +28,6 @@ export default () => (
         <section className='text-center mx-auto max-w-lg'>
             <h2 className='text-2xl font-serif'>What we do</h2>
             <br />
-            <br />
             <p className='font-sans text-lg font-semibold max-w-md mx-auto'>
                 We are an experienced interior design studio dedicated to creating unique, tailored spaces.
                 Whether offering advice or full turn-key transformations—including art, decor, and furnishings—we bring originality to every project, from hotels and offices to mid-century homes.
@@ -85,22 +84,20 @@ export default () => (
         </section>
         <section className='flex justify-center items-start text-center gap-x-35'>
             <div className='max-w-sm'>
-                <h1 className='text-3xl/loose font-serif'>Commercial design</h1>
+                <h1 className='text-3xl/relaxed font-serif'>Commercial design</h1>
                 <br />
                 <p className='text-lg font-sans font-semibold'>For commercial spaces—boutique B&Bs, hotels, offices, restaurants, and more—pricing is available upon request.</p>
                 <br />
                 <p className='text-lg font-sans font-semibold'>Reach out for a personalized quote—we’re flexible and ready to work with you!</p>
                 <br />
-                <br />
                 <Link href='/commercial-design' className='text-xl font-sans font-medium uppercase'>Read our code for commercial interiors</Link>
             </div>
             <div className='max-w-sm'>
-                <h1 className='text-3xl/loose font-serif'>Residential design</h1>
+                <h1 className='text-3xl/relaxed font-serif'>Residential design</h1>
                 <br />
                 <p className='text-lg font-sans font-semibold'>For residential spaces, we offer fixed-price packages. Need something unique? We can tailor a custom package to fit your vision.</p>
                 <br />
                 <p className='text-lg font-sans font-semibold'>Let’s transform your space into your dream home together.</p>
-                <br />
                 <br />
                 <Link href='/residential-design' className='font-sans text-xl font-medium uppercase'>See our residential packages</Link>
             </div>

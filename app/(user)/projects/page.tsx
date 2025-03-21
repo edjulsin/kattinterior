@@ -1,40 +1,9 @@
 import Bottom from '@/components/Bottom'
+import images from '@/data/projects'
 import clsx from 'clsx'
 import Image from 'next/image'
 
-const images = [
-    {
-        alt: 'Villa X',
-        source: '/x/4.png',
-        width: 1080,
-        height: 1296
-    },
-    {
-        alt: 'Villa Arunika',
-        source: '/arunika/1.jpg',
-        width: 1620,
-        height: 1080
-    },
-    {
-        alt: 'Villa Asri',
-        source: '/asri/4.png',
-        width: 1620,
-        height: 1080
-    },
-    {
-        alt: 'Villa Harmonis',
-        source: '/harmonis/14.jpg',
-        width: 1280,
-        height: 847
-    },
-    {
-        alt: 'Villa Ubud',
-        source: '/ubud/3.jpg',
-        width: 1920,
-        height: 1080
-    }
-]
-
+// make into list of articles
 export default () => (
     <div className='flex flex-col gap-y-40 pt-[8dvh]'>
         <section className='flex flex-col gap-y-16'>

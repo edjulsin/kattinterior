@@ -18,6 +18,9 @@ const works = [
     }
 ]
 
+// make it single projects so the theme/image's color will match instead of two different projects
+// optional make link to see all projects
+
 export default () => (
     <section className='flex flex-col gap-y-20'>
         <h3 className='font-serif text-3xl text-neutral-500 text-center'>LATEST WORKS</h3>

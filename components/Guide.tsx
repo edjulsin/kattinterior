@@ -22,12 +22,12 @@ export default (
             <div className='max-w-md self-end'>
                 <h1 key={ title } className='text-4xl/loose font-serif'>{ title }</h1>
                 {
-                    description.map(paragraph =>
-                        <>
-                            <br key={ paragraph + 'br' } />
+                    description.flatMap(paragraph => {
+                        return [
+                            <br key={ paragraph + 'br' } />,
                             <p key={ paragraph } className='text-lg font-semibold font-sans'>{ paragraph }</p>
-                        </>
-                    )
+                        ]
+                    })
                 }
             </div>
             <span className='text-5xl font-serif self-end'>&darr;</span>
@@ -35,22 +35,20 @@ export default (
         <section className='flex flex-col gap-y-20'>
             <span className='text-xl text-center font-serif'>{ contentTitle }</span>
             <ol className='*:max-w-sm grid grid-cols-2 place-items-center auto-rows-fr *:row-span-3 gap-y-20'>
-                <li key={ 'first' } className='col-start-2'>
+                <li key={ 'first' } className='col-start-2 flex flex-col justify-center gap-y-4'>
                     <h6 className='text-2xl/relaxed font-serif flex flex-col'>
                         <span className='text-4xl'>00</span>
                         <span>{ headTitle }</span>
                     </h6>
-                    <br />
                     <p className='text-lg font-semibold font-sans'>{ headDescription }</p>
                 </li>
                 {
                     contents.map(([title, description], i) =>
-                        <li key={ title }>
+                        <li className='flex flex-col justify-center gap-y-4' key={ title }>
                             <h6 className='text-2xl/relaxed font-serif flex flex-col'>
                                 <span className='text-4xl'>{ (i + 1 < 10 ? '0' : '') + (i + 1) }</span>
                                 <span>{ title }</span>
                             </h6>
-                            <br />
                             <p className='text-lg font-semibold font-sans'>{ description }</p>
                         </li>
                     )

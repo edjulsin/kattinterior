@@ -9,48 +9,51 @@
 	--font-serif: var(--font-serif);
 }
 
-
 @layer components {
 	.hamburger {
 		@apply bg-neutral-200 rounded-full size-16;
 	}
+
 	.hamburger-open {
 		@apply animate-[hamburger-open_500ms_both];
 	}
+
 	.hamburger-close {
 		@apply animate-[hamburger-close_500ms_both];
 	}
 
 	.hamburger-icon {
 		@apply stroke-1 stroke-black size-full;
-		& > * {
+
+		&>* {
 			@apply origin-center;
 		}
-		& > *:first-child {
+
+		&>*:first-child {
 			@apply -translate-y-[5px];
 		}
 
-		& > *:last-child {
+		&>*:last-child {
 			@apply translate-y-[5px] scale-x-80 translate-x-[5%];
 		}
 	}
 
 	.hamburger-icon-open {
-		& > *:first-child {
+		&>*:first-child {
 			@apply animate-[hamburger-top-open_500ms_both];
 		}
 
-		& > *:last-child {
+		&>*:last-child {
 			@apply animate-[hamburger-bottom-open_500ms_both];
 		}
 	}
 
 	.hamburger-icon-close {
-		& > *:first-child {
+		&>*:first-child {
 			@apply animate-[hamburger-top-close_500ms_both];
 		}
 
-		& > *:last-child {
+		&>*:last-child {
 			@apply animate-[hamburger-bottom-close_500ms_both];
 		}
 	}
@@ -60,66 +63,75 @@
 			width: 4rem;
 			height: 4rem;
 		}
+
 		to {
 			width: 5rem;
 			height: 5rem;
 		}
 	}
-	
+
 	@keyframes hamburger-close {
 		from {
 			width: 5rem;
 			height: 5rem;
 		}
+
 		to {
 			width: 4rem;
 			height: 4rem;
 		}
 	}
-	
+
 	@keyframes hamburger-top-open {
 		50% {
 			transform: translate(0, 5px);
 		}
+
 		100% {
 			transform: translate(0, 5px) rotate(-138deg);
 		}
 	}
-	
+
 	@keyframes hamburger-top-close {
 		0% {
 			transform: translateY(5px) rotate(-138deg);
 		}
+
 		50% {
 			transform: translateY(5px) rotate(0deg);
 		}
+
 		100% {
 			transform: translateY(0) rotate(0deg);
 		}
 	}
-	
+
 	@keyframes hamburger-bottom-open {
 		0% {
 			transform: translateY(-5px);
 		}
+
 		50% {
 			transform: translate(-5%, -5px);
 		}
+
 		100% {
 			transform: translate(-5%, -5px) scaleX(1.25) rotate(138deg);
 		}
 	}
-	
+
 	@keyframes hamburger-bottom-close {
 		0% {
 			transform: translate(-5%, -5px) scaleX(1.25) rotate(138deg);
 		}
+
 		33% {
 			transform: translate(-5%, -5px) scaleX(1.25) rotate(0deg);
 		}
+
 		66% {
 			transform: translate(0, -5px);
 		}
 	}
-	
+
 }

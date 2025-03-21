@@ -7,7 +7,7 @@ const serif = localFont({
 	style: 'normal',
 	weight: '400',
 	variable: '--font-serif',
-	display: 'swap'
+	preload: false
 })
 
 const sans = localFont({
@@ -25,7 +25,7 @@ const sans = localFont({
 		{ path: '../public/fonts/garamond/EBGaramond.otf', weight: '300', style: 'normal' }
 	],
 	variable: '--font-sans',
-	display: 'swap'
+	preload: false
 })
 
 export default ({

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from 'next/font/local'
 import "./globals.css";
+import clsx from 'clsx';
 
 const serif = localFont({
 	src: '../public/fonts/tanpearl/TanPearl.otf',
@@ -34,7 +35,7 @@ export default ({
 	children: React.ReactNode;
 }>) => (
 	<html lang='en'>
-		<body className={ `${serif.variable} ${sans.variable} antialiased` }>
+		<body className={ clsx(`${serif.variable} ${sans.variable} antialiased`, 'bg-light dark:bg-dark dark:text-white') }>
 			{ children }
 		</body>
 	</html>

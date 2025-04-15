@@ -8,7 +8,7 @@ export default () => (
     <div className='flex flex-col gap-y-40 pt-[8dvh]'>
         <section className='flex flex-col gap-y-16'>
             <h1 className='text-center font-serif text-lg'>Design Stories</h1>
-            <ul className='grid grid-cols-3 grid-flow-dense gap-y-20 place-items-center'>
+            <ul className='grid grid-cols-3 grid-flow-dense gap-y-20 place-items-center py-14'>
                 {
 
                     images.map((image, i) =>
@@ -19,7 +19,7 @@ export default () => (
                                 { 'row-start-2': i === 1 }
                             ) }
                         >
-                            <figure className='flex flex-col gap-y-5'>
+                            <figure className='flex flex-col gap-y-10'>
                                 <Image
                                     className='w-90 h-140 object-cover object-center'
                                     src={ image.source }

@@ -2,12 +2,12 @@ import Bottom from '@/components/Bottom';
 import Image from 'next/image';
 
 export default (
-    { thumbnail: { src, alt, width, height }, title, description, contentTitle, contentList: [[headTitle, headDescription], ...contents], contactCopy }: {
+    { thumbnail: { src, alt, width, height }, title, description, contentTitle, contentList: [ [ headTitle, headDescription ], ...contents ], contactCopy }: {
         thumbnail: { src: string, alt: string, width: number, height: number },
         title: string,
         description: string[],
         contentTitle: string,
-        contentList: [string, string][],
+        contentList: [ string, string ][],
         contactCopy?: string
     }) => (
     <div className='flex flex-col gap-y-40'>
@@ -43,7 +43,7 @@ export default (
                     <p className='text-lg font-semibold font-sans'>{ headDescription }</p>
                 </li>
                 {
-                    contents.map(([title, description], i) =>
+                    contents.map(([ title, description ], i) =>
                         <li className='flex flex-col justify-center gap-y-4' key={ title }>
                             <h6 className='text-2xl/relaxed font-serif flex flex-col'>
                                 <span className='text-4xl'>{ (i + 1 < 10 ? '0' : '') + (i + 1) }</span>

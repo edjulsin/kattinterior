@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export default () => (
     <div className='flex flex-col gap-y-50'>
-        <section className='grid grid-cols-[1fr_2fr] grid-rows-[auto_auto] gap-10'>
+        <section className='grid grid-cols-[1fr_2fr] grid-rows-[auto_auto] gap-14'>
             <Image
                 className='w-100 h-140 row-span-2 justify-self-end object-cover object-center'
                 src='/asri/7.jpg'

@@ -1,7 +1,22 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
 	--text-tiny: 0.625rem;
+	--color-light: #fcf9f5;
+	--color-dark: #6e3931;
+	--color-gold-50: #F9F5F1;
+	--color-gold-100: #F3EBE2;
+	--color-gold-200: #EDE0D4;
+	--color-gold-300: #E7D6C5;
+	--color-gold-400: #E1CCB7;
+	--color-gold-500: #DBC2A9;
+	--color-gold-600: #D5B89A;
+	--color-gold-700: #CFAF8C;
+	--color-gold-800: #C9A47E;
+	--color-gold-900: #C3996F;
+	--color-gold-950: #BD8F61;
 }
 
 @theme inline {
@@ -11,7 +26,7 @@
 
 @layer components {
 	.hamburger {
-		@apply bg-neutral-200 rounded-full size-16;
+		@apply bg-gold-100 rounded-full size-16;
 	}
 
 	.hamburger-open {
@@ -25,36 +40,40 @@
 	.hamburger-icon {
 		@apply stroke-1 stroke-black size-full;
 
-		&>* {
+		& > * {
 			@apply origin-center;
 		}
 
-		&>*:first-child {
+		& > *:first-child {
 			@apply -translate-y-[5px];
 		}
 
-		&>*:last-child {
-			@apply translate-y-[5px] scale-x-80 translate-x-[5%];
+		& > *:last-child {
+			@apply translate-y-[5px];
 		}
 	}
 
 	.hamburger-icon-open {
-		&>*:first-child {
+		& > *:first-child {
 			@apply animate-[hamburger-top-open_500ms_both];
+			@apply translate-y-0;
 		}
 
-		&>*:last-child {
+		& > *:last-child {
 			@apply animate-[hamburger-bottom-open_500ms_both];
+			@apply translate-y-0;
 		}
 	}
 
 	.hamburger-icon-close {
-		&>*:first-child {
+		& > *:first-child {
 			@apply animate-[hamburger-top-close_500ms_both];
+			@apply -translate-y-[5px];
 		}
 
-		&>*:last-child {
+		& > *:last-child {
 			@apply animate-[hamburger-bottom-close_500ms_both];
+			@apply translate-y-[5px];
 		}
 	}
 
@@ -83,54 +102,42 @@
 	}
 
 	@keyframes hamburger-top-open {
-		50% {
-			transform: translate(0, 5px);
+		from {
+			transform: rotate(0deg);
 		}
 
-		100% {
-			transform: translate(0, 5px) rotate(-138deg);
+		to {
+			transform: rotate(-138deg);
 		}
 	}
-
+	
 	@keyframes hamburger-top-close {
-		0% {
-			transform: translateY(5px) rotate(-138deg);
+		from {
+			transform: rotate(-138deg);
 		}
 
-		50% {
-			transform: translateY(5px) rotate(0deg);
-		}
-
-		100% {
-			transform: translateY(0) rotate(0deg);
+		to {
+			transform: rotate(0deg);
 		}
 	}
 
 	@keyframes hamburger-bottom-open {
-		0% {
-			transform: translateY(-5px);
+		from {
+			transform: rotate(0deg);
 		}
 
-		50% {
-			transform: translate(-5%, -5px);
-		}
-
-		100% {
-			transform: translate(-5%, -5px) scaleX(1.25) rotate(138deg);
+		to {
+			transform: rotate(138deg);
 		}
 	}
-
+	
 	@keyframes hamburger-bottom-close {
-		0% {
-			transform: translate(-5%, -5px) scaleX(1.25) rotate(138deg);
+		from {
+			transform: rotate(138deg);
 		}
 
-		33% {
-			transform: translate(-5%, -5px) scaleX(1.25) rotate(0deg);
-		}
-
-		66% {
-			transform: translate(0, -5px);
+		to {
+			transform: rotate(0deg);
 		}
 	}
 

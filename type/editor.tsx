@@ -1,26 +1,32 @@
 export type Item = {
-    i: number,
+    z: number,
     x: number,
     y: number,
     w: number,
     h: number,
     sx: number,
-    sy: number
+    sy: number,
+    sw: number,
+    sh: number,
+    bw: number,
+    bh: number
 }
+
+export type Items = Item[]
 
 export type Layout = {
     cols: number,
     rows: number,
-    items: Item[]
+    items: Items
 }
 
 export type Template = {
-    index: number,
     className: string,
     breakpoint: number,
+    grid: number,
     edited: boolean,
     layout: Layout
 }
 
-export type Templates = Template[]
+export type Templates = Record<string, Template>
 

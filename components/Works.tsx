@@ -23,7 +23,7 @@ const works = [
 
 export default () => (
     <section className='flex flex-col gap-y-20'>
-        <h3 className='font-serif text-3xl text-neutral-500 text-center'>LATEST WORKS</h3>
+        <h3 className='font-serif text-2xl text-gold-900 text-center'>LATEST WORKS</h3>
         <ul className='grid grid-cols-[1fr_.05fr_1fr] grid-rows-[1fr_.25fr]'>
             <li className='col-start-1 row-start-1 col-span-2 row-span-2 justify-self-end self-end z-20'>
                 <Link href='/villa-arunika'>
@@ -37,7 +37,7 @@ export default () => (
                         />
                         <figcaption className='text-center'>
                             <h2 className='text-2xl/normal font-serif'>Villa Arunika</h2>
-                            <span className='text-neutral-500 font-sans font-semibold'>Nyanyi Beach, Bali</span>
+                            <span className='text-gold-900 font-sans font-semibold'>Nyanyi Beach, Bali</span>
                         </figcaption>
                     </figure>
                 </Link>
@@ -54,7 +54,7 @@ export default () => (
                         />
                         <figcaption className='text-center'>
                             <h2 className='text-2xl/normal font-serif'>Villa X</h2>
-                            <span className='text-neutral-500 font-sans font-semibold'>Kaba-Kaba, Bali</span>
+                            <span className='text-gold-900 font-sans font-semibold'>Kaba-Kaba, Bali</span>
                         </figcaption>
                     </figure>
                 </Link>

@@ -4,18 +4,17 @@ import clsx from 'clsx'
 import Link from 'next/link'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Close, Content, Description, Portal, Root, Title, Trigger, Overlay } from '@radix-ui/react-dialog'
-import { AccessibleIcon } from '@radix-ui/react-accessible-icon'
 import Logo from './Logo'
 import { useState } from 'react'
 import Hamburger from './Hamburger'
-const pages = ['projects', 'services', 'packages', 'about', 'contact']
+const pages = [ 'projects', 'services', 'about', 'contact' ]
 
 export default ({ className = '' }: { className?: string }) => {
-    const [state, setState] = useState('')
-    const [scrollable, setScrollable] = useState(true)
+    const [ state, setState ] = useState(false)
+    const [ scrollable, setScrollable ] = useState(true)
 
-    const onOpenChange = () => {
-        setState(state => state === '' || state === 'close' ? 'open' : 'close')
+    const onOpenChange = (state: boolean) => {
+        setState(state)
         setScrollable(document.documentElement.scrollHeight > document.documentElement.clientHeight)
     }
 
@@ -26,7 +25,7 @@ export default ({ className = '' }: { className?: string }) => {
             </Trigger>
             <Portal>
                 <Overlay asChild>
-                    <Content className={ clsx('fixed inset-0 bg-[#6E3931] z-50 group size-full', { 'overflow-y-scroll': scrollable }) }>
+                    <Content className={ clsx('fixed inset-0 bg-dark z-50 group size-full', { 'overflow-y-scroll': scrollable }) }>
                         <div className='grid size-full grid-rows-[auto_1fr_auto] text-white place-items-center max-w-7xl mx-auto gap-y-[5dvh]'>
                             <VisuallyHidden>
                                 <Title>Navigation menu</Title>

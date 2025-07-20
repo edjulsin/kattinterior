@@ -18,8 +18,8 @@ const nextConfig: NextConfig = {
       {
         test: /\.svg$/i,
         issuer: fileLoaderRule.issuer,
-        resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] }, // exclude if *.svg?url
-        use: ['@svgr/webpack'],
+        resourceQuery: { not: [ ...fileLoaderRule.resourceQuery.not, /url/ ] }, // exclude if *.svg?url
+        use: [ '@svgr/webpack' ],
       },
     )
 
@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
     fileLoaderRule.exclude = /\.svg$/i
 
     return config
+  },
+  images: {
+    remotePatterns: [
+      new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_BUCKET!}/**`)
+    ]
   }
 };
 

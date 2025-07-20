@@ -1,21 +1,24 @@
 'use client'
 
 import clsx from 'clsx'
-import { brush, D3DragEvent, drag, image, index, map, select, xml } from 'd3'
-import React, { KeyboardEvent, MouseEventHandler, PointerEvent, PointerEventHandler, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Item, Layout, Template } from '@/type/editor'
-import * as ContextMenu from '@radix-ui/react-context-menu'
-import CropIcon from '@/public/crop.svg'
-import { AccessibleIcon } from '@radix-ui/react-accessible-icon'
-import percent from '@/utility/percent'
-import precise from '@/utility/precise'
-import { getActiveResourcesInfo } from 'process'
+import { D3DragEvent, drag, select } from 'd3'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Item, Photo, Layout, Asset, Items } from '@/type/editor'
+import { ContextMenu, Dialog, Label } from 'radix-ui'
+import { applyBoxConstrain, boxConstrain, clamp, compose, curry, extent, o } from '@/utility/fn'
+import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent, UseDragModifier } from '@/hook/useDrag'
+import { v7 as UUIDv7 } from 'uuid'
+import { CheckIcon, ChevronRightIcon } from '@radix-ui/react-icons'
 
 type Box = { x: number, y: number, w: number, h: number }
 
-type Subject = { x: number, y: number, container: Box, item: Item, image: Box }
-
-type Handle = { dx: number, dy: number, container: Box, item: Item, image: Box }
+type Result = {
+    dx: number,
+    dy: number,
+    image: Box,
+    item: Item,
+    container: Box
+}
 
 type IndexedBox = Box & { i: number }
 
@@ -26,39 +29,11 @@ type Rectangle = {
     y1: number
 }
 
-const o = (a: Function, b: Function) => (c: any) => a(b(c))
+type ItemCallback = (item: Item) => void
 
-const compose = (...fns: Function[]) => (...args: any[]) =>
-    fns.slice(0, -1).reduceRight(
-        (a, b) => b(a),
-        fns[ fns.length - 1 ](...args)
-    )
+type ImageCallback = (image: Photo) => void
 
-const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
-
-const boxConstrain = (container: Box, item: Box) => {
-    const dx0 = item.x - container.x
-    const dx1 = (item.x + item.w) - (container.x + container.w)
-    const dy0 = item.y - container.y
-    const dy1 = (item.y + item.h) - (container.y + container.h)
-    return {
-        dx: dx1 > dx0 ? (dx0 + dx1) / 2 : Math.min(0, dx0) || Math.max(0, dx1),
-        dy: dy1 > dy0 ? (dy0 + dy1) / 2 : Math.min(0, dy0) || Math.max(0, dy1)
-    }
-}
-
-const constrain = (min: number, max: number, value: number) => Math.min(Math.max(min, value), max)
-
-const applyBoxConstrain = (container: Box, item: Box) => {
-    const { dx, dy } = boxConstrain(container, item)
-    return {
-        ...item,
-        x: item.x - dx,
-        y: item.y - dy,
-    }
-}
-
-const generateItemBoxes = ({ container, item, image }: { container: HTMLElement, item: HTMLElement, image: HTMLElement }) => {
+const generateItemBoxes = ({ container, item, image }: { container: HTMLElement, item: HTMLElement, image: HTMLElement }): { container: Box, item: Item, image: Box } => {
     const co = container.getBoundingClientRect()
     const it = item.getBoundingClientRect()
     const im = image.getBoundingClientRect()
@@ -70,6 +45,8 @@ const generateItemBoxes = ({ container, item, image }: { container: HTMLElement,
             h: co.height
         },
         item: {
+            id: item.dataset.id!,
+            src: item.dataset.src!,
             z: Number(item.dataset.z),
             x: it.x - co.x,
             y: it.y - co.y,
@@ -79,8 +56,7 @@ const generateItemBoxes = ({ container, item, image }: { container: HTMLElement,
             sy: (it.y - im.y) / im.height,
             sw: it.width / im.width,
             sh: it.height / im.height,
-            bw: Number(item.dataset.bw),
-            bh: Number(item.dataset.bh)
+            effect: item.dataset.effect!
         },
         image: {
             x: im.x - co.x,
@@ -90,79 +66,64 @@ const generateItemBoxes = ({ container, item, image }: { container: HTMLElement,
         }
     }
 }
+const eventTransformer = <T extends HTMLElement>(e: UseDragEvent<T>): Result => ({
+    dx: e.x - e.subject.x,
+    dy: e.y - e.subject.y,
+    image: e.subject.image,
+    item: e.subject.item,
+    container: e.subject.container
+})
 
-const Handle = ({ container, item, image, className = '', onDragStart, onDrag, onDragEnd }: { image: React.RefObject<HTMLImageElement | null>, item: React.RefObject<HTMLElement | null>, container: React.RefObject<HTMLElement | null>, className: string, onDragStart: Function, onDrag: Function, onDragEnd: Function }) => {
-    const ref = useRef<HTMLSpanElement>(null)
+const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
 
-    useLayoutEffect(() => {
-        const selection = select(ref.current!)
-
-        const result = (e: { x: number, y: number, subject: Subject }) => ({
-            dx: e.x - e.subject.x,
-            dy: e.y - e.subject.y,
-            image: e.subject.image,
-            item: e.subject.item,
-            container: e.subject.container
-        })
-
-        selection.call(
-            drag<HTMLSpanElement, unknown>()
-                .clickDistance(1)
-                .container(() => container.current!)
-                .subject(e => {
-                    return {
-                        ...generateItemBoxes({
-                            container: container.current!,
-                            item: item.current!,
-                            image: image.current!
-                        }),
-                        x: e.x,
-                        y: e.y
-                    }
-                })
-                .on('start', o(onDragStart, result))
-                .on('drag', o(onDrag, result))
-                .on('end', o(onDragEnd, result))
-        )
-        return () => {
-            selection.on('.drag', null)
-        }
-    }, [])
-
-    return (
-        <span ref={ ref } className={ className }></span>
-    )
+const Handle = ({ className, ...rest }: DragPropsType<HTMLSpanElement> & { className: string }) => {
+    const ref = useDrag<HTMLSpanElement>({ ...rest })
+    return <span ref={ ref } className={ className }></span>
 }
 
+const effects = [
+    [ 'Scale Up', 'scale-up' ],
+    [ 'Scale Down', 'scale-down' ],
+    [ 'Parallax', 'parallax' ],
+    [ 'Left to Right', 'left-to-right' ],
+    [ 'Right to Left', 'right-to-left' ],
+    [ 'Top to Bottom', 'top-to-bottom' ],
+    [ 'Bottom to Top', 'bottom-to-top' ]
+]
+
 type EditableProps = {
-    onContextMenu: Function,
+    onCenter: ItemCallback,
+    onContextMenu: ItemCallback,
     active: boolean,
     interactive: boolean,
     container: React.RefObject<HTMLElement | null>,
-    image: HTMLImageElement,
+    image: Photo,
     value: Item,
-    onMoveStart: Function,
-    onMove: Function,
-    onMoveEnd: Function,
-    onResizeStart: Function,
-    onResize: Function,
-    onResizeEnd: Function,
-    onCropStart: Function,
-    onCrop: Function,
-    onCropEnd: Function,
-    bringToFront: Function,
-    sendToBack: Function,
-    i: number,
+    onMoveStart: ItemCallback,
+    onMove: ItemCallback,
+    onMoveEnd: ItemCallback,
+    onResizeStart: ItemCallback,
+    onResize: ItemCallback,
+    onResizeEnd: ItemCallback,
+    onCropStart: ItemCallback,
+    onCrop: ItemCallback,
+    onCropEnd: ItemCallback,
+    onDuplicate: ItemCallback,
+    onEffect: ItemCallback,
+    bringToFront: ItemCallback,
+    sendToBack: ItemCallback,
+    setAsThumbnail: ImageCallback,
+    setImageAlt: ImageCallback,
     sizeExtent: number[][],
     translateExtent: number[][],
 }
 
-const snap = (grid: number, value: number) => Math.round(value / grid) * grid
-
 const Editable = ({
     sizeExtent: [ [ wMin, wMax ], [ hMin, hMax ] ],
     translateExtent: [ [ xMin, xMax ], [ yMin, yMax ] ],
-    i,
+    onCenter,
+    onDuplicate,
+    onEffect,
     active,
     interactive,
     onContextMenu,
@@ -179,83 +140,74 @@ const Editable = ({
     onCrop,
     onCropEnd,
     bringToFront,
-    sendToBack
+    sendToBack,
+    setAsThumbnail,
+    setImageAlt
 }: EditableProps) => {
-
-    const itemRef = useRef<HTMLDivElement>(null)
-    const imageRef = useRef<HTMLImageElement>(null)
+    const [ alt, setAlt ] = useState('')
     const [ cropMode, setCropMode ] = useState(false)
+    const [ dialog, setDialog ] = useState(false)
 
-    useLayoutEffect(() => {
-        const item = select(itemRef.current!)
-        const image = select(imageRef.current!)
+    const modifier = <T extends HTMLElement>(drag: UseDragBehavior<T>) =>
+        drag
+            .clickDistance(1)
+            .container(() => container.current!)
+            .subject((e: { x: number, y: number }) => {
+                return {
+                    ...generateItemBoxes({
+                        container: container.current!,
+                        item: itemRef.current!,
+                        image: imageRef.current!
+                    }),
+                    x: e.x,
+                    y: e.y,
+                }
+            })
 
-        const subject = (e: D3DragEvent<HTMLElement, any, any>) => ({
-            ...generateItemBoxes({
-                container: container.current!,
-                item: itemRef.current!,
-                image: imageRef.current!
-            }),
-            x: e.x,
-            y: e.y
-        })
-
-        const onImageDrag = (e: { subject: Subject, x: number, y: number }) => {
-            const { image, item } = e.subject
-            const sx = constrain(0, 1 - (item.w / image.w), (item.x - (image.x + (e.x - e.subject.x))) / image.w)
-            const sy = constrain(0, 1 - (item.h / image.h), (item.y - (image.y + (e.y - e.subject.y))) / image.h)
-            return { ...item, sx, sy }
-        }
-
-        const onItemDrag = (e: { subject: Subject, x: number, y: number }) => {
-            const { item } = e.subject
-            const x = constrain(
-                xMin,
-                xMax - item.w,
-                item.x + (e.x - e.subject.x)
-            )
-            const y = constrain(
-                yMin,
-                yMax,
-                item.y + (e.y - e.subject.y)
-            )
-            return { ...item, x, y }
-        }
-
-        item.call(
-            drag<HTMLDivElement, unknown>()
-                .clickDistance(1)
-                .container(() => container.current!)
-                .subject(subject)
-                .on('start', o(onMoveStart, onItemDrag))
-                .on('drag', o(onMove, onItemDrag))
-                .on('end', o(onMoveEnd, onItemDrag))
+    const onItem = (e: Result): Item => {
+        const x = clamp(
+            xMin,
+            xMax - e.item.w,
+            e.item.x + e.dx
         )
-
-        image.call(
-            drag<HTMLImageElement, unknown>()
-                .clickDistance(1)
-                .container(() => container.current!)
-                .subject(subject)
-                .on('start', o(onCropStart, onImageDrag))
-                .on('drag', o(onCrop, onImageDrag))
-                .on('end', o(onCropEnd, onImageDrag))
+        const y = clamp(
+            yMin,
+            yMax,
+            e.item.y + e.dy
         )
+        return { ...e.item, x, y }
+    }
 
-        return () => {
-            item.on('.drag', null)
-            image.on('.drag', null)
-        }
-    }, [])
+    const onImage = (e: Result): Item => {
+        const sx = clamp(0, 1 - (e.item.w / e.image.w), (e.item.x - (e.image.x + e.dx)) / e.image.w)
+        const sy = clamp(0, 1 - (e.item.h / e.image.h), (e.item.y - (e.image.y + e.dy)) / e.image.h)
+        return { ...e.item, sx, sy }
+    }
+
+    const itemRef = useDrag<HTMLDivElement>({
+        modifier: modifier,
+        transform: eventTransformer,
+        onDragStart: o(onMoveStart, onItem),
+        onDrag: o(onMove, onItem),
+        onDragEnd: o(onMoveEnd, onItem)
+    })
+
+    const imageRef = useDrag<HTMLImageElement>({
+        modifier: modifier,
+        transform: eventTransformer,
+        onDragStart: o(onCropStart, onImage),
+        onDrag: o(onCrop, onImage),
+        onDragEnd: o(onCropEnd, onImage)
+    })
 
     useEffect(() => () => setCropMode(false), [ active ])
 
     const resizers = [
         {
             style: 'top-0 left-[4px] right-[4px] h-[8px] -translate-y-[50%] opacity-0 cursor-n-resize', // top-center
-            callback: ({ dy, item }: Handle) => {
+            callback: ({ dy, item }: Result): Item => {
                 const ratio = item.w / item.h
-                const delta = constrain(
+                const delta = clamp(
                     Math.min(wMin - item.w, hMin - item.h),
                     Math.min(
                         (wMax - item.w) / ratio,
@@ -270,14 +222,14 @@ const Editable = ({
                     y: item.y - delta,
                     w: item.w + delta * ratio,
                     h: item.h + delta
-                })
+                }) as Item
             }
         },
         {
             style: 'bottom-0 left-[4px] right-[4px] h-[8px] translate-y-[50%] opacity-0 cursor-s-resize', // bottom-center
-            callback: ({ dy, item }: Handle) => {
+            callback: ({ dy, item }: Result): Item => {
                 const ratio = item.w / item.h
-                const delta = constrain(
+                const delta = clamp(
                     Math.min(wMin - item.w, hMin - item.h),
                     Math.min(
                         (wMax - item.w) / ratio,
@@ -290,14 +242,14 @@ const Editable = ({
                     x: item.x + delta * ratio * -.5,
                     w: item.w + delta * ratio,
                     h: item.h + delta
-                })
+                }) as Item
             }
         },
         {
             style: 'left-0 top-[4px] bottom-[4px] w-[8px] -translate-x-[50%] opacity-0 cursor-w-resize', // left-center
-            callback: ({ dx, item }: Handle) => {
+            callback: ({ dx, item }: Result): Item => {
                 const ratio = item.h / item.w
-                const delta = constrain(
+                const delta = clamp(
                     Math.min(wMin - item.w, hMin - item.h),
                     Math.min(wMax - item.w, hMax - item.h),
                     -dx
@@ -308,14 +260,14 @@ const Editable = ({
                     y: item.y + delta * ratio * -.5,
                     w: item.w + delta,
                     h: item.h + delta * ratio
-                })
+                }) as Item
             }
         },
         {
             style: 'right-0 top-[4px] bottom-[4px] w-[8px] translate-x-[50%] opacity-0 cursor-e-resize', // right-center
-            callback: ({ dx, item }: Handle) => {
+            callback: ({ dx, item }: Result): Item => {
                 const ratio = item.h / item.w
-                const delta = constrain(
+                const delta = clamp(
                     Math.min(wMin - item.w, hMin - item.h),
                     Math.min(wMax - item.w, hMax - item.h),
                     dx
@@ -326,14 +278,14 @@ const Editable = ({
                     y: item.y + delta * ratio * -.5,
                     w: item.w + delta,
                     h: item.h + delta * ratio
-                })
+                }) as Item
             }
         },
         {
             style: 'left-0 top-0 cursor-nwse-resize size-2 -translate-x-[50%] -translate-y-[50%] outline-1 outline-blue-500 bg-white', // top-left
-            callback: ({ dx, dy, item }: Handle) => {
+            callback: ({ dx, dy, item }: Result): Item => {
                 const ratio = item.w / item.h
-                const delta = constrain(
+                const delta = clamp(
                     Math.min(wMin - item.w, hMin - item.h),
                     Math.min(
                         (wMax - item.w) / ratio,
@@ -347,14 +299,14 @@ const Editable = ({
                     y: item.y + delta * -1,
                     w: item.w + delta * ratio,
                     h: item.h + delta
-                })
+                }) as Item
             }
         },
         {
             style: 'top-0 right-0 cursor-nesw-resize size-2 translate-x-[50%] -translate-y-[50%] outline-1 outline-blue-500 bg-white', // top-right
-            callback: ({ dx, dy, item }: Handle) => {
+            callback: ({ dx, dy, item }: Result): Item => {
                 const ratio = item.w / item.h
-                const delta = constrain(
+                const delta = clamp(
                     Math.min(wMin - item.w, hMin - item.h),
                     Math.min(
                         (wMax - item.w) / ratio,
@@ -368,14 +320,14 @@ const Editable = ({
                     y: item.y + delta * -1,
                     w: item.w + delta * ratio,
                     h: item.h + delta
-                })
+                }) as Item
             }
         },
         {
             style: 'right-0 bottom-0 cursor-nwse-resize size-2 translate-x-[50%] translate-y-[50%] outline-1 outline-blue-500 bg-white', // bottom-right
-            callback: ({ dx, dy, item }: Handle) => {
+            callback: ({ dx, dy, item }: Result): Item => {
                 const ratio = item.w / item.h
-                const delta = constrain(
+                const delta = clamp(
                     Math.min(wMin - item.w, hMin - item.h),
                     Math.min(
                         (wMax - item.w) / ratio,
@@ -389,14 +341,14 @@ const Editable = ({
                     y: item.y,
                     w: item.w + delta * ratio,
                     h: item.h + delta
-                })
+                }) as Item
             }
         },
         {
             style: 'bottom-0 left-0 cursor-nesw-resize size-2 -translate-x-[50%] translate-y-[50%] outline-1 outline-blue-500 bg-white', // bottom-left
-            callback: ({ dx, dy, item }: Handle) => {
+            callback: ({ dx, dy, item }: Result): Item => {
                 const ratio = item.w / item.h
-                const delta = constrain(
+                const delta = clamp(
                     Math.min(wMin - item.w, hMin - item.h),
                     Math.min(
                         (wMax - item.w) / ratio,
@@ -410,7 +362,7 @@ const Editable = ({
                     y: item.y,
                     w: item.w + delta * ratio,
                     h: item.h + delta
-                })
+                }) as Item
             }
         }
     ]
@@ -418,8 +370,8 @@ const Editable = ({
     const croppers = [
         {
             style: 'top-0 left-[4px] right-[4px] h-[8px] -translate-y-[50%] opacity-0 cursor-n-resize', // top-center
-            callback: ({ dy, item, image }: Handle) => {
-                const delta = constrain(
+            callback: ({ dy, item, image }: Result): Item => {
+                const delta = clamp(
                     hMin - item.h,
                     Math.min(item.y - image.y, item.y - yMin),
                     -dy
@@ -433,8 +385,8 @@ const Editable = ({
         },
         {
             style: 'bottom-0 left-[4px] right-[4px] h-[8px] translate-y-[50%] opacity-0 cursor-s-resize', // bottom-center
-            callback: ({ dy, item, image }: Handle) => {
-                const delta = constrain(hMin - item.h, (image.y + image.h) - (item.y + item.h), dy)
+            callback: ({ dy, item, image }: Result): Item => {
+                const delta = clamp(hMin - item.h, (image.y + image.h) - (item.y + item.h), dy)
                 const h = item.h + delta
                 const sh = h / image.h
                 return { ...item, h, sh }
@@ -442,8 +394,8 @@ const Editable = ({
         },
         {
             style: 'left-0 top-[4px] bottom-[4px] w-[8px] -translate-x-[50%] opacity-0 cursor-w-resize', // left-center
-            callback: ({ dx, item, image }: Handle) => {
-                const delta = constrain(wMin - item.w, Math.min(item.x - image.x, item.x - xMin), -dx)
+            callback: ({ dx, item, image }: Result): Item => {
+                const delta = clamp(wMin - item.w, Math.min(item.x - image.x, item.x - xMin), -dx)
                 const x = item.x - delta
                 const w = item.w + delta
                 const sx = (x - image.x) / image.w
@@ -453,8 +405,8 @@ const Editable = ({
         },
         {
             style: 'right-0 top-[4px] bottom-[4px] w-[8px] translate-x-[50%] opacity-0 cursor-e-resize', // right-center
-            callback: ({ dx, item, image }: Handle) => {
-                const delta = constrain(wMin - item.w, Math.min((image.x + image.w) - (item.x + item.w), (xMin + xMax) - (item.x + item.w)), dx)
+            callback: ({ dx, item, image }: Result): Item => {
+                const delta = clamp(wMin - item.w, Math.min((image.x + image.w) - (item.x + item.w), (xMin + xMax) - (item.x + item.w)), dx)
                 const w = item.w + delta
                 const sw = w / image.w
                 return { ...item, w, sw }
@@ -462,9 +414,9 @@ const Editable = ({
         },
         {
             style: 'left-0 top-0 cursor-nwse-resize size-2 -translate-x-[50%] -translate-y-[50%] outline-1 outline-red-500 bg-white', // top-left
-            callback: ({ dx, dy, item, image }: Handle) => {
-                const dh = constrain(wMin - item.w, Math.min(item.x - image.x, item.x - xMin), -dx)
-                const dv = constrain(hMin - item.h, Math.min(item.y - image.y, item.y - yMin), -dy)
+            callback: ({ dx, dy, item, image }: Result): Item => {
+                const dh = clamp(wMin - item.w, Math.min(item.x - image.x, item.x - xMin), -dx)
+                const dv = clamp(hMin - item.h, Math.min(item.y - image.y, item.y - yMin), -dy)
                 const x = item.x - dh
                 const w = item.w + dh
                 const y = item.y - dv
@@ -478,9 +430,9 @@ const Editable = ({
         },
         {
             style: 'top-0 right-0 cursor-nesw-resize size-2 translate-x-[50%] -translate-y-[50%] outline-1 outline-red-500 bg-white', // top-right
-            callback: ({ dx, dy, item, image }: Handle) => {
-                const dh = constrain(wMin - item.w, Math.min((image.x + image.w) - (item.x + item.w), (xMin + xMax) - (item.x + item.w)), dx)
-                const dv = constrain(hMin - item.h, Math.min(item.y - image.y, item.y - xMin), -dy)
+            callback: ({ dx, dy, item, image }: Result): Item => {
+                const dh = clamp(wMin - item.w, Math.min((image.x + image.w) - (item.x + item.w), (xMin + xMax) - (item.x + item.w)), dx)
+                const dv = clamp(hMin - item.h, Math.min(item.y - image.y, item.y - xMin), -dy)
                 const y = item.y - dv
                 const w = item.w + dh
                 const h = item.h + dv
@@ -492,9 +444,9 @@ const Editable = ({
         },
         {
             style: 'right-0 bottom-0 cursor-nwse-resize size-2 translate-x-[50%] translate-y-[50%] outline-1 outline-red-500 bg-white', // bottom-right
-            callback: ({ dx, dy, item, image }: Handle) => {
-                const dh = constrain(wMin - item.w, Math.min((image.x + image.w) - (item.x + item.w), (xMin + xMax) - (item.x + item.w)), dx)
-                const dv = constrain(hMin - item.h, (image.y + image.h) - (item.y + item.h), dy)
+            callback: ({ dx, dy, item, image }: Result): Item => {
+                const dh = clamp(wMin - item.w, Math.min((image.x + image.w) - (item.x + item.w), (xMin + xMax) - (item.x + item.w)), dx)
+                const dv = clamp(hMin - item.h, (image.y + image.h) - (item.y + item.h), dy)
                 const w = item.w + dh
                 const h = item.h + dv
                 const sw = w / image.w
@@ -504,9 +456,9 @@ const Editable = ({
         },
         {
             style: 'bottom-0 left-0 cursor-nesw-resize size-2 -translate-x-[50%] translate-y-[50%] outline-1 outline-red-500 bg-white', // bottom-left
-            callback: ({ dx, dy, item, image }: Handle) => {
-                const dh = constrain(wMin - item.w, Math.min(item.x - image.x, item.x - xMin), -dx)
-                const dv = constrain(hMin - item.h, (image.y + image.h) - (item.y + item.h), dy)
+            callback: ({ dx, dy, item, image }: Result): Item => {
+                const dh = clamp(wMin - item.w, Math.min(item.x - image.x, item.x - xMin), -dx)
+                const dv = clamp(hMin - item.h, (image.y + image.h) - (item.y + item.h), dy)
                 const x = item.x - dh
                 const w = item.w + dh
                 const h = item.h + dv
@@ -518,17 +470,15 @@ const Editable = ({
         }
     ]
 
-    const imgWidth = image.naturalWidth
-    const imgHeight = image.naturalHeight
     const imgScale = Math.max(
-        value.w / (value.sw * imgWidth),
-        value.h / (value.sh * imgHeight)
+        value.w / (value.sw * image.width),
+        value.h / (value.sh * image.height)
     )
 
-    const sx = value.sx * imgWidth
-    const sy = value.sy * imgHeight
-    const sw = value.sw * imgWidth
-    const sh = value.sh * imgHeight
+    const sx = value.sx * image.width
+    const sy = value.sy * image.height
+    const sw = value.sw * image.width
+    const sh = value.sh * image.height
 
     const actives = [
         'outline-1 outline-blue-500',
@@ -542,13 +492,13 @@ const Editable = ({
     return (
         <div
             ref={ itemRef }
+            className='absolute bg-neutral-200'
             onContextMenu={ () => onContextMenu(value) }
-            data-i={ i }
+            data-id={ value.id }
             data-z={ value.z }
+            data-src={ value.src }
             data-active={ active }
-            data-bw={ value.bw }
-            data-bh={ value.bh }
-            className='absolute'
+            data-effect={ value.effect }
             style={ {
                 transform: `translate(${value.x}px, ${value.y}px)`,
                 width: value.w + 'px',
@@ -566,9 +516,15 @@ const Editable = ({
                         >
                             <img
                                 ref={ imageRef }
-                                className='relative max-w-none max-h-none'
-                                width={ imgWidth }
-                                height={ imgHeight }
+                                className='relative max-w-none max-h-none select-none'
+                                src={ image.src }
+                                width={ image.width }
+                                height={ image.height }
+                                alt={ image.alt }
+                                onError={ e => {
+                                    e.currentTarget.src = '/fallback.svg'
+                                    e.currentTarget.alt = 'Image not found. Delete then reupload.'
+                                } }
                                 style={ {
                                     transformOrigin: 'top left',
                                     transform: `scale(${imgScale}) translate(${-sx}px, ${-sy}px)`,
@@ -578,27 +534,25 @@ const Editable = ({
                                     `,
                                     pointerEvents: cropMode ? 'auto' : 'none'
                                 } }
-                                src={ image.src }
                             />
                         </div>
                         <div className={
                             clsx(
                                 'absolute size-full',
                                 { [ actives[ Number(cropMode) ] ]: active },
-                                { [ hovers[ Number(cropMode) ] ]: interactive },
+                                { [ hovers[ Number(cropMode) ] ]: interactive }
                             )
                         }>
                             {
                                 (cropMode ? croppers : resizers).map(({ style, callback }, i) =>
                                     <Handle
                                         key={ i + (cropMode ? 'cropper' : 'resizer') }
-                                        container={ container }
-                                        item={ itemRef }
-                                        image={ imageRef }
                                         className={ clsx('absolute invisible', { 'visible pointer-events-auto': active && interactive }, style) }
-                                        onDragStart={ o(cropMode ? onCropStart : onResizeStart, callback) }
-                                        onDrag={ o(cropMode ? onCrop : onResize, callback) }
-                                        onDragEnd={ o(cropMode ? onCropEnd : onResizeEnd, callback) }
+                                        modifier={ modifier }
+                                        onDragStart={ compose(cropMode ? onCropStart : onResizeStart, callback) }
+                                        onDrag={ compose(cropMode ? onCrop : onResize, callback) }
+                                        onDragEnd={ compose(cropMode ? onCropEnd : onResizeEnd, callback) }
+                                        transform={ eventTransformer }
                                     />
                                 )
 
@@ -609,9 +563,12 @@ const Editable = ({
                 <ContextMenu.Portal>
                     <ContextMenu.Content
                         className='
+                            flex
+                            flex-col
+                            gap-y-0.5
                             z-50
                             p-1
-                            bg-white 
+                            bg-light 
                             rounded-sm
                             font-sans 
                             text-sm 
@@ -621,23 +578,140 @@ const Editable = ({
                             *:rounded-sm
                             *:size-full
                             *:select-none
-                            *:outline-none
+                            *:outline-transparent
                             *:data-[highlighted]:bg-neutral-200
                         '
+                        onContextMenu={ e => e.stopPropagation() }
                     >
-                        <ContextMenu.Item className='px-2 py-1' onSelect={ () => setCropMode(true) }>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => setCropMode(true) }>
                             Crop Image
                         </ContextMenu.Item>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => onCenter(value) }>
+                            Center Horizontally
+                        </ContextMenu.Item>
                         <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
-                        <ContextMenu.Item className='px-2 py-1' onSelect={ () => bringToFront(value) }>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => setAsThumbnail({ ...image, thumbnail: true }) }>
+                            Set as Thumbnail
+                        </ContextMenu.Item>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => setDialog(true) }>
+                            Set Image Description
+                        </ContextMenu.Item>
+                        <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => bringToFront({ ...value, z: value.z + 1 }) }>
                             Bring to Front
                         </ContextMenu.Item>
-                        <ContextMenu.Item className='px-2 py-1' onSelect={ () => sendToBack(value) }>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => sendToBack({ ...value, z: value.z - 1 }) }>
                             Send to Back
+                        </ContextMenu.Item>
+                        <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
+                        <ContextMenu.Sub>
+                            <ContextMenu.SubTrigger className='flex justify-between items-center px-3 py-1.5'>
+                                <span>Effects</span>
+                                <span>
+                                    <ChevronRightIcon />
+                                </span>
+                            </ContextMenu.SubTrigger>
+                            <ContextMenu.Portal>
+                                <ContextMenu.SubContent
+                                    onContextMenu={ e => e.stopPropagation() }
+                                    sideOffset={ 5 }
+                                    asChild
+                                >
+                                    <ContextMenu.RadioGroup
+                                        value={ value.effect }
+                                        onValueChange={ effect => onEffect({ ...value, effect }) }
+                                        className='
+                                            flex
+                                            flex-col
+                                            gap-y-0.5
+                                            z-50
+                                            p-1
+                                            bg-light 
+                                            rounded-sm
+                                            font-sans 
+                                            text-sm 
+                                            font-semibold
+                                            ring-1
+                                            ring-neutral-200
+                                            *:rounded-sm
+                                            *:size-full
+                                            *:select-none
+                                            *:outline-transparent
+                                            *:data-[highlighted]:bg-neutral-200
+                                        '
+                                    >
+                                        {
+                                            effects.map(([ label, effect ]) =>
+                                                <ContextMenu.RadioItem
+                                                    key={ label }
+                                                    className={ clsx('px-3 py-1.5', { 'bg-neutral-200': value.effect === effect }) }
+                                                    value={ effect }
+                                                >
+                                                    { label }
+                                                </ContextMenu.RadioItem>
+                                            )
+                                        }
+                                    </ContextMenu.RadioGroup>
+                                </ContextMenu.SubContent>
+                            </ContextMenu.Portal>
+                        </ContextMenu.Sub>
+                        <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => onDuplicate(value) }>
+                            Duplicate
                         </ContextMenu.Item>
                     </ContextMenu.Content>
                 </ContextMenu.Portal>
             </ContextMenu.Root>
+            <Dialog.Root open={ dialog } onOpenChange={ setDialog }>
+                <Dialog.Portal>
+                    <Dialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
+                    <Dialog.Content
+                        className='
+                            flex
+                            flex-col
+                            gap-y-1
+                            justify-center
+                            font-sans 
+                            fixed 
+                            top-[50%] 
+                            left-[50%] 
+                            -translate-x-[50%] 
+                            -translate-y-[50%] 
+                            min-w-2xs 
+                            rounded-md 
+                            ring-1
+                            ring-neutral-200
+                            px-5
+                            py-3
+                            bg-light
+                            z-50
+                        '
+                    >
+                        <Dialog.Title className='font-bold text-lg'>Edit description</Dialog.Title>
+                        <Dialog.Description className='font-semibold text-base text-neutral-500'>
+                            Short description about the image.
+                        </Dialog.Description>
+                        <fieldset className='py-3'>
+                            <label htmlFor='alt' className='sr-only'>Description</label>
+                            <input
+                                id='alt'
+                                autoFocus={ true }
+                                className='px-2 py-1 rounded-md bg-neutral-200 outline-1 outline-neutral-200 focus:outline-amber-600 w-full font-semibold text-base'
+                                value={ alt }
+                                onChange={ v => setAlt(v.target.value) }
+                                type='text'
+                                placeholder='e.g., Scandinavian chair'
+                            />
+                        </fieldset>
+                        <Dialog.Close
+                            className='text-center font-bold text-base rounded-md cursor-pointer px-2 py-1 hover:bg-neutral-200 hover:outline-1 hover:outline-neutral-200 w-full'
+                            onClick={ () => setImageAlt({ ...image, alt }) }
+                        >
+                            Save changes
+                        </Dialog.Close>
+                    </Dialog.Content>
+                </Dialog.Portal>
+            </Dialog.Root>
         </div>
     )
 }
@@ -662,6 +736,44 @@ const centers = ({ x, y, w, h }: Box) => ([
 const eq = (a: number, b: number) => Math.round(a) === Math.round(b)
 
 const toPoints = (item: Box) => ([ ...corners(item), center(item) ])
+
+const xs = (box: Box) => ([ box.x, box.x + box.w * .5, box.x + box.w ])
+const ys = (box: Box) => ([ box.y, box.y + box.h * .5, box.y + box.h ])
+const smaller = (a: number, b: number) => Math.min(
+    Math.abs(a),
+    Math.abs(b)
+)
+const smallest = (a: Box | IndexedBox, b: Box | IndexedBox) => {
+    const reducer = (xs: number[], ys: number[]) => {
+        const [ x, ...xss ] = xs
+        const [ y, ...yss ] = ys
+        const initial = yss.reduce((a, b) => smaller(a, b - x), y - x)
+        return xss.reduce((a, b) => ys.reduce((c, d) => smaller(c, d - b), a), initial)
+    }
+    const axs = xs(a)
+    const ays = ys(a)
+    const bxs = xs(b)
+    const bys = ys(b)
+    const ox = reducer(axs, bxs)
+    const oy = reducer(ays, bys)
+    return [ ox, oy ]
+}
+
+const snap = (threshold: number, box: Box | IndexedBox, boxes: Box[] | IndexedBox[]) => {
+    if(boxes.length === 0) {
+        return [ 0, 0 ]
+    } else {
+        const [ x, ...xs ] = boxes
+        const result = xs.reduce(
+            ([ px, py ], x) => {
+                const [ cx, cy ] = smallest(box, x)
+                return [ smaller(px, cx), smaller(py, cy) ]
+            },
+            smallest(box, x)
+        )
+        return result.map(v => Math.abs(v) <= threshold ? v : 0)
+    }
+}
 
 const intersections = ([ ax, ay ]: number[], points: number[][]): number[][][] => {
     if(points.length > 0) {
@@ -695,8 +807,21 @@ const removeDuplicateLines = (lines: number[][][], acc: number[][][]) => {
     }
 }
 
-const Group = ({ container, onDragStart, onDrag, onDragEnd, x0, y0, x1, y1 }: { container: React.RefObject<HTMLElement | null>, x0: number, y0: number, x1: number, y1: number, onDragStart: Function, onDrag: Function, onDragEnd: Function }) => {
+const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, x0, y0, x1, y1 }: {
+    container: React.RefObject<HTMLElement | null>,
+    onCenter: () => void,
+    onEffect: (effect: string) => void,
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+    onDragStart: Function,
+    onDrag: Function,
+    onDragEnd: Function
+}) => {
     const ref = useRef<HTMLDivElement>(null)
+
+    const [ effect, setEffect ] = useState('')
 
     useLayoutEffect(() => {
         const element = ref.current!
@@ -717,17 +842,106 @@ const Group = ({ container, onDragStart, onDrag, onDragEnd, x0, y0, x1, y1 }: { 
     }, [])
 
     return (
-        <div
-            ref={ ref }
-            className='absolute top-0 left-0 outline-1 outline-blue-500 z-20'
-            style={ {
-                transform: `translate(${x0}px, ${y0}px)`,
-                width: (x1 - x0) + 'px',
-                height: (y1 - y0) + 'px'
-            } }
-        />
+        <ContextMenu.Root>
+            <ContextMenu.Trigger>
+                <div
+                    ref={ ref }
+                    className='absolute top-0 left-0 outline-1 outline-blue-500 z-20'
+                    style={ {
+                        transform: `translate(${x0}px, ${y0}px)`,
+                        width: (x1 - x0) + 'px',
+                        height: (y1 - y0) + 'px'
+                    } }
+                />
+            </ContextMenu.Trigger>
+            <ContextMenu.Portal>
+                <ContextMenu.Content
+                    className='
+                        flex
+                        flex-col
+                        gap-y-0.5
+                        z-50
+                        p-1
+                        bg-light 
+                        rounded-sm
+                        font-sans 
+                        text-sm 
+                        font-semibold
+                        ring-1
+                        ring-neutral-200
+                        *:capitalize
+                        *:rounded-sm
+                        *:size-full
+                        *:select-none
+                        *:outline-transparent
+                        *:data-[highlighted]:bg-neutral-200
+                    '
+                    onContextMenu={ e => e.stopPropagation() }
+                >
+                    <ContextMenu.Item className='px-3 py-1.5' onSelect={ onCenter }>
+                        Center Horizontally
+                    </ContextMenu.Item>
+                    <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
+                    <ContextMenu.Sub>
+                        <ContextMenu.SubTrigger className='flex justify-between items-center px-3 py-1.5'>
+                            <span>Effects</span>
+                            <span>
+                                <ChevronRightIcon />
+                            </span>
+                        </ContextMenu.SubTrigger>
+                        <ContextMenu.Portal>
+                            <ContextMenu.SubContent
+                                onContextMenu={ e => e.stopPropagation() }
+                                sideOffset={ 5 }
+                                asChild
+                            >
+                                <ContextMenu.RadioGroup
+                                    value={ effect }
+                                    onValueChange={ effect => {
+                                        setEffect(effect)
+                                        onEffect(effect)
+                                    } }
+                                    className='
+                                        flex
+                                        flex-col
+                                        gap-y-0.5
+                                        z-50
+                                        p-1
+                                        bg-light 
+                                        rounded-sm
+                                        font-sans 
+                                        text-sm 
+                                        font-semibold
+                                        ring-1
+                                        ring-neutral-200
+                                        *:rounded-sm
+                                        *:size-full
+                                        *:select-none
+                                        *:outline-transparent
+                                        *:data-[highlighted]:bg-neutral-200
+                                    '
+                                >
+                                    {
+                                        effects.map(([ label, value ]) =>
+                                            <ContextMenu.RadioItem
+                                                key={ label }
+                                                className={ clsx('px-3 py-1.5', { 'bg-neutral-200': effect === value }) }
+                                                value={ value }
+                                            >
+                                                { label }
+                                            </ContextMenu.RadioItem>
+                                        )
+                                    }
+                                </ContextMenu.RadioGroup>
+                            </ContextMenu.SubContent>
+                        </ContextMenu.Portal>
+                    </ContextMenu.Sub>
+                </ContextMenu.Content>
+            </ContextMenu.Portal>
+        </ContextMenu.Root>
     )
 }
+
 
 const itemsToGroup = (ox: number, oy: number, items: Item[] | Box[] | IndexedBox[]) => items.reduce((acc, curr) => ({
     x0: Math.min(acc.x0, curr.x + ox),
@@ -741,13 +955,25 @@ const itemsToGroup = (ox: number, oy: number, items: Item[] | Box[] | IndexedBox
     y1: -Infinity
 })
 
-export default ({ className = '', images, deleteImages, template, setTemplate }: { deleteImages: Function, images: HTMLImageElement[], className?: string | '', template: Template, setTemplate: Function }) => {
+// 
+export default ({
+    className = '',
+    asset,
+    setAsset,
+    layout,
+    setLayout,
+}: {
+    asset: Asset,
+    setAsset: (fn: (asset: Asset) => Asset) => void,
+    className?: string | '',
+    layout: Layout,
+    setLayout: Function
+}) => {
     const rootRef = useRef<HTMLElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const contextRef = useRef<CanvasRenderingContext2D>(null)
-    const prevRef = useRef<Item>(null)
-    const [ actives, setActives ] = useState<number[]>([])
+    const [ actives, setActives ] = useState<string[]>([])
     const [ interactive, setInteractive ] = useState(true)
     const [ [ pw, ph ], setParentSize ] = useState([ 0, 0 ])
     const [ dpr, setDpr ] = useState(1)
@@ -793,7 +1019,7 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
         context.strokeStyle = blue
 
         context.beginPath()
-        context.rect(ox, oy, container.width, container.height)
+        context.rect(ox - 1, oy - 1, container.width + 1, container.height + 1)
         context.clip()
 
         lines.forEach(([ [ sx, sy ], [ ex, ey ] ]) => {
@@ -836,7 +1062,7 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
         context.strokeStyle = orange
 
         context.beginPath()
-        context.rect(ox, oy, container.width + 1, container.height + 1)
+        context.rect(ox - 1, oy - 1, container.width + 1, container.height + 1)
         context.clip()
 
         context.stroke(path)
@@ -860,19 +1086,32 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
 
         const onDelete = (e: { key: string }) => {
             if(e.key === 'Delete') {
-                const actives = [ ...container.children ].reduce<number[]>((a, b) => {
+                const actives = [ ...container.children ].reduce<string[]>((a, b) => {
                     const item = b as HTMLDivElement
                     const active = item.dataset.active === 'true'
                     if(active) {
-                        return [ ...a, Number(item.dataset.i) ]
+                        return [ ...a, item.dataset.id as string ]
                     } else {
                         return a
                     }
                 }, [])
 
-                setInteractive(true)
-                setActives([])
-                deleteImages(actives)
+                if(actives.length > 0) {
+                    setInteractive(true)
+                    setLayout((layout: Layout) => {
+                        const items = layout.items.filter(v =>
+                            !actives.includes(v.id)
+                        )
+                        const height = items.length > 0
+                            ? Math.max(
+                                ...items.map(v => v.y + v.h)
+                            )
+                            : 0
+                        return { ...layout, items, height }
+                    })
+                    setActives([])
+                    clearCanvas()
+                }
             }
         }
 
@@ -918,7 +1157,7 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
 
                     const c = canvas.getBoundingClientRect()
                     const childrens = [ ...container.children ]
-                    const actives = childrens.reduce<number[]>((acc, curr) => {
+                    const actives = childrens.reduce<string[]>((acc, curr) => {
                         const rect = curr.getBoundingClientRect()
                         const element = curr as HTMLDivElement
                         const l = rect.x - c.x
@@ -926,19 +1165,19 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
                         const r = l + rect.width
                         const b = t + rect.height
                         const xs =
-                            constrain(x, x + w, l) === l ||
-                            constrain(x, x + w, r) === r ||
-                            constrain(l, r, x) === x ||
-                            constrain(l, r, x + w) === x + w
+                            clamp(x, x + w, l) === l ||
+                            clamp(x, x + w, r) === r ||
+                            clamp(l, r, x) === x ||
+                            clamp(l, r, x + w) === x + w
 
                         const ys =
-                            constrain(y, y + h, t) === t ||
-                            constrain(y, y + h, b) === b ||
-                            constrain(t, b, y) === y ||
-                            constrain(t, b, y + h) === y + h
+                            clamp(y, y + h, t) === t ||
+                            clamp(y, y + h, b) === b ||
+                            clamp(t, b, y) === y ||
+                            clamp(t, b, y + h) === y + h
 
                         if(xs && ys) {
-                            return acc.concat([ Number(element.dataset.i) ])
+                            return acc.concat([ element.dataset.id as string ])
                         } else {
                             return acc
                         }
@@ -972,67 +1211,34 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
         }
     }, [])
 
-    useLayoutEffect(() => () => {
-        const prev = images.length
-        const curr = containerRef.current!.children.length
-        const diff = curr - prev
-
-        const generate = (count: number, acc: number[]): number[] =>
-            count > 0
-                ? generate(count - 1, [ ...acc, acc.length ])
-                : acc
-
-        clearCanvas()
-
-        if(diff > 0) {
-            const actives = generate(diff, []).map((_, i) =>
-                curr - (i + 1)
-            )
-            setInteractive(actives.length < 2)
-            setActives(actives)
-        }
-    }, [ images.length ])
-
-    const width = template.breakpoint
-
-    const height = template.layout.rows * template.grid
-
-    const applyChange = (index: number, item: Item) =>
-        setTemplate((template: Template) => {
-            const items = template.layout.items.with(index, item)
-            const rows = Math.round(
-                Math.max(
-                    ...items.map(v => (v.y + v.h) / template.grid)
+    const applyChange = curry((index: number, item: Item) =>
+        setLayout((layout: Layout) => {
+            const items = layout.items.with(index, item)
+            const height = items.length > 0
+                ? Math.max(
+                    ...items.map(v => v.y + v.h)
                 )
-            )
-            return {
-                ...template,
-                layout: { ...template.layout, rows, items }
-            }
+                : 0
+            return { ...layout, height, items }
         })
+    )
 
-    const bringToFront = (index: number) => (item: Item) =>
-        setTemplate((template: Template) => {
+    const bringToFront = curry((index: number, item: Item) =>
+        setLayout((layout: Layout) => {
             const max = Math.max(
-                ...template.layout.items.map(v => v.z)
+                ...layout.items.map(v => v.z)
             )
-            const items = template.layout.items.with(index, { ...item, z: max + 1 })
-            return {
-                ...template,
-                layout: { ...template.layout, items }
-            }
+            const items = layout.items.with(index, { ...item, z: max + 1 })
+            return { ...layout, items }
         })
+    )
 
-    const sendToBack = (index: number) => (item: Item) =>
-        setTemplate((template: Template) => {
-            return {
-                ...template,
-                layout: {
-                    ...template.layout,
-                    items: template.layout.items.with(index, { ...item, z: 0 })
-                }
-            }
+    const sendToBack = curry((index: number, item: Item) =>
+        setLayout((layout: Layout) => {
+            const items = layout.items.with(index, { ...item, z: 0 })
+            return { ...layout, items }
         })
+    )
 
     const drawActiveLines = (item: Item) => {
         const cx = item.x + item.w * .5
@@ -1044,10 +1250,10 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
         ])
     }
 
-    const onContextMenu = (index: number) => () => {
+    const onContextMenu = curry((index: number, item: Item) => {
         setInteractive(true)
-        setActives([ index ])
-    }
+        setActives([ item.id ])
+    })
 
     const calculateGroup = (items: Item[]): Rectangle => {
         const root = rootRef.current!.getBoundingClientRect()
@@ -1063,10 +1269,9 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
         const container = containerRef.current!
         const c = container.getBoundingClientRect()
 
-        const [ actives, inactives ] = [ ...container.children ].reduce<IndexedBox[][]>(([ actives, inactives ], curr) => {
+        const [ actives, inactives ] = [ ...container.children ].reduce<IndexedBox[][]>(([ actives, inactives ], curr, i) => {
             const item = curr as HTMLDivElement
             const active = item.dataset.active === 'true'
-            const i = Number(item.dataset.i)
             const r = item.getBoundingClientRect()
             const next = {
                 i: i,
@@ -1084,10 +1289,10 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
 
         const group = itemsToGroup(0, 0, actives)
 
-        const constrainBox = {
+        const constrain = {
             x: 0,
             y: 0,
-            w: snap(template.grid, c.width),
+            w: c.width,
             h: Infinity
         }
 
@@ -1098,33 +1303,19 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
             h: group.y1 - group.y0
         }
 
-        const moved = applyBoxConstrain(
-            constrainBox,
-            {
-                x: initial.x + e.dx,
-                y: initial.y + e.dy,
-                w: initial.w,
-                h: initial.h
-            }
-        )
-        const snapped = applyBoxConstrain(
-            constrainBox,
-            {
-                x: snap(template.grid, moved.x),
-                y: snap(template.grid, moved.y),
-                w: snap(template.grid, moved.w),
-                h: snap(template.grid, moved.h)
-            }
-        )
-
-        const canvas = centers({
-            x: 0,
-            y: 0,
-            w: c.width,
-            h: c.height
+        const moved = applyBoxConstrain(constrain, {
+            ...initial,
+            x: initial.x + e.dx,
+            y: initial.y + e.dy
         })
 
-        const points = toPoints(snapped)
+        const canvas = centers({ ...constrain, h: c.height })
+
+        const [ ox, oy ] = snap(5, moved, [ { ...constrain, h: c.height }, ...inactives ])
+
+        const result = applyBoxConstrain(constrain, { ...moved, x: moved.x + ox, y: moved.y + oy })
+
+        const points = toPoints(result)
 
         const lines = removeDuplicateLines(
             inactives.reduce(
@@ -1142,34 +1333,28 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
             []
         )
 
-        const shouldSnap = lines.length > 0
-        const dx = (shouldSnap ? snapped.x : moved.x) - initial.x
-        const dy = (shouldSnap ? snapped.y : moved.y) - initial.y
+        const dx = result.x - initial.x
+        const dy = result.y - initial.y
 
-        setTemplate((template: Template) => {
+        setLayout((layout: Layout) => {
             const items = actives.reduce(
                 (a, b) => {
-                    const item = template.layout.items[ b.i ]
+                    const item = layout.items[ b.i ]
                     return a.with(b.i, {
                         ...item,
                         x: item.x + dx,
                         y: item.y + dy
                     })
                 },
-                template.layout.items
+                layout.items
             )
-            const rows = Math.round(
-                Math.max(
-                    ...items.map(v => (v.y + v.h) / template.grid)
-                )
+            const height = Math.max(
+                ...items.map(v => v.y + v.h)
             )
-            return {
-                ...template,
-                layout: { ...template.layout, items, rows }
-            }
+            return { ...layout, items, height }
         })
 
-        if(shouldSnap) {
+        if(lines.length > 0) {
             drawOrangeLines(lines)
         } else {
             clearCanvas()
@@ -1181,26 +1366,6 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
 
         if(dx || dy) {
             clearCanvas()
-            setTemplate((template: Template) => {
-                const items = template.layout.items.map(v => {
-                    return {
-                        ...v,
-                        x: snap(template.grid, v.x),
-                        y: snap(template.grid, v.y),
-                        w: snap(template.grid, v.w),
-                        h: snap(template.grid, v.h)
-                    }
-                })
-                const rows = Math.round(
-                    Math.max(
-                        ...items.map(v => (v.y + v.h) / template.grid)
-                    )
-                )
-                return {
-                    ...template,
-                    layout: { ...template.layout, items, rows }
-                }
-            })
         } else {
             const container = containerRef.current!
             const c = container.getBoundingClientRect()
@@ -1209,7 +1374,7 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
                 const r = v.getBoundingClientRect()
                 const x = r.x - c.x
                 const y = r.y - c.y
-                const inside = constrain(x, x + r.width, e.x) === e.x && constrain(y, y + r.height, e.y) === e.y
+                const inside = clamp(x, x + r.width, e.x) === e.x && clamp(y, y + r.height, e.y) === e.y
                 return inside
             })
 
@@ -1230,7 +1395,7 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
                 const cx = item.x + item.w * .5
                 const cy = item.y + item.h * .5
 
-                setActives([ Number(element.dataset.i) ])
+                setActives([ element.dataset.id as string ])
                 drawBlueLines([
                     [ [ 0, cy ], [ item.x, cy ] ],
                     [ [ cx, 0 ], [ cx, item.y ] ]
@@ -1239,65 +1404,97 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
         }
     }
 
+    const onGroupCenter = (group: Items) => () => {
+        setLayout((layout: Layout) => {
+            const [ min, max ] = extent(v => ([ v.x, v.x + v.w ]), group)
+            const delta = (layout.width / 2) - ((min + max) / 2)
+            const table: Record<string, number> = layout.items.reduce((a, b, i) => ({ ...a, [ b.id ]: i }), {})
+            const indexes = group.map(v => table[ v.id ])
+            const items = indexes.reduce((a, b) =>
+                a.with(
+                    b,
+                    applyBoxConstrain(
+                        { x: 0, y: 0, w: layout.width, h: Infinity },
+                        { ...a[ b ], x: a[ b ].x + delta }
+                    )
+                ),
+                layout.items
+            )
+            return { ...layout, items }
+        })
+    }
+
+    const onGroupEffect = curry((group: Items, effect: string) => {
+        setLayout((layout: Layout) => {
+            const table: Record<string, number> = layout.items.reduce((a, b, i) => ({ ...a, [ b.id ]: i }), {})
+            const indexes = group.map(v => table[ v.id ])
+            const items = indexes.reduce((a, b) => a.with(b, { ...a[ b ], effect }), layout.items)
+            return { ...layout, items }
+        })
+    })
+
     const sizeExtent = [
-        [ 15, template.breakpoint ],
+        [ 15, layout.width ],
         [ 15, Infinity ]
     ]
 
     const translateExtent = [
-        [ 0, template.breakpoint ],
+        [ 0, layout.width ],
         [ 0, Infinity ]
     ]
 
-    const onMoveStart = (index: number) => (item: Item) => {
+    const onMoveStart = curry((index: number, item: Item) => {
         setInteractive(true)
-        setActives([ index ])
+        setActives([ item.id ])
         drawActiveLines(item)
-    }
+    })
 
-    const onMove = (index: number) => (item: Item) => {
-        const snapped = {
-            ...item,
-            x: snap(template.grid, item.x),
-            y: snap(template.grid, item.y),
-            w: snap(template.grid, item.w),
-            h: snap(template.grid, item.h)
-        }
-
-        const points = toPoints(snapped)
-
+    const onMove = curry((index: number, item: Item) => {
         const c = containerRef.current!.getBoundingClientRect()
-
-        const canvas = centers({
+        const container = {
             x: 0,
             y: 0,
-            w: snap(template.grid, c.width),
-            h: snap(template.grid, c.height)
+            w: c.width,
+            h: c.height
+        }
+        const constrain = { ...container, h: Infinity }
+        const others = [ ...containerRef.current!.children ].reduce<Box[]>((a, b) => {
+            const next = b as HTMLDivElement
+            const id = next.dataset.id as string
+            if(item.id === id) {
+                return a
+            } else {
+                const r = next.getBoundingClientRect()
+                const box = {
+                    x: r.x - c.x,
+                    y: r.y - c.y,
+                    w: r.width,
+                    h: r.height
+                }
+                return a.concat([ box ])
+            }
+        }, [])
+
+        const [ ox, oy ] = snap(5, item, [ constrain, ...others ])
+
+        const result = applyBoxConstrain(constrain, {
+            ...item,
+            x: item.x + ox,
+            y: item.y + oy
         })
 
-        const childrens = [ ...containerRef.current!.children ]
+        const points = toPoints(result)
+
+        const canvas = centers(container)
 
         const lines = removeDuplicateLines(
-            childrens.reduce(
+            others.reduce(
                 (acc, curr) => {
-                    const next = curr as HTMLDivElement
-                    const i = Number(next.dataset.i)
-                    const r = next.getBoundingClientRect()
-                    const box = {
-                        x: r.x - c.x,
-                        y: r.y - c.y,
-                        w: r.width,
-                        h: r.height
-                    }
-                    if(index === i) {
-                        return acc
-                    } else {
-                        const lines = toPoints(box)
-                        const result = points.flatMap(point =>
-                            intersections(point, lines)
-                        )
-                        return [ ...acc, ...result ]
-                    }
+                    const lines = toPoints(curr)
+                    const result = points.flatMap(point =>
+                        intersections(point, lines)
+                    )
+                    return [ ...acc, ...result ]
                 },
                 points.flatMap(point =>
                     intersections(point, canvas)
@@ -1306,144 +1503,105 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
             []
         )
 
-        const shouldSnap = lines.length > 0
-
-        const result = shouldSnap ? snapped : item
-
         setInteractive(false)
         applyChange(index, result)
 
-        if(shouldSnap) {
+        if(lines.length > 0) {
             drawOrangeLines(lines)
         } else {
             clearCanvas()
         }
+    })
 
-    }
-
-    const onMoveEnd = (index: number) => (item: Item) => {
-        const result = {
-            ...item,
-            x: snap(template.grid, item.x),
-            y: snap(template.grid, item.y)
-        }
-        applyChange(index, result)
+    const onMoveEnd = curry((index: number, item: Item) => {
         setInteractive(true)
-        drawActiveLines(result)
-    }
+        drawActiveLines(item)
+    })
 
-    const onResizeStart = (index: number) => (item: Item) => {
-        prevRef.current = item
+    const onResizeStart = curry((index: number, item: Item) => {
         setInteractive(false)
-    }
+    })
 
-    const onResize = (index: number) => (item: Item) => {
+    const onResize = curry((index: number, item: Item) => {
         applyChange(index, item)
         drawActiveLines(item)
-    }
+    })
 
-    const onResizeEnd = (index: number) => (item: Item) => {
-        const sw = Math.round(item.w / (item.bw * template.grid))
-        const sh = Math.round(item.h / (item.bh * template.grid))
-        const prev = prevRef.current!
-        const k = constrain(
-            1,
-            Math.floor(
-                template.breakpoint / (item.bw * template.grid)
-            ),
-            Math.min(sw, sh)
-        )
-
-        const w = item.bw * k * template.grid
-        const h = item.bh * k * template.grid
-
-        const dw = w - item.w
-        const dh = h - item.h
-
-        const dx0 = eq(item.x, prev.x)
-        const dy0 = eq(item.y, prev.y)
-        const dx1 = eq(item.x + item.w, prev.x + prev.w)
-        const dy1 = eq(item.y + item.h, prev.y + prev.h)
-
-        const dx = dx0 ? 0 : dx1 ? -dw : -dw * .5
-        const dy = dy0 ? 0 : dy1 ? -dh : -dh * .5
-
-        const result = {
-            ...item,
-            ...applyBoxConstrain(
-                { x: 0, y: 0, w: template.breakpoint, h: Infinity },
-                {
-                    x: snap(template.grid, item.x + dx),
-                    y: snap(template.grid, item.y + dy),
-                    w: w,
-                    h: h
-                }
-
-            )
-        }
-
-        applyChange(index, result)
+    const onResizeEnd = curry((index: number, item: Item) => {
         setInteractive(true)
-        drawActiveLines(result)
-    }
+    })
 
-    const onCropStart = (index: number) => (item: Item) => {
+    const onCropStart = curry((index: number, item: Item) => {
         setInteractive(false)
-    }
+    })
 
-    const onCrop = (index: number) => (item: Item) => {
+    const onCrop = curry((index: number, item: Item) => {
         applyChange(index, item)
-    }
+    })
 
-    const onCropEnd = (index: number) => (item: Item) => {
-        const x = Math.round((item.x + template.grid * .25) / template.grid)
-        const y = Math.round((item.y + template.grid * .25) / template.grid)
-        const w = Math.round((item.w - template.grid * .25) / template.grid)
-        const h = Math.round((item.h - template.grid * .25) / template.grid)
-        const ox = w % 2
-        const oy = h % 2
-
-        const box = {
-            x: (x + ox) * template.grid,
-            y: (y + oy) * template.grid,
-            w: (w - ox) * template.grid,
-            h: (h - oy) * template.grid
-        }
-
-        const iw = item.w / item.sw
-        const ih = item.h / item.sh
-
-        const image = {
-            x: item.x - (item.sx * iw),
-            y: item.y - (item.sy * ih),
-            w: iw,
-            h: ih
-        }
-
-        const source = {
-            sx: (box.x - image.x) / image.w,
-            sy: (box.y - image.y) / image.h,
-            sw: box.w / image.w,
-            sh: box.h / image.h
-        }
-
-        const rw = Math.round(box.w / template.grid)
-        const rh = Math.round(box.h / template.grid)
-
-        const divisor = gcd(rw, rh)
-
-        const base = {
-            bw: rw / divisor,
-            bh: rh / divisor
-        }
-
-        const result = { ...item, ...box, ...source, ...base }
-
-        applyChange(index, result)
+    const onCropEnd = curry((index: number, item: Item) => {
         setInteractive(true)
-    }
+    })
 
-    return (
+    const onDuplicate = curry((index: number, item: Item) => {
+        const id = UUIDv7()
+
+        setActives([ id ])
+        setLayout((layout: Layout) => {
+            const c = containerRef.current!.getBoundingClientRect()
+            const items = layout.items.concat([
+                applyBoxConstrain(
+                    { x: 0, y: 0, w: c.width, h: Infinity },
+                    {
+                        ...item,
+                        id: id,
+                        x: item.x + .05 * item.w,
+                        y: item.y + .05 * item.h
+                    }
+                )
+            ])
+            const height = Math.max(
+                ...items.map(v => v.y + v.h)
+            )
+            return { ...layout, items, height }
+        })
+    })
+
+    const onEffect = applyChange
+
+    const onCenter = curry((index: number, item: Item) => {
+        const c = containerRef.current!.getBoundingClientRect()
+        const delta = (layout.width / 2) - ((item.x + item.x + item.w) / 2)
+        const moved = applyBoxConstrain(
+            { x: 0, y: 0, w: c.width, h: Infinity },
+            { ...item, x: item.x + delta }
+        )
+        setLayout((layout: Layout) => {
+            const items = layout.items.with(index, moved)
+            return { ...layout, items }
+        })
+        drawActiveLines(moved)
+    })
+
+    const setAsThumbnail = (image: Photo) => setAsset(asset =>
+        Object.entries(asset).reduce((a, [ k, v ]) => ({
+            ...a,
+            [ k ]: { ...v, thumbnail: image.id === k }
+        }), {})
+    )
+
+    const setImageAlt = (image: Photo) =>
+        setAsset((asset: Asset) => {
+            return { ...asset, [ image.id ]: image }
+        })
+
+    const group = actives.length > 1
+        ? layout.items.filter(v =>
+            actives.includes(v.id)
+        )
+        : ([])
+
+    return ( // add sticky effect
         <section
             ref={ rootRef }
             className={ clsx('relative size-full flex flex-col items-center', className) }
@@ -1452,25 +1610,26 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
                 ref={ containerRef }
                 className='outline-1 outline-neutral-200'
                 style={ {
-                    width: width + 'px',
-                    height: height + 'px'
+                    width: layout.width + 'px',
+                    height: layout.height + 'px'
                 } }
             >
                 {
-                    template.layout.items.map((item, i) =>
+                    layout.items.map((item, i) =>
                         <Editable
-                            i={ i }
-                            key={ template.breakpoint + i }
+                            key={ item.id + i }
                             container={ containerRef }
-                            active={ actives.includes(i) }
+                            active={ actives.includes(item.id) }
                             interactive={ interactive }
-                            image={ images[ i ] }
+                            image={ asset[ item.src ] }
                             value={ item }
                             sizeExtent={ sizeExtent }
                             translateExtent={ translateExtent }
                             onContextMenu={ onContextMenu(i) }
                             bringToFront={ bringToFront(i) }
                             sendToBack={ sendToBack(i) }
+                            setAsThumbnail={ setAsThumbnail }
+                            setImageAlt={ setImageAlt }
                             onMoveStart={ onMoveStart(i) }
                             onMove={ onMove(i) }
                             onMoveEnd={ onMoveEnd(i) }
@@ -1480,6 +1639,9 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
                             onResizeStart={ onResizeStart(i) }
                             onResize={ onResize(i) }
                             onResizeEnd={ onResizeEnd(i) }
+                            onDuplicate={ onDuplicate(i) }
+                            onCenter={ onCenter(i) }
+                            onEffect={ onEffect(i) }
                         />
                     )
                 }
@@ -1491,17 +1653,15 @@ export default ({ className = '', images, deleteImages, template, setTemplate }:
                 { ...attSize }
             />
             {
-                actives.length > 1
+                group.length > 1
                     ? <Group
                         container={ containerRef }
                         onDragStart={ onGroupDragStart }
                         onDrag={ onGroupDrag }
                         onDragEnd={ onGroupDragEnd }
-                        {
-                        ...calculateGroup(
-                            actives.map(i => template.layout.items[ i ])
-                        )
-                        }
+                        onCenter={ onGroupCenter(group) }
+                        onEffect={ onGroupEffect(group) }
+                        { ...calculateGroup(group) }
                     />
                     : null
             }

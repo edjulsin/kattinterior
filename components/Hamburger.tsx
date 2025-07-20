@@ -5,16 +5,18 @@ import { useEffect, useState } from 'react'
 export default ({ state, className, ...props }: { state: boolean, className?: string }) => {
     const [ animate, setAnimate ] = useState(false)
 
-    const label = state ? 'open' : 'close'
+    const hamburger = state ? `hamburger-open` : `hamburger-close`
+
+    const icon = state ? 'hamburger-icon-open' : 'hamburger-icon-close'
 
     useEffect(() => () => setAnimate(true), [ state ])
 
     return (
-        <button className={ clsx(className, 'hamburger', { [ `hamburger-${label}` ]: animate }) } { ...props }>
-            <AccessibleIcon label={ label }>
+        <button className={ clsx(className, 'hamburger', { [ hamburger ]: animate }) } { ...props }>
+            <AccessibleIcon label={ state ? 'open' : 'close' }>
                 <svg
                     viewBox='0 0 100 100'
-                    className={ clsx('hamburger-icon', { [ `hamburger-icon-${label}` ]: animate }) }
+                    className={ clsx('hamburger-icon', { [ icon ]: animate }) }
                     shapeRendering='crispEdges'
                 >
                     <line

@@ -25,6 +25,72 @@
 }
 
 @layer components {
+	.left-to-right,
+	.right-to-left,
+	.top-to-bottom,
+	.bottom-to-top {
+		transition-property: opacity, translate;
+		transition-duration: 750ms;
+		transition-delay: 200ms;
+	}
+
+	.scale-up,
+	.scale-down {
+		transition-property: scale;
+		transition-duration: 750ms;
+		transition-delay: 200ms;
+	}
+
+	.scale-up[data-done='false'] {
+		@apply scale-75;
+	}
+
+	.scale-up[data-done='true'] {
+		@apply scale-100;
+	}
+
+	.scale-down[data-done='false'] {
+		@apply scale-125;
+	}
+
+	.scale-down[data-done='true'] {
+		@apply scale-100;
+	}
+
+	.left-to-right[data-done='false'] {
+		@apply opacity-0 -translate-x-[10%];
+	}
+
+	.left-to-right[data-done='true'] {
+		@apply opacity-100 translate-x-[0%];
+	}
+
+	.right-to-left[data-done='false'] {
+		@apply opacity-0 translate-x-[10%];
+	}
+
+	.right-to-left[data-done='true'] {
+		@apply opacity-100 translate-x-[0%];
+	}
+
+	.top-to-bottom[data-done='false'] {
+		@apply opacity-100 -translate-y-[10%];
+	}
+
+	.top-to-bottom[data-done='true'] {
+		@apply opacity-100 translate-y-[0%];
+	}
+
+	.bottom-to-top[data-done='false'] {
+		@apply opacity-100 translate-y-[10%];
+	}
+
+	.bottom-to-top[data-done='true'] {
+		@apply opacity-100 translate-y-[0%];
+	}
+}
+
+@layer components {
 	.hamburger {
 		@apply bg-gold-100 rounded-full size-16;
 	}
@@ -40,38 +106,38 @@
 	.hamburger-icon {
 		@apply stroke-1 stroke-black size-full;
 
-		& > * {
+		&>* {
 			@apply origin-center;
 		}
 
-		& > *:first-child {
+		&>*:first-child {
 			@apply -translate-y-[5px];
 		}
 
-		& > *:last-child {
+		&>*:last-child {
 			@apply translate-y-[5px];
 		}
 	}
 
 	.hamburger-icon-open {
-		& > *:first-child {
+		&>*:first-child {
 			@apply animate-[hamburger-top-open_500ms_both];
 			@apply translate-y-0;
 		}
 
-		& > *:last-child {
+		&>*:last-child {
 			@apply animate-[hamburger-bottom-open_500ms_both];
 			@apply translate-y-0;
 		}
 	}
 
 	.hamburger-icon-close {
-		& > *:first-child {
+		&>*:first-child {
 			@apply animate-[hamburger-top-close_500ms_both];
 			@apply -translate-y-[5px];
 		}
 
-		& > *:last-child {
+		&>*:last-child {
 			@apply animate-[hamburger-bottom-close_500ms_both];
 			@apply translate-y-[5px];
 		}
@@ -110,7 +176,7 @@
 			transform: rotate(-138deg);
 		}
 	}
-	
+
 	@keyframes hamburger-top-close {
 		from {
 			transform: rotate(-138deg);
@@ -130,7 +196,7 @@
 			transform: rotate(138deg);
 		}
 	}
-	
+
 	@keyframes hamburger-bottom-close {
 		from {
 			transform: rotate(138deg);

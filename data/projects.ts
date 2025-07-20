@@ -33,5 +33,26 @@ export default [
         source: '/ubud/3.jpg',
         width: 1920,
         height: 1080
+    },
+    {
+        id: 4,
+        alt: 'Villa Ubud',
+        source: '/ubud/3.jpg',
+        width: 1920,
+        height: 1080
+    },
+    {
+        id: 4,
+        alt: 'Villa Ubud',
+        source: '/ubud/3.jpg',
+        width: 1920,
+        height: 1080
+    },
+    {
+        id: 4,
+        alt: 'Villa Ubud',
+        source: '/ubud/3.jpg',
+        width: 1920,
+        height: 1080
     }
 ]

@@ -20,6 +20,7 @@ const works = [
 
 // make it single projects so the theme/image's color will match instead of two different projects
 // optional make link to see all projects
+// should omit this if there are no featured project
 
 export default () => (
     <section className='flex flex-col gap-y-20'>

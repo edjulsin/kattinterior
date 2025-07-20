@@ -1,6 +1,6 @@
 'use client'
 
-import storageAvailable from '@/utility/storageAvailable'
+import { storageAvailable } from '@/utility/fn'
 import * as Switch from '@radix-ui/react-switch'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
@@ -34,17 +34,15 @@ export default () => {
             <label className='sr-only' htmlFor='theme'>Switch theme</label>
             <Switch.Root
                 id='theme'
-                className={ clsx('w-8 h-4 rounded-full bg-gold-500') }
+                className={ clsx('w-8 h-4 rounded-full bg-gold-100') }
                 onCheckedChange={ onChange }
                 checked={ checked }
             >
                 <Switch.Thumb
-                    className={
-                        clsx(
-                            'block size-4 rounded-full bg-gold-100 transition-[translate] ease-in-out duration-200',
-                            checked ? 'translate-x-4' : 'translate-x-0'
-                        )
-                    }
+                    className={ clsx(
+                        'block size-4 rounded-full bg-gold-300 ring-1 ring-gold-300 transition-[translate] ease-in-out duration-200',
+                        checked ? 'translate-x-4' : 'translate-x-0'
+                    ) }
                 />
             </Switch.Root>
         </div>

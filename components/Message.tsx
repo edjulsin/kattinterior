@@ -1,0 +1,1 @@
+export default ({ message }: { message: string }) => <p className='text-xl text-neutral-500 font-medium'>{ message }</p>

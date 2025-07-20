@@ -1,4 +1,15 @@
+export type Photo = {
+    id: string,
+    src: string,
+    alt: string,
+    width: number,
+    height: number,
+    thumbnail: boolean
+}
+
 export type Item = {
+    id: string,
+    src: string,
     z: number,
     x: number,
     y: number,
@@ -8,25 +19,44 @@ export type Item = {
     sy: number,
     sw: number,
     sh: number,
-    bw: number,
-    bh: number
+    effect: string
 }
 
 export type Items = Item[]
 
+export type Photos = Photo[]
+
 export type Layout = {
-    cols: number,
-    rows: number,
+    edited: boolean,
+    width: number,
+    height: number,
     items: Items
 }
 
 export type Template = {
-    className: string,
-    breakpoint: number,
-    grid: number,
-    edited: boolean,
-    layout: Layout
+    desktop: Layout,
+    tablet: Layout,
+    mobile: Layout
 }
 
-export type Templates = Record<string, Template>
+export type Device = 'desktop' | 'tablet' | 'mobile'
 
+export type Project = {
+    id: string,
+    created_at: string,
+    updated_at: string,
+    published_at: string,
+    featured: boolean,
+    published: boolean,
+    name: string,
+    location: string,
+    story: string,
+    tagline: string,
+    slug: string,
+    title: string,
+    description: string,
+    template: Template,
+    assets: Photos
+}
+
+export type Asset = Record<string, Photo>

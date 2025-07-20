@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-
+// image should be imported then use as src
 export default () => (
     <section className='grid grid-cols-[1fr_.1fr_.5fr_.1fr_1fr] grid-rows-2'>
         <Image
@@ -26,66 +26,3 @@ export default () => (
         />
     </section>
 )
-
-
-
-// useEffect(() => {
-//     const canvas = canvasRef.current!
-//     const context = contextRef.current!
-
-//     const caches = layout.items.map(({ i, w, h, sx, sy }) => {
-//         const width = w * grid
-//         const height = h * grid
-//         const canvas = new OffscreenCanvas(
-//             Math.floor(width * devicePixelRatio),
-//             Math.floor(height * devicePixelRatio)
-//         )
-//         const context = canvas.getContext('2d')!
-//         const image = images[ i ]
-//         const imageWidth = image.width
-//         const imageHeight = image.height
-//         const scale = Math.min(imageWidth / width, imageHeight / height) * grid
-
-//         context.imageSmoothingEnabled = true
-//         context.imageSmoothingQuality = 'high'
-
-//         context.scale(dpr, dpr)
-//         context.drawImage(
-//             image,
-//             Math.floor((imageWidth - w * scale) * sx),
-//             Math.floor((imageHeight - h * scale) * sy),
-//             Math.floor(w * scale),
-//             Math.floor(h * scale),
-//             0,
-//             0,
-//             Math.floor(width),
-//             Math.floor(height)
-//         )
-
-//         return canvas
-//     })
-//     setCaches(caches)
-//     drawLayout({
-//         context: contextRef.current!,
-//         images: caches,
-//         items: layout.items,
-//         grid: grid,
-//         dpr: dpr
-//     })
-//     return () => resetCanvas({ canvas, context })
-// }, [ images, grid, dpr ])
-
-// useEffect(() => {
-//     const canvas = canvasRef.current!
-//     const context = contextRef.current!
-
-//     drawLayout({
-//         context: contextRef.current!,
-//         images: caches,
-//         items: layout.items,
-//         grid: grid,
-//         dpr: dpr
-//     })
-
-//     return () => resetCanvas({ canvas, context })
-// }, [ layout.items ])

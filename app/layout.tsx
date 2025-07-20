@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import localFont from 'next/font/local'
 import "./globals.css";
 import clsx from 'clsx';
@@ -29,14 +28,12 @@ const sans = localFont({
 	preload: false
 })
 
-export default ({
-	children,
-}: Readonly<{
-	children: React.ReactNode;
-}>) => (
+export default ({ children }: Readonly<{ children: React.ReactNode }>) =>
 	<html lang='en'>
-		<body className={ clsx(`${serif.variable} ${sans.variable} antialiased`, 'bg-light dark:bg-dark dark:text-white') }>
+		<body
+			className={
+				clsx(`${serif.variable} ${sans.variable} antialiased flex flex-col justify-center items-center`, 'bg-light dark:bg-dark dark:text-white')
+			}>
 			{ children }
 		</body>
 	</html>
-)

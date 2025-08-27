@@ -4,12 +4,7 @@ import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const tabs = [
-    [ 'projects', '/dashboard/projects', ],
-    [ 'contacts', '/dashboard/contacts' ]
-]
-
-export default ({ className }: { className?: string }) => {
+const Tabs = ({ className }: { className?: string }) => {
     const pathname = usePathname()
     return (
         <ul className={ clsx(className, 'grid grid-cols-2 items-center justify-center text-base font-semibold text-neutral-400 capitalize') }>
@@ -28,3 +23,5 @@ export default ({ className }: { className?: string }) => {
         </ul>
     )
 }
+
+export default Tabs

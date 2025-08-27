@@ -1,4 +1,5 @@
 import { Item, Items, Template } from '@/type/editor'
+import { timeDay, timeMonth, timeYear } from 'd3'
 
 export const curry = (fn: Function) => (...xs: any[]) =>
     xs.length >= fn.length
@@ -350,4 +351,23 @@ export function isValidEmail(v: string) {
     if(!v) return false;
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     return re.test(v)
+}
+
+export const formatISODate = (now: Date, time: string) => {
+    const date = new Date(time)
+    const years = timeYear.count(date, now)
+    const months = timeMonth.count(date, now)
+    const days = timeDay.count(date, now)
+    const year = `${years} year${years > 1 ? 's' : ''} ago`
+    const month = `${months} month${months > 1 ? 's' : ''} ago`
+    const day = `${days} day${days > 1 ? 's' : ''} ago`
+    return years > 0 ? year : months > 0 ? month : day
+}
+
+export const capitalize = (string: string) => {
+    const splitted = string.split(' ')
+    const capitalized = splitted.map(([ x, ...xs ]) => {
+        return [ x.toUpperCase(), ...xs ].join('')
+    })
+    return capitalized.join(' ')
 }

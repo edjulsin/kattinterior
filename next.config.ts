@@ -1,38 +1,41 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
+
+const env = process.env.NODE_ENV === 'development'
+const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL
+
+const CSP = `
+	default-src 'self';
+	script-src 'self' ${env ? "'unsafe-eval' 'unsafe-inline'" : ''};
+	style-src 'self' ${env ? "'unsafe-inline'" : ''};
+	img-src 'self' blob: data: ${supabase};
+	connect-src 'self' ${supabase};
+	font-src 'self';
+	object-src 'none';
+	base-uri 'self';
+	form-action 'self';
+	frame-ancestors 'none';
+	upgrade-insecure-requests;
+`.replace(/\n/g, '')
 
 const nextConfig: NextConfig = {
-  webpack(config) {
-    // Grab the existing rule that handles SVG imports
-    const fileLoaderRule = config.module.rules.find((rule: any) =>
-      rule.test?.test?.('.svg'),
-    )
+	images: {
+		remotePatterns: [
+			new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_BUCKET!}/**`)
+		]
+	},
+	async headers() {
+		return [
+			{
+				source: '/(.*)',
+				headers: [
+					{
+						key: 'Content-Security-Policy',
+						value: CSP
+					}
+				]
+			}
+		]
+	}
+}
 
-    config.module.rules.push(
-      // Reapply the existing rule, but only for svg imports ending in ?url
-      {
-        ...fileLoaderRule,
-        test: /\.svg$/i,
-        resourceQuery: /url/, // *.svg?url
-      },
-      // Convert all other *.svg imports to React components
-      {
-        test: /\.svg$/i,
-        issuer: fileLoaderRule.issuer,
-        resourceQuery: { not: [ ...fileLoaderRule.resourceQuery.not, /url/ ] }, // exclude if *.svg?url
-        use: [ '@svgr/webpack' ],
-      },
-    )
-
-    // Modify the file loader rule to ignore *.svg, since we have it handled now.
-    fileLoaderRule.exclude = /\.svg$/i
-
-    return config
-  },
-  images: {
-    remotePatterns: [
-      new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_BUCKET!}/**`)
-    ]
-  }
-};
-
-export default nextConfig;
+export default nextConfig

@@ -7,8 +7,7 @@ import Article from './Article'
 import { Project } from '@/type/editor'
 import { getPublishedProjects } from '@/action/server'
 
-
-export default ({ start, count }: { start: number, count: number }) => {
+const Articles = ({ start, count }: { start: number, count: number }) => {
     const [ data, setData ] = useState<Project[]>([])
     const [ loader, setLoader ] = useState(true)
     const [ error, setError ] = useState(false)
@@ -38,8 +37,9 @@ export default ({ start, count }: { start: number, count: number }) => {
     return (
         <Loader key={ data.length } enabled={ loader } callback={ callback }>
             {
-                data.map(v =>
+                data.map((v, i) =>
                     <Article
+                        index={ i }
                         key={ v.id }
                         project={ v }
                     />
@@ -49,3 +49,5 @@ export default ({ start, count }: { start: number, count: number }) => {
         </Loader>
     )
 }
+
+export default Articles

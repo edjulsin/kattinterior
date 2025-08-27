@@ -1,39 +1,54 @@
 import localFont from 'next/font/local'
 import "./globals.css";
-import clsx from 'clsx';
+import type { Metadata } from 'next';
 
 const serif = localFont({
-	src: '../public/fonts/tanpearl/TanPearl.otf',
+	src: '../assets/fonts/tanpearl/TanPearl.otf',
 	style: 'normal',
 	weight: '400',
-	variable: '--font-serif',
-	preload: false
+	variable: '--font-serif'
 })
 
 const sans = localFont({
 	src: [
-		{ path: '../public/fonts/garamond/EBGaramond-ExtraBold.ttf', weight: '800', style: 'normal' },
-		{ path: '../public/fonts/garamond/EBGaramond-ExtraBold.ttf', weight: '800', style: 'italic' },
-		{ path: '../public/fonts/garamond/EBGaramond-Bold.ttf', weight: '700', style: 'normal' },
-		{ path: '../public/fonts/garamond/EBGaramond-BoldItalic.ttf', weight: '700', style: 'italic' },
-		{ path: '../public/fonts/garamond/EBGaramond-Medium.ttf', weight: '500', style: 'normal' },
-		{ path: '../public/fonts/garamond/EBGaramond-MediumItalic.ttf', weight: '500', style: 'italic' },
-		{ path: '../public/fonts/garamond/EBGaramond-Italic.ttf', weight: '400', style: 'italic' },
-		{ path: '../public/fonts/garamond/EBGaramond-Regular.ttf', weight: '400', style: 'normal' },
-		{ path: '../public/fonts/garamond/EBGaramond-SemiBold.ttf', weight: '600', style: 'normal' },
-		{ path: '../public/fonts/garamond/EBGaramond-SemiBoldItalic.ttf', weight: '600', style: 'italic' },
-		{ path: '../public/fonts/garamond/EBGaramond.otf', weight: '300', style: 'normal' }
+		{ path: '../assets/fonts/garamond/EBGaramond-ExtraBold.ttf', weight: '800', style: 'normal' },
+		{ path: '../assets/fonts/garamond/EBGaramond-ExtraBold.ttf', weight: '800', style: 'italic' },
+		{ path: '../assets/fonts/garamond/EBGaramond-Bold.ttf', weight: '700', style: 'normal' },
+		{ path: '../assets/fonts/garamond/EBGaramond-BoldItalic.ttf', weight: '700', style: 'italic' },
+		{ path: '../assets/fonts/garamond/EBGaramond-Medium.ttf', weight: '500', style: 'normal' },
+		{ path: '../assets/fonts/garamond/EBGaramond-MediumItalic.ttf', weight: '500', style: 'italic' },
+		{ path: '../assets/fonts/garamond/EBGaramond-Italic.ttf', weight: '400', style: 'italic' },
+		{ path: '../assets/fonts/garamond/EBGaramond-Regular.ttf', weight: '400', style: 'normal' },
+		{ path: '../assets/fonts/garamond/EBGaramond-SemiBold.ttf', weight: '600', style: 'normal' },
+		{ path: '../assets/fonts/garamond/EBGaramond-SemiBoldItalic.ttf', weight: '600', style: 'italic' },
+		{ path: '../assets/fonts/garamond/EBGaramond.otf', weight: '300', style: 'normal' }
 	],
-	variable: '--font-sans',
-	preload: false
+	variable: '--font-sans'
 })
 
-export default ({ children }: Readonly<{ children: React.ReactNode }>) =>
+const name = process.env.NEXT_PUBLIC_SITE_NAME
+
+export const metadata: Metadata = {
+	metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL as string),
+	referrer: 'origin-when-cross-origin',
+	title: {
+		default: `${name} | Interior Designer`,
+		template: `${name} | %s`
+	},
+	pinterest: { richPin: true }
+}
+
+// use parameterized Next.js
+// smooth scroll
+// check post input data before publish
+// apply challenge to protect login and contact
+
+const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) =>
 	<html lang='en'>
 		<body
-			className={
-				clsx(`${serif.variable} ${sans.variable} antialiased flex flex-col justify-center items-center`, 'bg-light dark:bg-dark dark:text-white')
-			}>
+			className={ `${serif.variable} ${sans.variable} antialiased flex flex-col justify-center items-center bg-light dark:bg-dark dark:text-white transition-colors duration-300 ease-in-out` }>
 			{ children }
 		</body>
 	</html>
+
+export default RootLayout

@@ -1,12 +1,14 @@
 'use server'
 
-
-import { Contact } from '@/email/Contact'
+import Contact from '@/email/Contact'
 import { isValidEmail } from '@/utility/fn'
+import { render } from '@react-email/render'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import sanitizer from 'sanitize-html'
+import crypto from 'crypto';
+import { isEmail } from 'validator'
 
 const sanitize = (string: string) => sanitizer(string, {
     allowedTags: [],
@@ -47,13 +49,16 @@ export const isAuthorized = async () => client().then(client =>
 const smtp = () => new Resend(process.env.RESEND_API_KEY!)
 
 export const signIn = async (email: string) => {
-    const formatted = email + ''
-    if(isValidEmail(formatted)) {
+    const address = (email + '').trim()
+    if(isValidEmail(address)) {
         return client().then(
-            client => client.auth.signInWithOtp({ email: formatted }).then(v =>
+            client => client.auth.signInWithOtp({
+                email: address,
+                options: { shouldCreateUser: false }
+            }).then(v =>
                 v.error === null
-                    ? Promise.resolve()
-                    : Promise.reject()
+                    ? Promise.resolve(v)
+                    : Promise.reject(v)
             )
         )
     } else {
@@ -73,9 +78,13 @@ export const sendEmail = async (form: FormData) => {
     }
 
     const errors = Object.entries({
-        name: values.name.length > 2 && values.name.length < 50 ? '' : 'Name must contain 2 to 50 characters',
-        email: isValidEmail(values.email) ? '' : 'Invalid email address',
-        message: values.message.length > 10 && values.message.length < 1000 ? '' : 'Message must contain 10 to 1000 characters'
+        name: values.name.length > 2 && values.name.length < 50
+            ? ''
+            : 'Name must contain 2 to 50 characters',
+        email: isEmail(values.email) ? '' : 'Invalid email address',
+        message: values.message.length > 10 && values.message.length < 1000
+            ? ''
+            : 'Message must contain 10 to 1000 characters'
     }).filter(([ _, v ]) => v)
 
     if(errors.length > 0) {
@@ -88,26 +97,69 @@ export const sendEmail = async (form: FormData) => {
             email: sanitize(values.email),
             message: sanitize(values.message)
         }
-        return smtp().emails.send({
-            from: process.env.EMAIL_SENDER!,
-            to: process.env.EMAIL_RECEIVER!,
-            subject: 'Contact from kattinterior.com',
-            react: Contact(form)
-        }).then(
-            () => Promise.resolve(form),
-            () => Promise.reject({ other: 'Something is wrong' })
+        const config = {
+            idempotencyKey: crypto
+                .createHash('sha256')
+                .update(`${form.name}${form.email}${form.message}`)
+                .digest('hex')
+        }
+
+        const content = Contact(form)
+        const contents = Promise.all([
+            render(content),
+            render(content, { plainText: true })
+        ])
+        return contents.then(([ html, text ]) =>
+            smtp().emails.send({
+                from: process.env.EMAIL_SENDER!, // insert name here
+                to: process.env.EMAIL_RECEIVER!,
+                subject: 'Contact from Katt',
+                html: html,
+                text: text,
+                replyTo: form.email
+            }, config).then(
+                () => client().then(client =>
+                    client.from('contacts').upsert({
+                        name: form.name,
+                        email: form.email,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'email' }).then(
+                        () => Promise.resolve(form),
+                        () => Promise.reject({ other: 'Something wrong' })
+                    ),
+                    () => Promise.reject({ other: 'Something wrong' })
+                ),
+                () => Promise.reject({ other: 'Something wrong' })
+            )
         )
     }
 }
 
 export const getProject = async (id: string) => client().then(client =>
-    client.from('projects').select('*').eq('id', id + '').then(v => {
+    client.from('projects').select('*').eq('id', id + '').limit(1).then(v => {
         if(v.error === null) {
             return Promise.resolve(v.data ?? ([]))
         } else {
             return Promise.reject()
         }
     })
+)
+
+export const getFeaturedProject = async () => client().then(client =>
+    client
+        .from('projects')
+        .select('*')
+        // .eq('published', true)
+        .eq('featured', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .then(v => {
+            if(v.error === null) {
+                return Promise.resolve(v.data ?? ([]))
+            } else {
+                return Promise.reject()
+            }
+        })
 )
 
 export const getProjects = async (limit: number) => client().then(client =>
@@ -120,12 +172,48 @@ export const getProjects = async (limit: number) => client().then(client =>
     })
 )
 
+export const getPublishedProject = async (slug: string) =>
+    client().then(client =>
+        client
+            .from('projects')
+            .select('*')
+            // .eq('published', true) //
+            .eq('slug', slug)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .then((v) => {
+                if(v.error === null) {
+                    return Promise.resolve(v.data ?? ([]))
+                } else {
+                    return Promise.reject()
+                }
+            })
+    )
+
+export const getNextPublishedProject = async (limit: number, created_at: string) =>
+    client().then(client =>
+        client
+            .from('projects')
+            .select('*')
+            // .eq('published', true)
+            .gt('created_at', created_at)
+            .order('created_at', { ascending: true })
+            .limit(limit)
+            .then((v) => {
+                if(v.error === null) {
+                    return Promise.resolve(v.data ?? ([]))
+                } else {
+                    return Promise.reject()
+                }
+            })
+    )
+
 export const getPublishedProjects = async (start: number, end: number) =>
     client().then(client =>
         client
             .from('projects')
             .select('*')
-            .eq('published', true)
+            // .eq('published', true)
             .order('created_at', { ascending: false })
             .range(start, end)
             .then(v => {
@@ -138,9 +226,60 @@ export const getPublishedProjects = async (start: number, end: number) =>
     )
 
 
-export const verifyEmailToken = async (token_hash: string): Promise<void> =>
+export const getAllPublishedProjects = async () =>
     client().then(client =>
-        client.auth.verifyOtp({ type: 'email', token_hash: token_hash + '' }).then(v =>
-            v.error === null ? Promise.resolve() : Promise.reject()
+        client
+            .from('projects')
+            .select('*')
+            .eq('published', true)
+            .order('created_at', { ascending: false })
+            .then(v => {
+                if(v.error === null) {
+                    return Promise.resolve(v.data ?? ([]))
+                } else {
+                    return Promise.reject()
+                }
+            })
+    )
+
+
+export const verifyEmailToken = async (token: string): Promise<void> =>
+    client().then(client =>
+        client.auth.verifyOtp({ type: 'email', token_hash: token + '' }).then(v =>
+            v.error === null && v.data.user ? Promise.resolve() : Promise.reject()
         )
+    )
+
+
+export const getAllContacts = async (start: number, end: number) =>
+    client().then(client =>
+        client.from('contacts')
+            .select('*')
+            .order('updated_at', { ascending: false })
+            .range(start, end)
+            .then(v => {
+                if(v.error === null) {
+                    return Promise.resolve(v.data ?? ([]))
+                } else {
+                    return Promise.reject()
+                }
+            })
+    )
+
+
+
+export const searchContacts = async (start: number, end: number, search: string) =>
+    client().then(client =>
+        client
+            .from('contacts')
+            .select('*')
+            .or(`name.ilike.%${search.trim()}%,email.ilike.%${search.trim()}%`)
+            .range(start, end)
+            .then(v => {
+                if(v.error === null) {
+                    return Promise.resolve(v.data ?? ([]))
+                } else {
+                    return Promise.reject()
+                }
+            })
     )

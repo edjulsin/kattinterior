@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 
 const storage = storageAvailable('localStorage')
 
-export default () => {
+const Theme = () => {
     const [ checked, setChecked ] = useState(false)
 
     const onChange = (value: boolean) => {
@@ -48,3 +48,5 @@ export default () => {
         </div>
     )
 }
+
+export default Theme

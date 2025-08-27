@@ -1,7 +1,7 @@
 'use client'
 
 import { MoveIcon, ResetIcon, CrossCircledIcon, CheckCircledIcon, TrashIcon, Share2Icon, PlayIcon, UploadIcon, CaretDownIcon, DesktopIcon, MobileIcon, BoxIcon, ViewVerticalIcon, InfoCircledIcon, ImageIcon, ChevronLeftIcon, GearIcon } from '@radix-ui/react-icons'
-import { AlertDialog, Toast, DropdownMenu, Tooltip, AccessibleIcon, ContextMenu, Dialog, Switch } from 'radix-ui'
+import { AlertDialog, Toast, DropdownMenu, Tooltip, AccessibleIcon, Switch, RadioGroup } from 'radix-ui'
 import React, { MouseEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 
@@ -14,7 +14,7 @@ import downscale from 'downscale';
 import { v7 as UUIDv7 } from 'uuid'
 import Droppable from './Droppable';
 import { useDrag, UseDragListener } from '@/hook/useDrag';
-import { applyBoxConstrain, clamp, toStorageURL } from '@/utility/fn';
+import { applyBoxConstrain, between, clamp, curry, toStorageURL } from '@/utility/fn';
 
 const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
 
@@ -37,19 +37,11 @@ const urlToPhoto = (url: string): Promise<Photo> => new Promise((resolve, reject
 	image.src = url
 })
 
-const filesToUrls = (files: File[] | Blob[]) => files.map(fileToUrl)
-
 const filesToPhotos = (files: File[] | Blob[]) => Promise.all(
 	files.map((file): Promise<Photo> =>
 		urlToPhoto(
 			fileToUrl(file)
 		)
-	)
-)
-
-const urlsToPhotos = (urls: string[]): Promise<Photo[]> => Promise.all(
-	urls.map((url) =>
-		urlToPhoto(url)
 	)
 )
 
@@ -62,16 +54,7 @@ const compressFromFiles = (files: File[]): Promise<Blob[]> =>
 		)
 	)
 
-const compressFromURLs = (urls: string[]): Promise<Blob[]> =>
-	urlsToPhotos(urls).then(images =>
-		Promise.all(
-			images.map(v =>
-				downscale(v.src, Math.min(v.width, 1920), 0, { returnBlob: true })
-			)
-		)
-	)
-
-const TextArea = ({ required = false, placeholder, className, value, onChange }: { required?: boolean, placeholder?: string, className?: string, value?: string, onChange: Function }) => {
+const TextArea = ({ required = false, placeholder, className, value, onChange }: { required?: boolean, placeholder?: string, className?: string, value?: string, onChange: (change: string) => void }) => {
 	const ref = useRef<HTMLTextAreaElement>(null)
 
 	useLayoutEffect(() => {
@@ -95,21 +78,6 @@ const TextArea = ({ required = false, placeholder, className, value, onChange }:
 	)
 }
 
-const urls = [
-	'/x/1.png',
-	'/x/2.png',
-	'/x/3.png',
-	'/x/4.png',
-	'/x/6.png',
-	'/x/7.png',
-	'/x/8.png',
-	'/x/9.png',
-	'/x/10.png',
-	'/x/11.png',
-	'/x/12.png',
-	'/x/5.png',
-]
-
 const breakpoint = {
 	desktop: {
 		icon: <DesktopIcon />,
@@ -127,7 +95,7 @@ const breakpoint = {
 
 const breakpoints = Object.keys(breakpoint)
 
-const MainUpload = ({ uploadAssets }: { uploadAssets: Function }) =>
+const MainUpload = ({ uploadAssets }: { uploadAssets: (files: File[]) => Promise<void> }) =>
 	<Droppable className='size-full flex flex-col justify-center items-center' noClick={ true } onDrop={ uploadAssets }>
 		<section className='flex flex-col justify-center items-center gap-y-5 px-10'>
 			<Droppable onDrop={ uploadAssets } noDragsEventBubbling={ true }>
@@ -201,7 +169,7 @@ const MainEditorBody = ({
 	setAsset
 }: {
 	layout: Layout,
-	setLayout: Function,
+	setLayout: (fn: (layout: Layout) => Layout) => void,
 	asset: Asset,
 	setAsset: (fn: (asset: Asset) => Asset) => void
 }) => (
@@ -226,7 +194,7 @@ const MainEditorBody = ({
 		</section>
 )
 
-const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMenu }: { onPreview: Function, published: boolean, onUnpublish: Function, onPublish: Function, menu: boolean, setMenu: Function }) =>
+const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMenu }: { onPreview: () => void, published: boolean, onUnpublish: () => void, onPublish: () => void, menu: boolean, setMenu: (value: boolean) => void }) =>
 	<div className='flex size-full justify-between items-center min-h-20 *:w-auto'>
 		<div className='flex flex-row justify-center items-center rounded-md *:h-full'>
 			<button onClick={ () => onPreview() } className='rounded-md hover:bg-neutral-200 p-2'>
@@ -311,6 +279,8 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 
 const RightMain = ({
 	errors,
+	category,
+	setCategory,
 	slug,
 	setSlug,
 	title,
@@ -321,6 +291,8 @@ const RightMain = ({
 	setFeatured
 }: {
 	errors: string[],
+	category: string,
+	setCategory: (category: Project[ 'category' ]) => void,
 	slug: string,
 	setSlug: (slug: string) => void,
 	title: string,
@@ -331,11 +303,28 @@ const RightMain = ({
 	setFeatured: (featured: boolean) => void
 }) =>
 	<div className='flex flex-col justify-center items-stretch h-max w-full gap-y-10'>
+		<div className='flex items-center gap-x-4'>
+			<small className='text-base font-semibold text-neutral-500'>Category:</small>
+			<RadioGroup.Root value={ category } onValueChange={ v => setCategory(v as Project[ 'category' ]) } className='flex gap-x-4'>
+				{
+					[ 'Residential', 'Commercial' ].map(v =>
+						<div key={ v } className='flex gap-x-2 items-center justify-center'>
+							<RadioGroup.Item value={ v } id={ v.toLowerCase() } className='size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-400'>
+								<RadioGroup.Indicator className='rounded-full size-2 bg-neutral-600' />
+							</RadioGroup.Item>
+							<label className='text-base font-medium' htmlFor={ v.toLowerCase() }>{ v }</label>
+						</div>
+					)
+				}
+			</RadioGroup.Root>
+		</div>
 		<div>
-			<label className='text-base font-medium sr-only'>Slug</label>
+			<label htmlFor='slug' className='text-base font-medium sr-only'>Slug</label>
 			<input
+				id='slug'
 				required={ true }
 				onChange={ e => setSlug(e.target.value) }
+				onBlur={ e => setSlug(e.target.value.toLowerCase().trim().split(' ').join('-')) }
 				value={ slug }
 				className={ clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl bg-neutral-200 focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('slug') }) }
 				placeholder='Slug'
@@ -344,8 +333,9 @@ const RightMain = ({
 			<small className='text-base font-medium text-neutral-500'>{ `${process.env.NEXT_PUBLIC_DOMAIN}/projects/${slug}` }</small>
 		</div>
 		<div>
-			<label className='text-base font-medium sr-only'>Title</label>
+			<label htmlFor='title' className='text-base font-medium sr-only'>Title</label>
 			<input
+				id='title'
 				required={ true }
 				onChange={ e => setTitle(e.target.value) }
 				value={ title }
@@ -356,8 +346,9 @@ const RightMain = ({
 			<small className='text-base font-medium text-neutral-500'>{ `Recommended: 60 characters. You’ve used ${title.length}` }</small>
 		</div>
 		<div>
-			<label className='text-base font-medium sr-only'>Description</label>
+			<label htmlFor='description' className='text-base font-medium sr-only'>Description</label>
 			<textarea
+				id='description'
 				required={ true }
 				onChange={ e => setDescription(e.target.value) }
 				value={ description }
@@ -368,14 +359,14 @@ const RightMain = ({
 		</div>
 		<div className='flex items-center gap-x-2 rounded-full'>
 			<Switch.Root
-				id='feature'
-				className={ clsx('w-8 h-4 rounded-full outline-1 outline-neutral-200', featured ? 'bg-neutral-500' : 'bg-neutral-200') }
+				id='featured'
+				className={ clsx('w-8 h-4 rounded-full outline-transparent', featured ? 'bg-neutral-600' : 'bg-neutral-200') }
 				onCheckedChange={ v => setFeatured(v) }
 				checked={ featured }
 			>
 				<Switch.Thumb
 					className={ clsx(
-						'block size-4 rounded-full bg-light ring-1 ring-neutral-300 transition-[translate] will-change-transform ease-in-out duration-200',
+						'block size-4 rounded-full bg-white shadow-md ring-1 ring-neutral-200 transition-[translate] will-change-transform ease-in-out duration-200',
 						featured ? 'translate-x-4' : 'translate-x-0'
 					) }
 				/>
@@ -385,7 +376,7 @@ const RightMain = ({
 	</div>
 
 
-const RightFooter = ({ onDelete }: { onDelete: Function }) =>
+const RightFooter = ({ onDelete }: { onDelete: () => void }) =>
 	<button onClick={ () => onDelete() } className='flex gap-x-1 justify-center items-center p-2 rounded-lg hover:bg-neutral-200 cursor-pointer'>
 		<span><TrashIcon className='text-neutral-500' /></span>
 		<span className='font-semibold text-base leading-none'>Delete</span>
@@ -413,7 +404,7 @@ const Breakpoint = ({
 }: {
 	className: string,
 	breakpoint: string,
-	setBreakpoint: Function
+	setBreakpoint: (breakpoint: Device) => void
 }) => {
 	const Item = ({
 		label,
@@ -423,7 +414,7 @@ const Breakpoint = ({
 	}: {
 		label: string,
 		active: boolean,
-		onClick: Function,
+		onClick: () => void,
 		icon: React.JSX.Element
 	}) =>
 		<WithTooltip side='bottom' tooltip={ label + ' view' }>
@@ -467,7 +458,16 @@ const Breakpoint = ({
 	)
 }
 
-const MainHeader = ({ onBack, content, menu, setMenu, breakpoint, setBreakpoint }: { onBack: Function, content: boolean, menu: boolean, setMenu: Function, breakpoint: string, setBreakpoint: Function }) => (
+const MainHeader = (
+	{ onBack, content, menu, setMenu, breakpoint, setBreakpoint }: {
+		onBack: () => void,
+		content: boolean,
+		menu: boolean,
+		setMenu: (value: boolean) => void,
+		breakpoint: string,
+		setBreakpoint: (breakpoint: Device) => void
+	}
+) => (
 	<header className='z-50 sticky top-0 left-0 right-0 size-full grid grid-cols-3 items-center min-h-20 *:w-auto pointer-events-none'>
 		<button onClick={ () => onBack() } className='justify-self-start cursor-pointer flex justify-center items-center hover:bg-neutral-200 rounded-md p-2 text-center pointer-events-auto'>
 			<AccessibleIcon.Root label='Back'>
@@ -513,57 +513,16 @@ const formatChanges = (id: string, changes: Partial<Project>) => {
 	}
 }
 
-const Left = ({ onDelete, asset, onDrag, onDrop, setAsset }: { onDelete: (items: Photos) => void, asset: Asset, setAsset: Function, onDrag: UseDragListener, onDrop: UseDragListener }) => {
+const Left = ({ onDelete, asset, onDrag, onDrop }: {
+	onDelete: (items: Photos) => void,
+	asset: Asset,
+	onDrag: UseDragListener,
+	onDrop: UseDragListener
+}) => {
 	const [ actives, setActives ] = useState<number[]>([])
+	const ref = useRef<HTMLUListElement>(null)
 
-	const ref = useDrag<HTMLUListElement>({
-		transform: e => ({
-			...e.subject,
-			x: e.x,
-			y: e.y,
-			moved: (e.x - e.subject.x) || (e.y - e.subject.y)
-		}),
-		modifier: drag => drag
-			.clickDistance(1)
-			.subject(e => {
-				const childrens = [ ...ref.current.children ] as HTMLLIElement[]
-				const items = childrens.filter(v => v.dataset.active === 'true').map(v => {
-					const el = v as HTMLLIElement
-					const d = el.dataset
-					return {
-						id: d.id,
-						src: d.src,
-						alt: d.alt,
-						width: Number(d.width),
-						height: Number(d.height),
-						thumbnail: d.thumbnail === 'true'
-					}
-				})
-				return {
-					items: items,
-					x: e.x,
-					y: e.y
-				}
-			})
-			.filter(e => {
-				const childrens = [ ...ref.current.children ] as HTMLLIElement[]
-				const result = !e.ctrlKey && !e.shiftKey && !e.button && childrens.some(v =>
-					v.contains(e.target) && e.target.dataset.active === 'true'
-				)
-				return result
-			})
-		,
-		onDrag: e => onDrag({ x: e.x, y: e.y, items: e.items }),
-		onDragEnd: e => {
-			if(e.moved) {
-				onDrop({ x: e.x, y: e.y, items: e.items })
-			}
-		}
-	})
-
-	const onClick = (e: PointerEvent | MouseEvent) => {
-		const el = e.currentTarget as HTMLLIElement
-		const index = Number(el.dataset.index)
+	const onClick = curry((index: number, e: PointerEvent | MouseEvent) => {
 		const ctrl = e.ctrlKey
 		const shift = e.shiftKey
 
@@ -592,7 +551,7 @@ const Left = ({ onDelete, asset, onDrag, onDrop, setAsset }: { onDelete: (items:
 					}
 				}, [] as number[])
 
-			const clickFn = (number: number, numbers: number[]): number[] => ([ number ])
+			const clickFn = (number: number): number[] => ([ number ])
 
 			const table: [ boolean, (number: number, numbers: number[]) => number[] ][] = [
 				[ shift, shiftFn ],
@@ -610,40 +569,18 @@ const Left = ({ onDelete, asset, onDrag, onDrop, setAsset }: { onDelete: (items:
 
 			return result
 		})
-	}
+	})
 
-	const onPointerDown = (e: PointerEvent | MouseEvent) => {
-		const el = e.currentTarget as HTMLLIElement
-		const index = Number(el.dataset.index)
-		const ctrl = e.ctrlKey
-		const shift = e.shiftKey
-
-		setActives(actives =>
-			actives.includes(index) || ctrl || shift
-				? actives
-				: ([ index ])
-		)
-	}
+	const onContextMenu = curry((index: number, _event: PointerEvent | MouseEvent) => {
+		setActives([ index ])
+	})
 
 	const items = Object.values(asset)
-
-	const setAsThumbnail = (item: Photo) =>
-		setAsset((asset: Asset) =>
-			Object.entries(asset).reduce((a, [ k, v ]) => ({
-				...a,
-				[ k ]: { ...v, thumbnail: k === item.id }
-			}), {})
-		)
-
-	const setImageDescription = (item: Photo) =>
-		setAsset((asset: Asset) => {
-			return { ...asset, [ item.id ]: item }
-		})
 
 	useEffect(() => {
 		const listener = (e: { key: string }) => {
 			if(e.key === 'Delete') {
-				const items = [ ...ref.current.children ] as HTMLLIElement[]
+				const items = [ ...ref.current!.children ] as HTMLLIElement[]
 				const actives = items.filter(v => v.dataset.active === 'true').map(v => {
 					return {
 						id: v.dataset.id || '',
@@ -668,143 +605,218 @@ const Left = ({ onDelete, asset, onDrag, onDrop, setAsset }: { onDelete: (items:
 
 	useEffect(() => () => setActives([]), [ items.length ])
 
-	return items.length > 0
-		? (
-			<ul
-				onClick={ () => setActives([]) }
+	type DragEvent = { x: number, y: number, dx: number, dy: number, subject: { x: number, y: number } }
+
+	const Group = ({ x0, y0, x1, y1, onDragStart, onDrag, onDragEnd, onClick }: {
+		onDragStart: (e: DragEvent) => void,
+		onDrag: (e: DragEvent) => void,
+		onDragEnd: (e: DragEvent) => void,
+		onClick: (e: PointerEvent | MouseEvent) => void,
+		x0: number,
+		y0: number,
+		x1: number,
+		y1: number
+	}) => {
+		const ref = useDrag<HTMLDivElement>({
+			modifier: drag => drag.clickDistance(1).filter(e =>
+				!e.ctrlKey && !e.shiftKey && !e.button
+			),
+			onDragStart: e => onDragStart(e),
+			onDrag: e => onDrag(e),
+			onDragEnd: e => onDragEnd(e)
+		})
+		return <div
+			ref={ ref }
+			onClick={ onClick }
+			className='absolute top-0 left-0'
+			style={ {
+				transform: `translate(${x0}px, ${y0}px)`,
+				width: (x1 - x0) + 'px',
+				height: (y1 - y0) + 'px'
+			} }
+		/>
+	}
+
+	const Item = ({ index, active, item, onDragStart, onDrag, onDragEnd, onClick }: {
+		index: number,
+		active: boolean,
+		item: Photo,
+		onDragStart: (e: DragEvent) => void,
+		onDrag: (e: DragEvent) => void,
+		onDragEnd: (e: DragEvent) => void,
+		onClick: (e: PointerEvent | MouseEvent) => void
+	}) => {
+
+		const ref = useDrag<HTMLLIElement>({
+			modifier: drag => drag.clickDistance(1).filter(e =>
+				!e.ctrlKey && !e.shiftKey && !e.button
+			),
+			onDragStart: e => onDragStart(e),
+			onDrag: e => onDrag(e),
+			onDragEnd: e => onDragEnd(e)
+		})
+
+		return (
+			<li
 				ref={ ref }
-				className='size-full overflow-y-auto p-4 flex flex-col justify-items-center items-center gap-y-4'
+				className='w-full h-auto data-[active=true]:outline-2 data-[active=true]:outline-blue-500'
+				onClick={ onClick }
+				onContextMenu={ onContextMenu }
+				data-active={ active }
+				data-index={ index }
+				data-id={ item.id }
+				data-src={ item.src }
+				data-alt={ item.alt }
+				data-width={ item.width }
+				data-height={ item.height }
+				data-thumbnail={ item.thumbnail }
 			>
-				{
-					items.map((item, i) => {
-						const [ alt, setAlt ] = useState('')
-						const [ dialog, setDialog ] = useState(false)
-						const active = actives.includes(i)
-						return (
-							<React.Fragment key={ item.id }>
-								<ContextMenu.Root onOpenChange={ () => setActives([ i ]) }>
-									<ContextMenu.Trigger disabled={ actives.length > 1 } asChild>
-										<li
-											onPointerDown={ onPointerDown }
-											onClick={ onClick }
-											className={ clsx('w-full h-auto', { 'outline-2 outline-blue-500': active }) }
-											data-active={ active }
-											data-index={ i }
-											data-id={ item.id }
-											data-src={ item.src }
-											data-alt={ item.alt }
-											data-width={ item.width }
-											data-height={ item.height }
-											data-thumbnail={ item.thumbnail }
-										>
-											<img
-												className='object-cover object-center h-40 w-full select-none pointer-events-none'
-												id={ item.id }
-												width={ item.width }
-												height={ item.height }
-												alt={ item.alt }
-												src={ item.src }
-											/>
-										</li>
-									</ContextMenu.Trigger>
-									<ContextMenu.Portal>
-										<ContextMenu.Content
-											className='
-											z-50
-											p-1
-											bg-light 
-											rounded-sm
-											font-sans 
-											text-sm 
-											font-semibold
-											ring-1
-											ring-neutral-200
-											*:rounded-sm
-											*:size-full
-											*:select-none
-											*:outline-none
-											*:data-[highlighted]:bg-neutral-200
-										'
-											onContextMenu={ e => e.stopPropagation() }
-										>
-											<ContextMenu.Item
-												className='px-3 py-1.5'
-												onSelect={ () => setAsThumbnail({ ...item, thumbnail: true }) }
-											>
-												Set as Thumbnail
-											</ContextMenu.Item>
-											<ContextMenu.Item
-												className='px-3 py-1.5'
-												onSelect={ () => setDialog(true) }
-											>
-												Set Image Description
-											</ContextMenu.Item>
-										</ContextMenu.Content>
-									</ContextMenu.Portal>
-								</ContextMenu.Root>
-								<Dialog.Root open={ dialog } onOpenChange={ setDialog }>
-									<Dialog.Portal>
-										<Dialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
-										<Dialog.Content
-											className='
-											flex
-											flex-col
-											gap-y-1
-											justify-center
-											font-sans 
-											fixed 
-											top-[50%] 
-											left-[50%] 
-											-translate-x-[50%] 
-											-translate-y-[50%] 
-											min-w-2xs 
-											rounded-md 
-											ring-1
-											ring-neutral-200
-											px-5
-											py-3
-											bg-light
-											z-50
-										'
-										>
-											<Dialog.Title className='font-bold text-lg'>Edit description</Dialog.Title>
-											<Dialog.Description className='font-semibold text-base text-neutral-500'>
-												Short description about the image.
-											</Dialog.Description>
-											<fieldset className='py-3'>
-												<label htmlFor='alt' className='sr-only'>Description</label>
-												<input
-													className='px-2 py-1 rounded-md bg-neutral-200 outline-1 outline-neutral-200 focus:outline-amber-600 w-full font-semibold text-base'
-													value={ alt }
-													onChange={ v => setAlt(v.target.value) }
-													type='text'
-													id='alt'
-													placeholder='e.g., Scandinavian chair'
-												/>
-											</fieldset>
-											<Dialog.Close
-												className='text-center font-bold text-base rounded-md cursor-pointer px-2 py-1 hover:bg-neutral-200 hover:outline-1 hover:outline-neutral-200 w-full'
-												onClick={ () => setImageDescription({ ...item, alt }) }
-											>
-												Save changes
-											</Dialog.Close>
-										</Dialog.Content>
-									</Dialog.Portal>
-								</Dialog.Root>
-							</React.Fragment>
-						)
-					})
+				<img
+					className='object-cover object-center w-full h-40 select-none'
+					width={ item.width }
+					height={ item.height }
+					alt={ item.alt }
+					src={ item.src }
+				/>
+			</li>
+		)
+	}
+
+	const getItems = () => {
+		const items = [ ...ref.current!.children ].filter(v => {
+			const el = v as HTMLLIElement
+			return el.dataset.active === 'true'
+		})
+
+		return items.map(v => {
+			const { dataset } = v as HTMLLIElement
+			return {
+				id: dataset.id,
+				src: dataset.src,
+				alt: dataset.alt,
+				width: Number(dataset.width),
+				height: Number(dataset.height),
+				thumbnail: dataset.thumbnail === 'true'
+			}
+		})
+	}
+
+	const onGroupDragStart = () => { }
+
+	const onGroupDrag = (event: DragEvent) =>
+		onDrag({
+			x: event.x,
+			y: event.y,
+			items: getItems()
+		})
+
+	const onGroupDragEnd = (event: DragEvent) => {
+		const moved = event.x - event.subject.x || event.y - event.subject.y
+		if(moved) {
+			onDrop({
+				x: event.x,
+				y: event.y,
+				items: getItems()
+			})
+		}
+	}
+
+	const onGroupClick = (event: MouseEvent | PointerEvent) => {
+		const [ item ] = [ ...ref.current!.children ].filter(v => {
+			const r = v.getBoundingClientRect()
+			const xs = between(r.x, r.x + r.width, event.clientX)
+			const ys = between(r.y, r.y + r.height, event.clientY)
+			return xs && ys
+		})
+
+		const el = item as HTMLLIElement
+		const index = Number(el.dataset.index)
+
+		onClick(index, event)
+	}
+
+	const onItemDragStart = curry((index: number, _event: DragEvent) => {
+		setActives([ index ])
+	})
+
+	const onItemDrag = curry((_index: number, event: DragEvent) =>
+		onDrag({
+			x: event.x,
+			y: event.y,
+			items: getItems()
+		})
+	)
+
+	const onItemDragEnd = curry((index: number, event: DragEvent) => {
+		const moved = event.x - event.subject.x || event.y - event.subject.y
+		if(moved) {
+			onDrop({
+				x: event.x,
+				y: event.y,
+				items: getItems()
+			})
+		}
+	})
+
+	const calcGroupRect = (actives: number[]) =>
+		actives.reduce(
+			(acc, index) => {
+				const r = [ ...ref.current!.children ][ index ].getBoundingClientRect()
+				return {
+					x0: Math.min(r.x, acc.x0),
+					y0: Math.min(r.y, acc.y0),
+					x1: Math.max(r.x + r.width, acc.x1 - acc.x0),
+					y1: Math.max(r.y + r.height, acc.y1 - acc.y0)
 				}
-				<style jsx>
-					{ `ul { scrollbar-width: thin; }` }
-				</style>
-			</ul>
+			},
+			{ x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity }
 		)
-		: (
-			<div className='size-full p-4 flex flex-col justify-center items-center'>
-				<p className='font-sans text-neutral-500 uppercase text-base text-semibold'>No images</p>
-			</div>
-		)
+
+	return (
+		<div onClick={ () => setActives([]) } className='size-full relative'>
+			{
+				items.length > 0
+					? <ul ref={ ref } className='size-full p-4 flex flex-col items-center gap-y-4 overflow-y-auto'>
+						{
+							items.map((item, i) =>
+								<Item
+									key={ item.id }
+									index={ i }
+									item={ item }
+									active={ actives.includes(i) }
+									onDragStart={ onItemDragStart(i) }
+									onDrag={ onItemDrag(i) }
+									onDragEnd={ onItemDragEnd(i) }
+									onClick={ onClick(i) }
+								/>
+							)
+						}
+						<style jsx>
+							{ `ul { scrollbar-width: thin; }` }
+						</style>
+					</ul>
+					: null
+			}
+			{
+				actives.length > 1
+					? <Group
+						onClick={ onGroupClick }
+						onDragStart={ onGroupDragStart }
+						onDrag={ onGroupDrag }
+						onDragEnd={ onGroupDragEnd }
+						{ ...calcGroupRect(actives) }
+					/>
+					: null
+			}
+			{
+				items.length === 0
+					? <div className='size-full p-4 flex flex-col justify-center items-center'>
+						<p className='font-sans text-neutral-500 uppercase text-base font-medium'>No images</p>
+					</div>
+					: null
+			}
+		</div>
+	)
 }
 
 const Overlay = ({ x, y, items }: { x: number, y: number, items: Photos }) => {
@@ -848,7 +860,7 @@ const Overlay = ({ x, y, items }: { x: number, y: number, items: Photos }) => {
 	)
 }
 
-export default ({ project }: { project: Project }) => { // should check if slug formatted correctly
+const Edit = ({ project }: { project: Project }) => {
 	const [ previous, setPrevious ] = useState<Partial<Project>>(() => {
 		return {
 			assets: project.assets,
@@ -861,7 +873,8 @@ export default ({ project }: { project: Project }) => { // should check if slug 
 			title: project.title,
 			description: project.description,
 			featured: project.featured,
-			published: project.published
+			published: project.published,
+			category: project.category
 		}
 	})
 
@@ -876,6 +889,7 @@ export default ({ project }: { project: Project }) => { // should check if slug 
 	const [ description, setDescription ] = useState(project.description)
 	const [ featured, setFeatured ] = useState(project.featured)
 	const [ published, setPublished ] = useState(project.published)
+	const [ category, setCategory ] = useState(project.category)
 
 	const [ errors, setErrors ] = useState<string[]>([])
 
@@ -924,7 +938,8 @@ export default ({ project }: { project: Project }) => { // should check if slug 
 		title: title,
 		description: description,
 		featured: featured,
-		published: published
+		published: published,
+		category: category
 	}
 
 	const showSuccessToast = ({ title, description }: { title: string, description: string | React.ReactNode }) =>
@@ -1603,7 +1618,6 @@ export default ({ project }: { project: Project }) => { // should check if slug 
 						<Left
 							key={ layout.width + remainingAsset.length }
 							asset={ unusedAsset }
-							setAsset={ updateAsset }
 							onDrag={ onDrag }
 							onDrop={ onDrop }
 							onDelete={ deleteAssets }
@@ -1624,6 +1638,8 @@ export default ({ project }: { project: Project }) => { // should check if slug 
 						/>
 						<RightMain
 							errors={ errors }
+							category={ category }
+							setCategory={ setCategory }
 							slug={ slug }
 							setSlug={ setSlug }
 							title={ title }
@@ -1760,3 +1776,5 @@ export default ({ project }: { project: Project }) => { // should check if slug 
 		</>
 	)
 }
+
+export default Edit

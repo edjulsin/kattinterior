@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default ({ className }: { className?: string }) => (
+const Spinner = ({ className }: { className?: string }) =>
     <svg
         viewBox="0 0 40 40"
         xmlns="http://www.w3.org/2000/svg"
@@ -21,4 +21,5 @@ export default ({ className }: { className?: string }) => (
             </circle>
         </g>
     </svg>
-)
+
+export default Spinner

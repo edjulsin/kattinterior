@@ -1,6 +1,6 @@
 'use client'
 
-import Logo from '@/components/Logo'
+import Logo from './Logo'
 import { signIn } from '@/action/server'
 import { useActionState } from 'react'
 import { CheckCircledIcon, CrossCircledIcon } from '@radix-ui/react-icons'
@@ -18,7 +18,7 @@ const login = (state: { message: string, success: boolean }, form: FormData) => 
     }
 }
 
-export default () => {
+const Login = () => {
     const [ { message, success }, action, pending ] = useActionState(login, { message: '', success: false })
     return (
         <main className='h-[65dvh] w-full flex flex-col justify-center items-center'>
@@ -57,3 +57,5 @@ export default () => {
         </main>
     )
 }
+
+export default Login

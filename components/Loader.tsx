@@ -1,7 +1,7 @@
 import Intersection from './Intersection'
 import Spinner from './Spinner'
 
-export default ({ enabled, children, callback }: {
+const Loader = ({ enabled, children, callback }: {
     callback: (entries: IntersectionObserverEntry[]) => void,
     enabled: boolean,
     children?: React.ReactNode
@@ -13,3 +13,5 @@ export default ({ enabled, children, callback }: {
         { children ?? null }
         { enabled ? <Spinner className='spinner size-8 text-neutral-500' /> : null }
     </Intersection>
+
+export default Loader

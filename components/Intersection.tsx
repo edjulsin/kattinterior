@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 
-export default ({ selectors, callback, options, children }: Readonly<{
+const Intersection = ({ selectors, callback, options, children }: Readonly<{
     callback: (entries: IntersectionObserverEntry[]) => void,
     selectors: string[],
     children?: React.ReactNode,
@@ -15,6 +15,11 @@ export default ({ selectors, callback, options, children }: Readonly<{
         })
         const observer = new IntersectionObserver(callback, options)
 
+        elements.forEach(el => {
+            el.dataset.intersected = 'false'
+            el.dataset.intersecting = 'false'
+        })
+
         elements.forEach(el =>
             observer.observe(el)
         )
@@ -25,3 +30,5 @@ export default ({ selectors, callback, options, children }: Readonly<{
 
     return children ?? null
 }
+
+export default Intersection

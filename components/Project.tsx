@@ -1,11 +1,10 @@
-import { Items, Project, Item, Photo } from '@/type/editor';
+import { Items, Project as ProjectType, Item, Photo } from '@/type/editor';
 import { ab, alt, extent, getLayout, ys } from '@/utility/fn';
 import Image from 'next/image';
 import React from 'react';
-import Intersection from './Intersection';
+import Style from './Style';
 
-export default ({ name, location, story, tagline, assets, template }: Project) => {
-
+const Project = ({ name, location, story, tagline, assets, template }: ProjectType) => {
     const atBreakpoint = (breakpoint: number, style: string): string => {
         if(style) {
             return `
@@ -99,6 +98,7 @@ export default ({ name, location, story, tagline, assets, template }: Project) =
                 const height = (ey - sy) + gap
                 const section = `
                     .section-${i} {
+                        position: relative;
                         height: ${(height / h) * 100}%;
                     }
                 `
@@ -108,7 +108,9 @@ export default ({ name, location, story, tagline, assets, template }: Project) =
                     ...row.flatMap(v => {
                         const item = `
                             .item-${v.id} {
+                                position: absolute; 
                                 display: block;
+                                overflow: clip;
                                 z-index: ${v.z};
                                 left: ${(v.x / w) * 100}%;
                                 top: ${(((v.y - sy) + gap) / height) * 100}%;
@@ -126,9 +128,11 @@ export default ({ name, location, story, tagline, assets, template }: Project) =
                                 translate: ${-v.sx * 100}% ${-v.sy * 100}%;
                                 width: ${((img.width * scale) / w) * 100}cqw;
                                 height: ${((img.height * scale) / h) * 100}cqh;
+                                max-width: none;
+                                max-height: none;
                             }   
                         `
-                        return [ item, image ].filter(v => v)
+                        return [ item, image ]
                     })
                 ]
             })
@@ -136,19 +140,16 @@ export default ({ name, location, story, tagline, assets, template }: Project) =
     }
 
     const styles = [
-        atBreakpoint(
-            template.mobile.width,
-            join([
-                ...responsiveStyles(
-                    template.mobile.width,
-                    template.mobile.height,
-                    mobiles
-                ),
-                ...mobileExcludes.map(v =>
-                    `.item-${v.id} { display: none; }`
-                )
-            ])
-        ),
+        join([
+            ...responsiveStyles(
+                template.mobile.width,
+                template.mobile.height,
+                mobiles
+            ),
+            ...mobileExcludes.map(v =>
+                `.item-${v.id} { display: none; }`
+            )
+        ]),
         atBreakpoint(
             template.tablet.width,
             join([
@@ -185,89 +186,62 @@ export default ({ name, location, story, tagline, assets, template }: Project) =
         return `(max-width: ${width}px) ${((image.width * scale) / width) * 100}vw`
     }
 
-    const onIntersect = (entries: IntersectionObserverEntry[]) =>
-        entries.forEach(entry => {
-            const el = entry.target as HTMLElement
-            const intersecting = entry.isIntersecting ? 'true' : 'false'
-            const done = el.dataset.done === 'true' ? 'true' : intersecting
+    const [ largest ] = (layout.at(0) ?? ([])).toSorted((a: Item, b: Item) => {
+        return (b.w * b.h) - (a.w * a.h)
+    })
 
-            el.dataset.done = done
-            el.dataset.intersecting = intersecting
-        })
+    const lcp = largest ?? ({ id: '' })
 
-    return ( // should use either desktop, tablet, or mobile by default to avoid mess on initial render or maybe wait unti production build
-        <Intersection
-            selectors={ [
-                '.story',
-                '.tagline',
-                ...layout.flatMap(items =>
-                    items.filter(v => v.effect).map(v => '.item-' + v.id)
-                )
-            ] }
-            options={ { threshold: 0.5 } }
-            callback={ onIntersect }
-        >
-            <article className='flex flex-col items-center justify-center gap-y-20 py-20'>
-                <header className='flex flex-col items-center justify-center gap-y-10 max-w-3xl text-center whitespace-pre-wrap *:w-full px-10'>
-                    <div className='flex flex-col items-center justify-center gap-y-5'>
-                        <h1 className='name font-serif text-2xl'>{ name }</h1>
-                        <h2 className='location font-serif text-sm'>{ location }</h2>
-                    </div>
-                    <div className='flex flex-col items-center justify-center gap-y-10'>
-                        <p
-                            data-done={ false }
-                            data-intersecting={ false }
-                            className='story font-sans font-semibold max-w-lg text-lg'
-                        >
-                            { story }
-                        </p>
-                        <h3
-                            data-done={ false }
-                            data-intersecting={ false }
-                            className='tagline font-serif text-lg leading-9'
-                        >
-                            { tagline }
-                        </h3>
-                    </div>
-                </header>
-                <div className={ `w-full layout` } style={ { containerType: 'size' } }>
-                    {
-                        layout.map((items, i) =>
-                            <section key={ i } className={ `section-${i} w-full relative` }>
-                                {
-                                    items.map(item => {
-                                        const img = asset[ item.src ]
-                                        const small = item.id in mobile ? generateSize(template.mobile.width, mobile[ item.id ], img) : ''
-                                        const medium = item.id in tablet ? generateSize(template.tablet.width, tablet[ item.id ], img) : ''
-                                        const large = item.id in desktop ? generateSize(template.desktop.width, desktop[ item.id ], img) : ''
-                                        const sizes = [ small, medium, large ].filter(v => v).join(', ')
-                                        return (
-                                            <div
-                                                key={ item.id }
-                                                className={ `item-${item.id} absolute overflow-clip` + (item.effect ? ` ${item.effect}` : '') }
-                                                data-done={ false }
-                                                data-intersecting={ false }
-                                                data-scroll-x={ 0 }
-                                                data-scroll-y={ 0 }
-                                            >
-                                                <Image
-                                                    className={ `relative image-${img.id} max-w-none max-h-none` }
-                                                    src={ img.src }
-                                                    width={ img.width }
-                                                    height={ img.height }
-                                                    alt={ alt(img.alt) }
-                                                    sizes={ sizes }
-                                                />
-                                            </div>
-                                        )
-                                    })
-                                }
-                            </section>
-                        )
-                    }
-                    <style jsx>{ `${join(styles)}` }</style>
+    return (
+        <article className='flex flex-col items-center justify-center gap-y-20 py-20 w-full'>
+            <header className='flex flex-col items-center justify-center gap-y-15 text-center whitespace-pre-wrap w-full'>
+                <div className='flex flex-col items-center justify-center gap-y-5'>
+                    <h1 className='font-serif text-2xl/relaxed sm:text-3xl/relaxed max-w-2xs sm:max-w-md'>{ name }</h1>
+                    <h2 className='font-serif text-sm/loose sm:text-base/loose max-w-2xs sm:max-w-sm'>{ location }</h2>
                 </div>
-            </article>
-        </Intersection>
+                <p className='font-sans font-semibold text-base slide-from-bottom max-w-2xs sm:max-w-md md:max-w-lg md:text-lg'>
+                    { story }
+                </p>
+                <h3 className='font-serif text-sm/loose sm:text-base/loose md:text-lg/loose slide-from-bottom max-w-2xs sm:max-w-lg md:max-w-xl lg:max-w-2xl'>
+                    { tagline }
+                </h3>
+            </header>
+            <div className='w-full layout' style={ { containerType: 'size' } }>
+                {
+                    layout.map((items, i) =>
+                        <section key={ i } className={ `w-full section-${i}` }>
+                            {
+                                items.map(item => {
+                                    const img = asset[ item.src ]
+                                    const small = item.id in mobile ? generateSize(template.mobile.width, mobile[ item.id ], img) : ''
+                                    const medium = item.id in tablet ? generateSize(template.tablet.width, tablet[ item.id ], img) : ''
+                                    const large = item.id in desktop ? generateSize(template.desktop.width, desktop[ item.id ], img) : ''
+                                    const sizes = [ small, medium, large ].filter(v => v).join(', ')
+                                    return (
+                                        <div
+                                            key={ item.id }
+                                            className={ `anim-delay-[100ms] item-${item.id}` + (item.effect ? ` ${item.effect}` : '') }
+                                        >
+                                            <Image
+                                                className={ `size-80 image-${img.id}` }
+                                                src={ img.src }
+                                                width={ img.width }
+                                                height={ img.height }
+                                                alt={ alt(img.alt) }
+                                                sizes={ sizes }
+                                                priority={ item.id === lcp.id }
+                                            />
+                                        </div>
+                                    )
+                                })
+                            }
+                        </section>
+                    )
+                }
+                <Style style={ join(styles) } />
+            </div>
+        </article>
     )
 }
+
+export default Project

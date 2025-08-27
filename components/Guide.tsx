@@ -1,60 +1,66 @@
 import Bottom from '@/components/Bottom';
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
+import React from 'react';
 
-export default (
+const Guide = (
     { thumbnail: { src, alt, width, height }, title, description, contentTitle, contentList: [ [ headTitle, headDescription ], ...contents ], contactCopy }: {
-        thumbnail: { src: string, alt: string, width: number, height: number },
+        thumbnail: { src: StaticImageData, alt: string, width: number, height: number },
         title: string,
         description: string[],
         contentTitle: string,
         contentList: [ string, string ][],
         contactCopy?: string
-    }) => (
-    <div className='flex flex-col gap-y-40'>
-        <section className='grid grid-cols-[auto_auto] grid-rows-[auto_auto]'>
+    }) =>
+    <>
+        <section className='max-w-2xs sm:max-w-sm lg:max-w-full grid grid-rows-[auto_auto_auto] lg:grid-rows-[1fr_auto] lg:grid-cols-[auto_1fr] gap-x-15 justify-center items-center gap-y-15'>
             <Image
-                className='h-140 w-100 row-span-2 self-center justify-self-center object-cover object-center rounded-tl-full rounded-tr-full'
+                className='h-100 sm:h-120 max-w-sm w-full row-span-2 object-cover object-center rounded-tl-full rounded-tr-full'
                 src={ src }
                 alt={ alt }
                 width={ width }
                 height={ height }
             />
-            <div className='max-w-md self-end'>
-                <h1 key={ title } className='text-4xl/loose font-serif'>{ title }</h1>
+            <div className='lg:max-w-xl'>
+                <h1 key={ title } className='text-xl/loose sm:text-2xl/loose lg:text-3xl/loose font-serif full-slide-from-bottom anim-delay-[300ms]'>{ title }</h1>
                 {
-                    description.flatMap(paragraph => {
-                        return [
-                            <br key={ paragraph + 'br' } />,
-                            <p key={ paragraph } className='text-lg font-semibold font-sans'>{ paragraph }</p>
-                        ]
-                    })
+                    description.map(paragraph =>
+                        <React.Fragment key={ paragraph }>
+                            <br />
+                            <p className='text-base sm:text-lg font-semibold font-sans slide-from-bottom'>{ paragraph }</p>
+                        </React.Fragment>
+                    )
                 }
             </div>
-            <span className='text-5xl font-serif self-end'>&darr;</span>
+            <div className='text-center justify-self-center lg:justify-self-start'>
+                <br />
+                <br />
+                <span className='text-5xl font-serif'>&darr;</span>
+            </div>
         </section>
-        <section className='flex flex-col gap-y-20'>
-            <span className='text-xl text-center font-serif'>{ contentTitle }</span>
-            <ol className='*:max-w-sm grid grid-cols-2 place-items-center auto-rows-fr *:row-span-3 gap-y-20'>
-                <li key={ 'first' } className='col-start-2 flex flex-col justify-center gap-y-4'>
-                    <h6 className='text-2xl/relaxed font-serif flex flex-col'>
-                        <span className='text-4xl'>00</span>
+        <section className='flex flex-col gap-y-20 max-w-2xs sm:max-w-sm lg:max-w-full'>
+            <span className='text-xl/loose sm:text-2xl/loose text-center font-serif full-slide-from-bottom'>{ contentTitle }</span>
+            <ol className='*:max-w-sm grid justify-center items-center auto-rows-fr gap-y-10 sm:gap-y-15 md:gap-y-20 lg:gap-y-25 gap-x-30 lg:grid-cols-2 lg:*:row-span-3 lg:*:odd:justify-self-start lg:*:even:justify-self-end'>
+                <li key={ 'first' } className='flex flex-col justify-center gap-y-4 lg:col-start-2 slide-from-bottom anim-delay-[100ms]'>
+                    <h6 className='text-xl/loose sm:text-2xl/loose font-serif flex flex-col'>
+                        <span className='text-2xl sm:text-3xl'>00</span>
                         <span>{ headTitle }</span>
                     </h6>
-                    <p className='text-lg font-semibold font-sans'>{ headDescription }</p>
+                    <p className='text-base sm:text-lg font-semibold font-sans'>{ headDescription }</p>
                 </li>
                 {
                     contents.map(([ title, description ], i) =>
-                        <li className='flex flex-col justify-center gap-y-4' key={ title }>
-                            <h6 className='text-2xl/relaxed font-serif flex flex-col'>
-                                <span className='text-4xl'>{ (i + 1 < 10 ? '0' : '') + (i + 1) }</span>
+                        <li key={ title } className='flex flex-col justify-center gap-y-4 slide-from-bottom anim-delay-[100ms]'>
+                            <h6 className='text-xl/loose sm:text-2xl/loose font-serif flex flex-col'>
+                                <span className='text-2xl sm:text-3xl'>{ (i + 1 < 10 ? '0' : '') + (i + 1) }</span>
                                 <span>{ title }</span>
                             </h6>
-                            <p className='text-lg font-semibold font-sans'>{ description }</p>
+                            <p className='text-base sm:text-lg font-semibold font-sans'>{ description }</p>
                         </li>
                     )
                 }
             </ol>
         </section>
         <Bottom copy={ contactCopy } />
-    </div>
-)
+    </>
+
+export default Guide

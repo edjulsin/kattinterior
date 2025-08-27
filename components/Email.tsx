@@ -1,6 +1,6 @@
 import { Body, Head, Html, Preview, Text, Container } from "@react-email/components";
 
-export default ({ name, email, message }: { name: string, email: string, message: string }) =>
+const Email = ({ name, email, message }: { name: string, email: string, message: string }) =>
     <Html lang='en'>
         <Head></Head>
         <Preview>{ message.slice(0, 60) }</Preview>
@@ -12,3 +12,5 @@ export default ({ name, email, message }: { name: string, email: string, message
             </Container>
         </Body>
     </Html>
+
+export default Email

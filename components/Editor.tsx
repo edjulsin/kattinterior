@@ -1,14 +1,15 @@
 'use client'
 
 import clsx from 'clsx'
-import { D3DragEvent, drag, select } from 'd3'
+import { drag, select } from 'd3'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Item, Photo, Layout, Asset, Items } from '@/type/editor'
-import { ContextMenu, Dialog, Label } from 'radix-ui'
-import { applyBoxConstrain, boxConstrain, clamp, compose, curry, extent, o } from '@/utility/fn'
-import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent, UseDragModifier } from '@/hook/useDrag'
+import { ContextMenu, Dialog } from 'radix-ui'
+import { applyBoxConstrain, capitalize, clamp, compose, curry, extent, o } from '@/utility/fn'
+import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent } from '@/hook/useDrag'
 import { v7 as UUIDv7 } from 'uuid'
-import { CheckIcon, ChevronRightIcon } from '@radix-ui/react-icons'
+import { ChevronRightIcon } from '@radix-ui/react-icons'
+import Fallback from '@/assets/fallback.svg'
 
 type Box = { x: number, y: number, w: number, h: number }
 
@@ -56,7 +57,7 @@ const generateItemBoxes = ({ container, item, image }: { container: HTMLElement,
             sy: (it.y - im.y) / im.height,
             sw: it.width / im.width,
             sh: it.height / im.height,
-            effect: item.dataset.effect!
+            effect: item.dataset.effect as string
         },
         image: {
             x: im.x - co.x,
@@ -74,21 +75,19 @@ const eventTransformer = <T extends HTMLElement>(e: UseDragEvent<T>): Result => 
     container: e.subject.container
 })
 
-const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
-
 const Handle = ({ className, ...rest }: DragPropsType<HTMLSpanElement> & { className: string }) => {
     const ref = useDrag<HTMLSpanElement>({ ...rest })
     return <span ref={ ref } className={ className }></span>
 }
 
 const effects = [
-    [ 'Scale Up', 'scale-up' ],
-    [ 'Scale Down', 'scale-down' ],
-    [ 'Parallax', 'parallax' ],
-    [ 'Left to Right', 'left-to-right' ],
-    [ 'Right to Left', 'right-to-left' ],
-    [ 'Top to Bottom', 'top-to-bottom' ],
-    [ 'Bottom to Top', 'bottom-to-top' ]
+    'scale-up',
+    'scale-down',
+    'parallax',
+    'slide-from-left',
+    'slide-from-right',
+    'slide-from-top',
+    'slide-from-bottom'
 ]
 
 type EditableProps = {
@@ -147,6 +146,7 @@ const Editable = ({
     const [ alt, setAlt ] = useState('')
     const [ cropMode, setCropMode ] = useState(false)
     const [ dialog, setDialog ] = useState(false)
+    const [ error, setError ] = useState(false)
 
     const modifier = <T extends HTMLElement>(drag: UseDragBehavior<T>) =>
         drag
@@ -514,27 +514,35 @@ const Editable = ({
                             className='absolute size-full'
                             style={ { overflow: cropMode ? 'visible' : 'clip' } }
                         >
-                            <img
-                                ref={ imageRef }
-                                className='relative max-w-none max-h-none select-none'
-                                src={ image.src }
-                                width={ image.width }
-                                height={ image.height }
-                                alt={ image.alt }
-                                onError={ e => {
-                                    e.currentTarget.src = '/fallback.svg'
-                                    e.currentTarget.alt = 'Image not found. Delete then reupload.'
-                                } }
-                                style={ {
-                                    transformOrigin: 'top left',
-                                    transform: `scale(${imgScale}) translate(${-sx}px, ${-sy}px)`,
-                                    mask: `
-                                        linear-gradient(#000 0 0) ${sx}px ${sy}px/${sw}px ${sh}px no-repeat, 
-                                        linear-gradient(rgba(0,0,0,0.5) 0 0) no-repeat
-                                    `,
-                                    pointerEvents: cropMode ? 'auto' : 'none'
-                                } }
-                            />
+                            {
+                                error
+                                    ? <img
+                                        ref={ imageRef }
+                                        className='size-full object-cover object-center bg-neutral-200'
+                                        width={ 1000 }
+                                        height={ 1000 }
+                                        alt='Image not found. Please delete and reupload.'
+                                        src={ Fallback.src }
+                                    />
+                                    : <img
+                                        ref={ imageRef }
+                                        className='relative max-w-none max-h-none select-none'
+                                        src={ image.src }
+                                        width={ image.width }
+                                        height={ image.height }
+                                        alt={ image.alt }
+                                        onError={ () => setError(true) }
+                                        style={ {
+                                            transformOrigin: 'top left',
+                                            transform: `scale(${imgScale}) translate(${-sx}px, ${-sy}px)`,
+                                            mask: `
+                                                linear-gradient(#000 0 0) ${sx}px ${sy}px/${sw}px ${sh}px no-repeat, 
+                                                linear-gradient(rgba(0,0,0,0.5) 0 0) no-repeat
+                                            `,
+                                            pointerEvents: cropMode ? 'auto' : 'none'
+                                        } }
+                                    />
+                            }
                         </div>
                         <div className={
                             clsx(
@@ -641,13 +649,17 @@ const Editable = ({
                                         '
                                     >
                                         {
-                                            effects.map(([ label, effect ]) =>
+                                            effects.map(effect =>
                                                 <ContextMenu.RadioItem
-                                                    key={ label }
+                                                    key={ effect }
                                                     className={ clsx('px-3 py-1.5', { 'bg-neutral-200': value.effect === effect }) }
                                                     value={ effect }
                                                 >
-                                                    { label }
+                                                    {
+                                                        capitalize(
+                                                            effect.split('-').join(' ')
+                                                        )
+                                                    }
                                                 </ContextMenu.RadioItem>
                                             )
                                         }
@@ -807,6 +819,8 @@ const removeDuplicateLines = (lines: number[][][], acc: number[][][]) => {
     }
 }
 
+type GroupEvent = { x: number, y: number, dx: number, dy: number, subject: { x: number, y: number } }
+
 const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, x0, y0, x1, y1 }: {
     container: React.RefObject<HTMLElement | null>,
     onCenter: () => void,
@@ -815,9 +829,9 @@ const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, 
     y0: number,
     x1: number,
     y1: number,
-    onDragStart: Function,
-    onDrag: Function,
-    onDragEnd: Function
+    onDragStart: (e: GroupEvent) => void,
+    onDrag: (e: GroupEvent) => void,
+    onDragEnd: (e: GroupEvent) => void
 }) => {
     const ref = useRef<HTMLDivElement>(null)
 
@@ -922,13 +936,17 @@ const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, 
                                     '
                                 >
                                     {
-                                        effects.map(([ label, value ]) =>
+                                        effects.map(value =>
                                             <ContextMenu.RadioItem
-                                                key={ label }
+                                                key={ value }
                                                 className={ clsx('px-3 py-1.5', { 'bg-neutral-200': effect === value }) }
                                                 value={ value }
                                             >
-                                                { label }
+                                                {
+                                                    capitalize(
+                                                        value.split('-').join(' ')
+                                                    )
+                                                }
                                             </ContextMenu.RadioItem>
                                         )
                                     }
@@ -955,8 +973,7 @@ const itemsToGroup = (ox: number, oy: number, items: Item[] | Box[] | IndexedBox
     y1: -Infinity
 })
 
-// 
-export default ({
+const Edit = ({
     className = '',
     asset,
     setAsset,
@@ -967,7 +984,7 @@ export default ({
     setAsset: (fn: (asset: Asset) => Asset) => void,
     className?: string | '',
     layout: Layout,
-    setLayout: Function
+    setLayout: (fn: (layout: Layout) => Layout) => void
 }) => {
     const rootRef = useRef<HTMLElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -1253,6 +1270,8 @@ export default ({
     const onContextMenu = curry((index: number, item: Item) => {
         setInteractive(true)
         setActives([ item.id ])
+
+        drawActiveLines(item)
     })
 
     const calculateGroup = (items: Item[]): Rectangle => {
@@ -1360,7 +1379,7 @@ export default ({
             clearCanvas()
         }
     }
-    const onGroupDragEnd = (e: D3DragEvent<HTMLDivElement, any, any>) => {
+    const onGroupDragEnd = (e: { x: number, y: number, subject: { x: number, y: number } }) => {
         const dx = e.x - e.subject.x
         const dy = e.y - e.subject.y
 
@@ -1513,12 +1532,12 @@ export default ({
         }
     })
 
-    const onMoveEnd = curry((index: number, item: Item) => {
+    const onMoveEnd = curry((_index: number, item: Item) => {
         setInteractive(true)
         drawActiveLines(item)
     })
 
-    const onResizeStart = curry((index: number, item: Item) => {
+    const onResizeStart = curry((_index: number, _item: Item) => {
         setInteractive(false)
     })
 
@@ -1527,11 +1546,11 @@ export default ({
         drawActiveLines(item)
     })
 
-    const onResizeEnd = curry((index: number, item: Item) => {
+    const onResizeEnd = curry((_index: number, _item: Item) => {
         setInteractive(true)
     })
 
-    const onCropStart = curry((index: number, item: Item) => {
+    const onCropStart = curry((_index: number, _item: Item) => {
         setInteractive(false)
     })
 
@@ -1539,11 +1558,11 @@ export default ({
         applyChange(index, item)
     })
 
-    const onCropEnd = curry((index: number, item: Item) => {
+    const onCropEnd = curry((_index: number, _item: Item) => {
         setInteractive(true)
     })
 
-    const onDuplicate = curry((index: number, item: Item) => {
+    const onDuplicate = curry((_index: number, item: Item) => {
         const id = UUIDv7()
 
         setActives([ id ])
@@ -1668,3 +1687,5 @@ export default ({
         </section>
     )
 }
+
+export default Edit

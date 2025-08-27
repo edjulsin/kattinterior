@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 type Callback = (event: { x: number, y: number, dx: number, dy: number, elements: HTMLElement[] }) => void
 
-export default ({ selectors, onScroll, children }: { selectors: string[], onScroll: Callback, children: React.ReactNode }) => {
+const Scroll = ({ selectors, onScroll, children }: { selectors: string[], onScroll: Callback, children: React.ReactNode }) => {
 
     useEffect(() => {
         type State = {
@@ -61,3 +61,5 @@ export default ({ selectors, onScroll, children }: { selectors: string[], onScro
 
     return children
 }
+
+export default Scroll

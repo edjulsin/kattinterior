@@ -10,8 +10,7 @@ import { useCallback, useState } from 'react'
 import clsx from 'clsx'
 import { v7 as UUIDv7 } from 'uuid'
 import { createProject, getAllProjects, getDraftProjects, getFeaturedProjects, getNewestProjects, getOldestProjects, getPublishedProjects, getRecentProjects, searchProjects } from '@/action/client'
-import { timeDay, timeMonth, timeYear, } from 'd3'
-import { debounce } from '@/utility/fn'
+import { debounce, formatISODate } from '@/utility/fn'
 import Loader from './Loader'
 import Message from './Message'
 
@@ -34,8 +33,6 @@ const queries: Record<string, (start: number, end: number) => Promise<Project[]>
     Oldest: getOldestProjects,
     Recent: getRecentProjects
 }
-
-const defaultCount = 8
 
 const defaultThumbnail = {
     id: UUIDv7(),
@@ -110,24 +107,17 @@ const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter
     </DropdownMenu.Root>
 )
 
-const Projects = ({ projects }: { projects: Project[] }) => {
+const List = ({ projects }: { projects: Project[] }) => {
     const now = new Date()
     return (
-        <ol className='grid grid-cols-4 place-items-center gap-15'>
+        <ol className='grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 place-items-center gap-15'>
             {
                 projects.map(project => {
                     const thumbnail = project.assets.length > 0
                         ? project.assets.find(v => v.thumbnail) ?? project.assets[ 0 ]
                         : defaultThumbnail
-                    const date = new Date(project.created_at)
-                    const years = timeYear.count(date, now)
-                    const months = timeMonth.count(date, now)
-                    const days = timeDay.count(date, now)
-                    const year = `${years} year${years > 1 ? 's' : ''} ago`
-                    const month = `${months} month${months > 1 ? 's' : ''} ago`
-                    const day = `${days} day${days > 1 ? 's' : ''} ago`
 
-                    const time = years > 0 ? year : months > 0 ? month : day
+                    const time = formatISODate(now, project.created_at)
 
                     return (
                         <li key={ project.id }>
@@ -164,10 +154,10 @@ const Projects = ({ projects }: { projects: Project[] }) => {
     )
 }
 
-export default ({ projects }: { projects: Project[] }) => {
+const Projects = ({ fetchCount, projects }: { fetchCount: number, projects: Project[] }) => {
     const [ data, setData ] = useState(projects)
     const [ filter, setFilter ] = useState('All')
-    const [ loader, setLoader ] = useState(projects.length >= defaultCount)
+    const [ loader, setLoader ] = useState(projects.length >= fetchCount)
     const [ error, setError ] = useState(false)
     const [ search, setSearch ] = useState('')
     const [ result, setResult ] = useState<Project[]>([])
@@ -185,10 +175,10 @@ export default ({ projects }: { projects: Project[] }) => {
     const onFilterChange = (filter: string) => {
         setFilter(filter)
         setLoader(false)
-        queries[ filter ](0, defaultCount - 1).then(
+        queries[ filter ](0, fetchCount - 1).then(
             v => {
                 setData(v)
-                setLoader(v.length >= defaultCount)
+                setLoader(v.length >= fetchCount)
                 setError(false)
             },
             () => {
@@ -199,10 +189,10 @@ export default ({ projects }: { projects: Project[] }) => {
     }
 
     const searchQuery = useCallback(debounce(1000, (search: string[]) => {
-        searchProjects(0, defaultCount - 1, search).then(
+        searchProjects(0, fetchCount - 1, search).then(
             v => {
                 setResult(v)
-                setLoader(v.length >= defaultCount)
+                setLoader(v.length >= fetchCount)
                 setError(false)
             },
             () => {
@@ -221,7 +211,7 @@ export default ({ projects }: { projects: Project[] }) => {
                 search.trim().split(' ')
             )
         } else {
-            setLoader((data.length % defaultCount) === 0)
+            setLoader((data.length % fetchCount) === 0)
             setResult([])
         }
     }
@@ -231,12 +221,12 @@ export default ({ projects }: { projects: Project[] }) => {
 
         if(search) {
             const count = result.length
-            const values = (count === 0 || count % defaultCount) ? ([]) : intersects
+            const values = (count === 0 || count % fetchCount) ? ([]) : intersects
 
             values.forEach(() =>
-                searchProjects(count, count + defaultCount, search.trim().split(' ')).then(
+                searchProjects(count, count + fetchCount, search.trim().split(' ')).then(
                     v => {
-                        setLoader(v.length >= defaultCount)
+                        setLoader(v.length >= fetchCount)
                         setResult(result =>
                             result.concat(v)
                         )
@@ -250,12 +240,12 @@ export default ({ projects }: { projects: Project[] }) => {
             )
         } else {
             const count = data.length
-            const values = (count === 0 || count % defaultCount) ? ([]) : intersects
+            const values = (count === 0 || count % fetchCount) ? ([]) : intersects
 
             values.forEach(() =>
-                (queries[ filter ])(count, count + defaultCount).then(
+                (queries[ filter ])(count, count + fetchCount).then(
                     v => {
-                        setLoader(v.length >= defaultCount)
+                        setLoader(v.length >= fetchCount)
                         setData(data =>
                             data.concat(v)
                         )
@@ -284,7 +274,7 @@ export default ({ projects }: { projects: Project[] }) => {
 
     return (
         <section className='w-full flex flex-col justify-center items-center text-base'>
-            <div className='z-50 sticky top-0 py-10 rounded-lg grid grid-cols-3 font-semibold size-full items-center justify-between text-base *:px-2 *:py-1'>
+            <div className='z-50 sticky top-0 py-10 rounded-lg grid grid-cols-2 md:grid-cols-3 font-semibold size-full items-center justify-between text-sm md:text-base *:px-2 *:py-1'>
                 <button
                     className='outline-2 outline-neutral-200 bg-light hover:bg-neutral-200 flex justify-center items-center gap-x-1 cursor-pointer rounded-lg justify-self-start'
                     onClick={ action }
@@ -292,18 +282,18 @@ export default ({ projects }: { projects: Project[] }) => {
                     <span>New Project</span>
                     <span><PlusIcon className='text-neutral-500' /></span>
                 </button>
-                <div className='flex justify-center items-center bg-neutral-200 rounded-xl justify-self-center focus-within:outline-1 focus-within:outline-amber-600'>
+                <div className='flex justify-center items-center bg-neutral-200 rounded-xl justify-self-end md:justify-self-center focus-within:outline-1 focus-within:outline-amber-600'>
                     <MagnifyingGlassIcon className='text-neutral-500' />
-                    <input value={ search } onChange={ e => onSearch(e.target.value) } className='max-h-6 max-w-30 size-full p-3 outline-1 outline-transparent' placeholder='Find projects...' />
+                    <input value={ search } onChange={ e => onSearch(e.target.value) } className='max-h-6 max-w-30 size-full p-2 outline-1 outline-transparent' placeholder='Find projects...' />
                 </div>
-                <Filter filter={ filter } onFilterChange={ onFilterChange } className='bg-light justify-self-end outline-2 outline-neutral-200' />
+                <Filter filter={ filter } onFilterChange={ onFilterChange } className='hidden md:flex bg-light justify-self-end outline-2 outline-neutral-200' />
             </div>
             <section className='py-15 flex flex-col justify-center items-center gap-y-5'>
-                <Projects projects={ filtered } />
+                <List projects={ filtered } />
                 { filtered.length === 0 && (!loader) ? <Message message={ 'No projects found' } /> : null }
                 { error ? <Message message='Database error' /> : null }
                 <Loader
-                    key={ filter + search }
+                    key={ (filter + search).length + result.length + data.length }
                     enabled={ loader }
                     callback={ onIntersecting }
                 />
@@ -311,3 +301,5 @@ export default ({ projects }: { projects: Project[] }) => {
         </section>
     )
 }
+
+export default Projects

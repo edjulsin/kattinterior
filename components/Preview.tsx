@@ -1,11 +1,11 @@
 'use client'
 
-import { Project } from '@/type/editor'
+import { Project as ProjectType } from '@/type/editor'
 import { useEffect, useState } from 'react'
-import Post from './Project'
+import Project from './Project'
 
-export default ({ project }: { project: Project }) => {
-    const [ data, setData ] = useState<Project>(project)
+const Preview = ({ project }: { project: ProjectType }) => {
+    const [ data, setData ] = useState<ProjectType>(project)
 
     useEffect(() => {
         const broadcast = new BroadcastChannel(project.id)
@@ -19,5 +19,7 @@ export default ({ project }: { project: Project }) => {
         }
     }, [])
 
-    return <Post { ...data } />
+    return <Project { ...data } />
 }
+
+export default Preview

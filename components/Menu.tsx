@@ -7,9 +7,10 @@ import { Close, Content, Description, Portal, Root, Title, Trigger, Overlay } fr
 import Logo from './Logo'
 import { useState } from 'react'
 import Hamburger from './Hamburger'
+
 const pages = [ 'projects', 'services', 'about', 'contact' ]
 
-export default ({ className = '' }: { className?: string }) => {
+const Menu = ({ className = '' }: { className?: string }) => {
     const [ state, setState ] = useState(false)
     const [ scrollable, setScrollable ] = useState(true)
 
@@ -19,13 +20,16 @@ export default ({ className = '' }: { className?: string }) => {
     }
 
     return (
-        <Root onOpenChange={ onOpenChange }>
+        <Root open={ state } onOpenChange={ onOpenChange }>
             <Trigger asChild>
                 <Hamburger className={ className } state={ state } />
             </Trigger>
             <Portal>
-                <Overlay asChild>
-                    <Content className={ clsx('fixed inset-0 bg-dark z-50 group size-full', { 'overflow-y-scroll': scrollable }) }>
+                <Overlay
+                    asChild
+                    className={ clsx('fixed inset-0 z-50 group bg-dark data-[state=open]:fade-in data-[state=closed]:fade-out data-[state=closed]:anim-delay-[500ms]', { 'overflow-y-scroll': scrollable }) }
+                >
+                    <Content>
                         <div className='grid size-full grid-rows-[auto_1fr_auto] text-white place-items-center max-w-7xl mx-auto gap-y-[5dvh]'>
                             <VisuallyHidden>
                                 <Title>Navigation menu</Title>
@@ -42,17 +46,30 @@ export default ({ className = '' }: { className?: string }) => {
                                 </Close>
                             </div>
                             <nav className='self-start'>
-                                <ul className='grid grid-rows-5 grid-cols-[.25fr_1fr] font-serif gap-y-15'>
+                                <ul className='grid justify-center auto-rows-fr grid-cols-[.25fr_1fr] font-serif gap-y-5 lg:gap-y-8 hover:*:hover:opacity-100 hover:*:not-hover:opacity-50'>
                                     {
                                         pages.map((page, i) =>
-                                            <Close key={ page } asChild>
-                                                <Link className={ clsx('col-span-2', { 'col-start-2': i % 2 === 1 }) } href={ `/${page}` }>
-                                                    <li className='capitalize flex flex-row items-center gap-x-10'>
+                                            <li key={ page } className={ clsx('col-span-2 transition-opacity duration-350 ease-in-out overflow-clip', { 'col-start-2': i % 2 === 1 }) } >
+                                                <Close asChild>
+                                                    <Link className='capitalize flex items-center gap-x-5' href={ `/${page}` }>
                                                         <span className='text-xs'>{ '0' + (i + 1) }</span>
-                                                        <span className='text-6xl'>{ page }</span>
-                                                    </li>
-                                                </Link>
-                                            </Close>
+                                                        <span
+                                                            data-play={ state }
+                                                            className='
+                                                                text-3xl/relaxed
+                                                                sm:text-4xl/relaxed 
+                                                                md:text-5xl/relaxed 
+                                                                lg:text-6xl/relaxed
+                                                                origin-bottom-left
+                                                                group-data-[state=open]:rotate-from-quarter
+                                                                group-data-[state=closed]:rotate-to-quarter
+                                                            '
+                                                        >
+                                                            { page }
+                                                        </span>
+                                                    </Link>
+                                                </Close>
+                                            </li>
                                         )
                                     }
                                 </ul>
@@ -65,4 +82,6 @@ export default ({ className = '' }: { className?: string }) => {
         </Root>
     )
 }
+
+export default Menu
 

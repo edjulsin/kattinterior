@@ -10,7 +10,7 @@ const send = (state: { message: string, token: string, name: string, email: stri
         v => ({ ...state, ...v, success: false, error: true })
     )
 
-export default () => {
+const Contact = () => {
     const [ state, action, pending ] = useActionState(send, { other: '', name: '', email: '', message: '', success: false, error: false })
 
     const Failed = ({ error }: { error: string }) => (
@@ -79,3 +79,5 @@ export default () => {
         </form>
     )
 }
+
+export default Contact

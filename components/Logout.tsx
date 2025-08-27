@@ -7,7 +7,7 @@ import { signOut } from '@/action/server'
 import { useRouter } from 'next/navigation'
 import clsx from 'clsx'
 
-export default ({ className }: { className?: string }) => {
+const Logout = ({ className }: { className?: string }) => {
     const router = useRouter()
     const logout = () => signOut().then(
         () => { router.push('/login') },
@@ -37,4 +37,6 @@ export default ({ className }: { className?: string }) => {
         </DropdownMenu.Root>
     )
 }
+
+export default Logout
 

@@ -69,7 +69,10 @@ export const deleteFiles = (paths: string[]) =>
     )
 
 export const signIn = (email: string) =>
-    client().auth.signInWithOtp({ email: email + '' }).then(v =>
+    client().auth.signInWithOtp({
+        email: email + '',
+        options: { shouldCreateUser: false }
+    }).then(v =>
         v.error === null
             ? Promise.resolve()
             : Promise.reject()
@@ -79,6 +82,7 @@ export const signOut = () => client().auth.signOut()
 
 export const createProject = async () => {
     const id = UUIDv7()
+    const category = 'Residential'
     const template = {
         desktop: {
             edited: false,
@@ -99,7 +103,7 @@ export const createProject = async () => {
             items: []
         }
     }
-    return client().from('projects').insert({ id, template }).then(() => id)
+    return client().from('projects').insert({ id, template, category }).then(() => id)
 }
 
 export const updateProject = async (project: Partial<Project>) => {
@@ -222,6 +226,36 @@ export const searchProjects = async (start: number, end: number, search: string[
         .from('projects')
         .select('*')
         .ilikeAnyOf('name', search.map(v => `%${v.trim()}%`))
+        .range(start, end)
+        .then(v => {
+            if(v.error === null) {
+                return Promise.resolve(v.data ?? ([]))
+            } else {
+                return Promise.reject()
+            }
+        })
+
+
+export const getAllContacts = async (start: number, end: number) =>
+    client()
+        .from('contacts')
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .range(start, end)
+        .then(v => {
+            if(v.error === null) {
+                return Promise.resolve(v.data ?? ([]))
+            } else {
+                return Promise.reject()
+            }
+        })
+
+
+export const searchContacts = async (start: number, end: number, search: string) =>
+    client()
+        .from('contacts')
+        .select('*')
+        .or(`name.ilike.%${search.trim()}%,email.ilike.%${search.trim()}%`)
         .range(start, end)
         .then(v => {
             if(v.error === null) {

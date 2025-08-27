@@ -1,22 +1,38 @@
-import Image from "next/image";
 import type { Metadata } from "next";
-import Hero from '@/components/Hero';
-import Works from '@/components/Works';
-import Chaterina from '@/components/Chaterina';
 import Bottom from '@/components/Bottom';
+import Chaterina from '@/components/Chaterina';
+import Hero from '@/components/Hero';
 import Intro from '@/components/Intro';
+import Work from '@/components/Work';
+import pageSchema from '@/schemas/pageSchema';
+import Schema from "@/components/Schema";
+import Intersector from '@/components/Intersector';
+import Parallax from '@/components/Parallax';
 
 export const metadata: Metadata = {
-	title: "Katt Interior Design",
-	description: 'Katt Interior is a Bali-based studio transforming visions into timeless spaces. We blend natural elements with thoughtful design to create environments that feel personal, meaningful, and lasting.',
+	title: 'Interior Designer',
+	description: `Discover professional interior design solutions in Bali with ${process.env.NEXT_PUBLIC_SITE_NAME}. Residential, commercial, and custom projects.`,
+	alternates: {
+		canonical: '/'
+	}
 }
 
-export default () => (
-	<>
+const HomePage = () =>
+	<Schema
+		value={
+			pageSchema({
+				path: '/',
+				description: metadata.description as string
+			})
+		}
+	>
+		<Intersector />
+		<Parallax selectors={ [ '.parallax' ] } />
 		<Hero />
-		<Works />
+		<Work />
 		<Intro />
 		<Chaterina />
 		<Bottom />
-	</>
-)
+	</Schema>
+
+export default HomePage

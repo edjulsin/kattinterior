@@ -1,6 +1,6 @@
 import { useDropzone } from 'react-dropzone'
 
-export default ({
+const Droppable = ({
     children,
     className = '',
     onDrop,
@@ -10,7 +10,7 @@ export default ({
     children: React.ReactNode,
     className?:
     string,
-    onDrop: Function,
+    onDrop: (files: File[]) => Promise<void>,
     noDragsEventBubbling?: boolean,
     noClick?: boolean
 }) => {
@@ -27,3 +27,5 @@ export default ({
         </div>
     )
 }
+
+export default Droppable

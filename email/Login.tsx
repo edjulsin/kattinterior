@@ -1,28 +1,65 @@
-import { Body, Head, Html, Preview, Text, Container } from "@react-email/components";
-import { render } from '@react-email/render';
+import {
+    Body,
+    Button,
+    Container,
+    Head,
+    Heading,
+    Hr,
+    Html,
+    Img,
+    Link,
+    Preview,
+    Section,
+    Tailwind,
+    Text,
+} from '@react-email/components';
 
-export const Login = ({ name, email, message }: { name: string, email: string, message: string }) =>
-    <Html lang='en'>
-        <Head></Head>
-        <Preview>{ message.slice(0, 60) }</Preview>
-        <Body>
-            <Container>
-                <Text>Name: { name }</Text>
-                <Text>Email: { email }</Text>
-                <Text>Message: { message }</Text>
-            </Container>
-        </Body>
+const Login = ({ confirm, logo }: { confirm: string, logo: string }) =>
+    <Html>
+        <Head />
+        <Preview>Login to Katt</Preview>
+        <Tailwind>
+            <Body className="mx-auto my-auto bg-white px-2 font-sans">
+                <Container className="mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid p-[20px]">
+                    <Section className="mt-[32px]">
+                        <Img
+                            src={ logo }
+                            width="519"
+                            height="241"
+                            alt="Katt"
+                            className="mx-auto my-0 w-[55px] h-auto"
+                        />
+                    </Section>
+                    <br />
+                    <Heading className="mx-0 my-[30px] p-0 text-center font-normal text-[24px] text-black">
+                        Login to <strong>Katt</strong>
+                    </Heading>
+                    <Text className="text-[14px] leading-[24px] text-neutral-500">
+                        Click one of the options below to login to <strong>Katt's</strong> dashboard.
+                    </Text>
+                    <Section className="mt-[32px] mb-[16px] text-center">
+                        <Button
+                            className="rounded bg-black px-4 py-2 text-center font-semibold text-[12px] text-white no-underline"
+                            href={ confirm }
+                        >
+                            Dashboard
+                        </Button>
+                    </Section>
+                    <Text className='text-center text-[14px] leading-[24px] text-neutral-400'>or</Text>
+                    <Text className="text-[14px] text-blue-500 leading-[24px] text-center">
+                        <Link href={ confirm } className="underline">
+                            Magic link
+                        </Link>
+                    </Text>
+                    <br />
+                    <Hr className="mx-0 my-[26px] w-full border border-[#eaeaea] border-solid" />
+                    <Text className="text-neutral-400 text-[12px] leading-[24px]">
+                        If you didn't try to login, you can safely ignore this email.
+                    </Text>
+                </Container>
+            </Body>
+        </Tailwind>
     </Html>
 
-export const LoginPreview = ({ name, email, message }: { name: string, email: string, message: string }) =>
-    render(
-        <Login
-            name={ name }
-            email={ email }
-            message={ message }
-        />
-    ).then(v =>
-        <iframe
-            srcDoc={ v }
-        />
-    )
+
+export default Login

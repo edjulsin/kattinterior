@@ -2,7 +2,7 @@ import { AccessibleIcon } from '@radix-ui/react-accessible-icon'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 
-export default ({ state, className, ...props }: { state: boolean, className?: string }) => {
+const Hamburger = ({ state, className, ...props }: { state: boolean, className?: string }) => {
     const [ animate, setAnimate ] = useState(false)
 
     const hamburger = state ? `hamburger-open` : `hamburger-close`
@@ -36,4 +36,6 @@ export default ({ state, className, ...props }: { state: boolean, className?: st
         </button >
     )
 }
+
+export default Hamburger
 

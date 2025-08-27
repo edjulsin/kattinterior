@@ -1,3 +1,5 @@
 'use client'
 
-export default () => <span className='text-sm'>{ '©' + new Date().getFullYear() }</span>
+const Year = () => <span className='text-sm sm:text-base'>{ '©' + new Date().getFullYear() }</span>
+
+export default Year

@@ -2,11 +2,11 @@ import { getAllPublishedProjects } from '@/action/server'
 import { Project } from '@/type/editor'
 import type { MetadataRoute } from 'next'
 
-export const revalidate = 60 * 60 * 24 * 7;
+export const revalidate = 604800;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const url = process.env.NEXT_PUBLIC_SITE_URL as string
-    const modified = new Date().toISOString()
+    const modified = new Date()
     const statics: MetadataRoute.Sitemap = [
         {
             url: url,
@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         {
             url: `${url}/contact`,
             lastModified: modified,
-            changeFrequency: 'monthly',
+            changeFrequency: 'yearly',
             priority: 0.8
         },
         {
@@ -33,13 +33,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.8
         },
         {
-            url: `${url}/commercial-design`,
+            url: `${url}/services/commercial-design`,
             lastModified: modified,
             changeFrequency: 'monthly',
             priority: 0.8
         },
         {
-            url: `${url}/residential-design`,
+            url: `${url}/services/residential-design`,
             lastModified: modified,
             changeFrequency: 'monthly',
             priority: 0.8
@@ -47,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         {
             url: `${url}/projects`,
             lastModified: modified,
-            changeFrequency: 'weekly',
+            changeFrequency: 'monthly',
             priority: 0.5
         }
     ]
@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             const result: MetadataRoute.Sitemap = projects.map(v => {
                 return {
                     url: `${url}/projects/${v.slug}`,
-                    lastModified: v.updated_at,
+                    lastModified: new Date(v.updated_at) as Date,
                     changeFrequency: 'monthly',
                     priority: 0.5,
                     images: v.assets.map(v => v.src)

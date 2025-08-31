@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 'use client'
 
 import { MoveIcon, ResetIcon, CrossCircledIcon, CheckCircledIcon, TrashIcon, Share2Icon, PlayIcon, UploadIcon, CaretDownIcon, DesktopIcon, MobileIcon, BoxIcon, ViewVerticalIcon, InfoCircledIcon, ImageIcon, ChevronLeftIcon, GearIcon } from '@radix-ui/react-icons'
@@ -1275,22 +1277,19 @@ const Edit = ({ project }: { project: Project }) => {
 
 		setBroadcast(broadcaster)
 
-		const openPreview = () => Promise.try(() =>
-			window.open('/preview/' + project.id, project.id)
-		).then(v =>
-			new Promise<void>((resolve, reject) => {
-				if(v === null) {
-					reject()
-				} else {
-					const timeout = setTimeout(() => {
-						broadcaster.postMessage(current)
-						resolve()
-						clearTimeout(timeout)
-					}, 5000)
+		const openPreview = () => new Promise<void>((resolve, reject) => {
+			const tab = window.open('/preview/' + project.id, project.id)
+			if(tab) {
+				const timeout = setTimeout(() => {
 					broadcaster.postMessage(current)
-				}
-			})
-		)
+					resolve()
+					clearTimeout(timeout)
+				}, 5000)
+				broadcaster.postMessage(current)
+			} else {
+				reject()
+			}
+		})
 
 		task.then(
 			() => {

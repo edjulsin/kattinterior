@@ -231,7 +231,7 @@ export const getAllPublishedProjects = async () =>
         client
             .from('projects')
             .select('*')
-            .eq('published', true)
+            // .eq('published', true)
             .order('created_at', { ascending: false })
             .then(v => {
                 if(v.error === null) {

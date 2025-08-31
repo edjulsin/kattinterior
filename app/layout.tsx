@@ -38,8 +38,6 @@ export const metadata: Metadata = {
 	pinterest: { richPin: true }
 }
 
-// use parameterized Next.js
-// smooth scroll
 // check post input data before publish
 // apply challenge to protect login and contact
 

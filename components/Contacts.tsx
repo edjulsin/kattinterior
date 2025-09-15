@@ -10,16 +10,14 @@ import { debounce, formatISODate } from '@/utility/fn'
 
 const Rows = ({ contacts }: { contacts: Contact[] }) => {
     const now = new Date()
-    return (
-        contacts.map(({ name, email, updated_at }, i) =>
-            <tr className='text-base not-last:border-b-1 not-last:border-b-neutral-200 text-nowrap *:px-8 *:py-3 *:text-left *:truncate' key={ i + email }>
-                <td className='w-[20%] font-medium text-neutral-500 capitalize hidden md:table-cell'>{ name }</td>
-                <td className='w-[40%] font-semibold'>
-                    <a className='text-amber-600 underline' href={ `mailto:${email}` }>{ email }</a>
-                </td>
-                <td className='w-[40%] font-medium text-neutral-500'>{ formatISODate(now, updated_at) }</td>
-            </tr>
-        )
+    return contacts.map(({ name, email, updated_at }, i) =>
+        <tr className='text-base not-last:border-b-1 not-last:border-b-neutral-200 text-nowrap *:px-8 *:py-3 *:text-left *:truncate' key={ i + email }>
+            <td className='w-[20%] font-medium text-neutral-500 capitalize hidden md:table-cell'>{ name }</td>
+            <td className='w-[40%] font-semibold'>
+                <a className='text-amber-600 underline' href={ `mailto:${email}` }>{ email }</a>
+            </td>
+            <td className='w-[40%] font-medium text-neutral-500'>{ formatISODate(now, updated_at) }</td>
+        </tr>
     )
 }
 
@@ -125,7 +123,7 @@ const Contacts = ({ fetchCount, contacts }: { fetchCount: number, contacts: Cont
                     />
                 </div>
             </header>
-            <section className='py-15 w-[80%]'>
+            <section className='py-15 w-[80%] flex flex-col justify-center items-center'>
                 {
                     filtered.length > 0
                         ? <table className='ring-1 ring-neutral-200 rounded-sm text-base table-fixed w-full'>

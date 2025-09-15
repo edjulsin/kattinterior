@@ -2,6 +2,7 @@ import type { NextConfig } from "next"
 
 const env = process.env.NODE_ENV === 'development'
 const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL
+const bucket = process.env.NEXT_PUBLIC_SUPABASE_BUCKET
 
 const CSP = `
 	default-src 'self';
@@ -20,7 +21,7 @@ const CSP = `
 const nextConfig: NextConfig = {
 	images: {
 		remotePatterns: [
-			new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_BUCKET!}/**`)
+			new URL(`${supabase}/storage/v1/object/public/${bucket}/**`)
 		]
 	},
 	async headers() {

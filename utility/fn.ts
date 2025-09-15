@@ -1,5 +1,5 @@
 import { Item, Items, Template } from '@/type/editor'
-import { timeDay, timeMonth, timeYear } from 'd3'
+import { timeDay, timeHour, timeMinute, timeMonth, timeYear } from 'd3'
 
 export const curry = (fn: Function) => (...xs: any[]) =>
     xs.length >= fn.length
@@ -358,10 +358,14 @@ export const formatISODate = (now: Date, time: string) => {
     const years = timeYear.count(date, now)
     const months = timeMonth.count(date, now)
     const days = timeDay.count(date, now)
+    const hours = timeHour.count(date, now)
+    const minutes = timeMinute.count(date, now)
     const year = `${years} year${years > 1 ? 's' : ''} ago`
     const month = `${months} month${months > 1 ? 's' : ''} ago`
     const day = `${days} day${days > 1 ? 's' : ''} ago`
-    return years > 0 ? year : months > 0 ? month : day
+    const hour = `${hours} hour${hours > 1 ? 's' : ''} ago`
+    const minute = `${minutes} minute${minutes > 1 ? 's' : ''} ago`
+    return years > 0 ? year : months > 0 ? month : days > 0 ? day : hours > 0 ? hour : minute
 }
 
 export const capitalize = (string: string) => {

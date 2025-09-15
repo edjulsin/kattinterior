@@ -18,7 +18,7 @@ const sanitize = (string: string) => sanitizer(string, {
 const client = async () => cookies().then(store =>
     createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        process.env.NEXT_PUBLIC_SUPABASE_KEY!,
         {
             cookies: {
                 getAll() {
@@ -111,7 +111,7 @@ export const sendEmail = async (form: FormData) => {
         ])
         return contents.then(([ html, text ]) =>
             smtp().emails.send({
-                from: process.env.EMAIL_SENDER!, // insert name here
+                from: `${form.name} <${process.env.EMAIL_SENDER!}>`, // change this after acquiring domain
                 to: process.env.EMAIL_RECEIVER!,
                 subject: 'Contact from Katt',
                 html: html,
@@ -149,7 +149,7 @@ export const getFeaturedProject = async () => client().then(client =>
     client
         .from('projects')
         .select('*')
-        // .eq('published', true)
+        .eq('published', true)
         .eq('featured', true)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -177,7 +177,7 @@ export const getPublishedProject = async (slug: string) =>
         client
             .from('projects')
             .select('*')
-            // .eq('published', true) //
+            .eq('published', true)
             .eq('slug', slug)
             .order('created_at', { ascending: false })
             .limit(1)
@@ -195,11 +195,11 @@ export const getNextPublishedProject = async (limit: number, created_at: string)
         client
             .from('projects')
             .select('*')
-            // .eq('published', true)
+            .eq('published', true)
             .gt('created_at', created_at)
             .order('created_at', { ascending: true })
             .limit(limit)
-            .then((v) => {
+            .then(v => {
                 if(v.error === null) {
                     return Promise.resolve(v.data ?? ([]))
                 } else {
@@ -213,7 +213,7 @@ export const getPublishedProjects = async (start: number, end: number) =>
         client
             .from('projects')
             .select('*')
-            // .eq('published', true)
+            .eq('published', true)
             .order('created_at', { ascending: false })
             .range(start, end)
             .then(v => {
@@ -225,13 +225,12 @@ export const getPublishedProjects = async (start: number, end: number) =>
             })
     )
 
-
 export const getAllPublishedProjects = async () =>
     client().then(client =>
         client
             .from('projects')
             .select('*')
-            // .eq('published', true)
+            .eq('published', true)
             .order('created_at', { ascending: false })
             .then(v => {
                 if(v.error === null) {
@@ -242,14 +241,12 @@ export const getAllPublishedProjects = async () =>
             })
     )
 
-
 export const verifyEmailToken = async (token: string): Promise<void> =>
     client().then(client =>
         client.auth.verifyOtp({ type: 'email', token_hash: token + '' }).then(v =>
             v.error === null && v.data.user ? Promise.resolve() : Promise.reject()
         )
     )
-
 
 export const getAllContacts = async (start: number, end: number) =>
     client().then(client =>
@@ -265,8 +262,6 @@ export const getAllContacts = async (start: number, end: number) =>
                 }
             })
     )
-
-
 
 export const searchContacts = async (start: number, end: number, search: string) =>
     client().then(client =>

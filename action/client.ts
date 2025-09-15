@@ -8,7 +8,7 @@ import { v7 as UUIDv7 } from 'uuid'
 
 const client = () => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_KEY!
 )
 
 export const uploadFiles = (

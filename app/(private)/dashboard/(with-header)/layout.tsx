@@ -1,4 +1,4 @@
-import Logout from '@/components/Logout';
+import Exit from '@/components/Exit';
 import Logo from '@/components/Logo';
 import Link from 'next/link';
 import Tabs from '@/components/Tabs';
@@ -11,7 +11,7 @@ const DashboardLayout = ({ children }: Readonly<{ children: React.ReactNode }>) 
                     <Logo className='max-h-9 size-full' />
                 </Link>
                 <Tabs />
-                <Logout />
+                <Exit />
             </nav>
         </header>
         <main className='w-full'>

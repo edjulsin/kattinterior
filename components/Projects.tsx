@@ -45,11 +45,11 @@ const defaultThumbnail = {
 
 const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter: string) => void, filter: string, className?: string }) => (
     <DropdownMenu.Root>
-        <DropdownMenu.Trigger className={ clsx('flex justify-between items-center gap-x-1 group font-sans font-semibold rounded-lg cursor-pointer hover:bg-neutral-200', className) }>
+        <DropdownMenu.Trigger className={ clsx('flex justify-between items-center gap-x-1 group font-sans font-semibold rounded-lg cursor-pointer bg-neutral-200 outline-transparent', className) }>
             <span>{ filter }</span>
             <span>
                 <AccessibleIcon.Root label='Filter posts'>
-                    <CaretDownIcon className='text-neutral-500 transition-transform duration-200 group-data-[state=open]:rotate-180' />
+                    <CaretDownIcon className='text-neutral-500 transition-transform duration-200 group-data-[state=open]:rotate-180 group-hover:text-amber-600' />
                 </AccessibleIcon.Root>
             </span>
         </DropdownMenu.Trigger>
@@ -274,13 +274,13 @@ const Projects = ({ fetchCount, projects }: { fetchCount: number, projects: Proj
 
     return (
         <section className='w-full flex flex-col justify-center items-center text-base'>
-            <div className='z-50 sticky top-0 py-10 rounded-lg grid grid-cols-2 md:grid-cols-3 font-semibold size-full items-center justify-between text-sm md:text-base *:px-2 *:py-1'>
+            <div className='z-50 sticky top-0 py-10 rounded-lg grid grid-cols-2 md:grid-cols-3 font-semibold size-full items-center justify-between text-sm md:text-base *:px-3 *:py-1.5'>
                 <button
-                    className='outline-2 outline-neutral-200 bg-light hover:bg-neutral-200 flex justify-center items-center gap-x-1 cursor-pointer rounded-lg justify-self-start'
+                    className='bg-neutral-200 flex justify-center items-center gap-x-1 cursor-pointer rounded-lg justify-self-start group'
                     onClick={ action }
                 >
                     <span>New Project</span>
-                    <span><PlusIcon className='text-neutral-500' /></span>
+                    <span><PlusIcon className='text-neutral-500 group-hover:text-amber-600' /></span>
                 </button>
                 <div className='flex justify-center items-center bg-neutral-200 rounded-xl justify-self-end md:justify-self-center focus-within:outline-1 focus-within:outline-amber-600'>
                     <MagnifyingGlassIcon className='text-neutral-500' />

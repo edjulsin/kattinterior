@@ -24,10 +24,10 @@ const Login = ({ confirm, logo }: { confirm: string, logo: string }) =>
                     <Section className="mt-[32px]">
                         <Img
                             src={ logo }
-                            width="519"
-                            height="241"
+                            width="1200"
+                            height="630"
                             alt="Katt"
-                            className="mx-auto my-0 w-[55px] h-auto"
+                            className="mx-auto my-0 w-[200px] h-auto"
                         />
                     </Section>
                     <br />

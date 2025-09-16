@@ -1564,20 +1564,20 @@ const Edit = ({ project }: { project: Project }) => {
 												sideOffset={ 13 }
 												side='top'
 												className='
-											flex 
-											flex-col 
-											justify-center 
-											gap-y-0.5
-											font-sans 
-											font-semibold 
-											text-sm 
-											z-50 
-											bg-light 
-											ring-1
-											ring-neutral-200 
-											rounded-md 
-											p-1
-										'
+													flex 
+													flex-col 
+													justify-center 
+													gap-y-0.5
+													font-sans 
+													font-semibold 
+													text-sm 
+													z-50 
+													bg-light 
+													ring-1
+													ring-neutral-200 
+													rounded-md 
+													p-1
+												'
 											>
 												{
 													breakpoints.filter(v => v !== breakpoint).map(screen =>

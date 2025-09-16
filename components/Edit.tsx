@@ -1194,10 +1194,20 @@ const Edit = ({ project }: { project: Project }) => {
 				description: 'In order to publish, project require at least one image on each viewport.'
 			})
 		} else {
-			const change = fields.reduce((acc, key) =>
-				({ ...acc, [ key ]: (acc[ key ] as string).trim() }),
+			const entries: [ string, any ][] = Object.entries(
 				changes(previous, { ...current, published: true })
 			)
+
+			const change = entries.reduce(
+				(a, [ k, v ]) => ({
+					...a,
+					[ k ]: fields.includes(k as StringKeysOf<Project>)
+						? (v as string).trim()
+						: v
+				}),
+				{}
+			)
+
 			const task = Object.keys(change).length > 0
 				? updateProject(
 					formatChanges(project.id, {
@@ -1360,6 +1370,7 @@ const Edit = ({ project }: { project: Project }) => {
 		}
 	}, [
 		featured,
+		category,
 		published,
 		name,
 		location,
@@ -1534,11 +1545,9 @@ const Edit = ({ project }: { project: Project }) => {
 										</AccessibleIcon.Root>
 										{
 											remainingAsset.length > 0
-												? (
-													<small className='absolute flex flex-col justify-center items-center top-0 left-full -translate-1/2 rounded-full bg-orange-500 text-center size-5 text-light text-tiny font-bold align-middle'>
-														{ remainingAsset.length > 100 ? '...' : remainingAsset.length }
-													</small>
-												)
+												? <small className='absolute flex flex-col justify-center items-center top-0 left-full -translate-1/2 rounded-full bg-orange-500 text-center size-5 text-light text-tiny font-bold align-middle'>
+													{ remainingAsset.length > 100 ? '...' : remainingAsset.length }
+												</small>
 												: null
 										}
 									</button>
@@ -1762,7 +1771,7 @@ const Edit = ({ project }: { project: Project }) => {
 							/>
 						</fieldset>
 						<div className='font-bold text-base flex items-center *:focus:outline-1 *:outline-neutral-200 justify-between w-full *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:hover:bg-neutral-200'>
-							<AlertDialog.Cancel className='text-neutral-500' onClick={ onSkip }>Skip</AlertDialog.Cancel>
+							<AlertDialog.Cancel className='text-neutral-500' onClick={ onSkip }>Skip All</AlertDialog.Cancel>
 							{
 								assetDialog.assets.length > 1
 									? <button onClick={ () => { onNext(); focusRef.current!.focus() } }>Next</button>

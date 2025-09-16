@@ -8,7 +8,7 @@ const Intro = () =>
         <br />
         <br />
         <br />
-        <p className='text-xl md:text-2xl font-sans font-medium'>Visit our <Link href='/services'><i className='underline'>services</i></Link> to see more about our solutions.</p>
+        <p className='text-xl md:text-2xl font-sans font-medium'>Visit our <Link href='/services'><i className='underline'>services</i></Link> or <Link href='/projects'><i className='underline'>projects</i></Link> to see more.</p>
     </section>
 
 export default Intro

@@ -3,10 +3,11 @@ import type { Project } from '@/type/editor'
 import Link from 'next/link'
 import Image from 'next/image'
 import { alt } from '@/utility/fn'
+import fallback from '@/assets/fallback.svg'
 
 const defaultThumbnail = {
     id: UUIDv7(),
-    src: '/fallback.svg',
+    src: fallback,
     alt: 'Fallback thumbnail',
     width: 29,
     height: 29,

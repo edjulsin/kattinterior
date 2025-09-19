@@ -2,8 +2,19 @@ import { getFeaturedProject } from '@/action/server';
 import { Project } from '@/type/editor';
 import clsx from 'clsx';
 import Image from 'next/image';
+import { v7 as UUIDv7 } from 'uuid'
+import fallback from '@/assets/fallback.svg'
 
-// optional make link to see all projects
+const thumbnail = () => ({
+    id: UUIDv7(),
+    src: fallback,
+    alt: 'Fallback thumbnail',
+    width: 29,
+    height: 29,
+    thumbnail: false
+})
+
+const defaultImages = [ thumbnail(), thumbnail() ]
 
 const Work = () => getFeaturedProject().then(
     (projects: Project[]) =>
@@ -13,9 +24,8 @@ const Work = () => getFeaturedProject().then(
                     return [ v.id, v ]
                 })
             )
-            const images = v.template.desktop.items.slice(0, 2).map(v =>
-                asset[ v.src ]
-            )
+
+            const images = [ ...v.template.desktop.items.slice(0, 2).map(v => asset[ v.src ]), ...defaultImages ].slice(0, 2)
 
             return (
                 <section key={ v.id } className='flex flex-col gap-y-20 justify-center items-center'>

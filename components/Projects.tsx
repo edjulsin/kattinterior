@@ -13,6 +13,7 @@ import { createProject, getAllProjects, getDraftProjects, getFeaturedProjects, g
 import { debounce, formatISODate } from '@/utility/fn'
 import Loader from './Loader'
 import Message from './Message'
+import fallback from '@/assets/fallback.svg'
 
 const filters = [
     'All',
@@ -36,14 +37,14 @@ const queries: Record<string, (start: number, end: number) => Promise<Project[]>
 
 const defaultThumbnail = {
     id: UUIDv7(),
-    src: '/fallback.svg',
+    src: fallback,
     alt: 'Fallback thumbnail',
     width: 29,
     height: 29,
     thumbnail: false
 }
 
-const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter: string) => void, filter: string, className?: string }) => (
+const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter: string) => void, filter: string, className?: string }) =>
     <DropdownMenu.Root>
         <DropdownMenu.Trigger className={ clsx('flex justify-between items-center gap-x-1 group font-sans font-semibold rounded-lg cursor-pointer bg-neutral-200 outline-transparent', className) }>
             <span>{ filter }</span>
@@ -105,7 +106,7 @@ const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter
             </DropdownMenu.Content>
         </DropdownMenu.Portal>
     </DropdownMenu.Root>
-)
+
 
 const List = ({ projects }: { projects: Project[] }) => {
     const now = new Date()
@@ -133,9 +134,11 @@ const List = ({ projects }: { projects: Project[] }) => {
                                         />
                                         {
                                             project.featured
-                                                ? <small className='text-light/80 text-sm absolute top-0 right-0 px-2 py-1 backdrop-blur-xl bg-neutral-600/50 capitalize'>
-                                                    featured
-                                                </small>
+                                                ? (
+                                                    <small className='text-light/80 text-sm absolute top-0 right-0 px-2 py-1 backdrop-blur-xl bg-neutral-600/50 capitalize'>
+                                                        featured
+                                                    </small>
+                                                )
                                                 : null
                                         }
                                         <div className='backdrop-blur-xl bg-neutral-600/50 w-full px-2 py-1 absolute bottom-0 left-0 flex justify-between items-center text-sm'>

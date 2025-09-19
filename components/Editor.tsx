@@ -7,7 +7,7 @@ import { drag, select } from 'd3'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Item, Photo, Layout, Asset, Items } from '@/type/editor'
 import { ContextMenu, Dialog } from 'radix-ui'
-import { applyBoxConstrain, capitalize, clamp, compose, curry, extent, o } from '@/utility/fn'
+import { applyBoxConstrain, capitalize, clamp, compose, curry, extent, o, alt as alternative } from '@/utility/fn'
 import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent } from '@/hook/useDrag'
 import { v7 as UUIDv7 } from 'uuid'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
@@ -719,7 +719,7 @@ const Editable = ({
                         </fieldset>
                         <Dialog.Close
                             className='text-center font-bold text-base rounded-md cursor-pointer px-2 py-1 hover:bg-neutral-200 hover:outline-1 hover:outline-neutral-200 w-full'
-                            onClick={ () => setImageAlt({ ...image, alt }) }
+                            onClick={ () => setImageAlt({ ...image, alt: alternative(alt) }) }
                         >
                             Save changes
                         </Dialog.Close>

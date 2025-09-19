@@ -74,7 +74,7 @@ const Menu = ({ className = '' }: { className?: string }) => {
                                     }
                                 </ul>
                             </nav>
-                            <Link target='_blank' className='font-sans text-md font-medium p-5' href='https://www.instagram.com/kattinterior/'>INSTAGRAM</Link>
+                            <Link target='_blank' className='font-sans text-md font-medium p-5' href={ process.env.NEXT_PUBLIC_INSTAGRAM_URL as string }>INSTAGRAM</Link>
                         </div>
                     </Content>
                 </Overlay>

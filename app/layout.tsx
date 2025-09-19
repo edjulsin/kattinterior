@@ -33,12 +33,11 @@ export const metadata: Metadata = {
 	referrer: 'origin-when-cross-origin',
 	title: {
 		default: `${name} | Interior Designer`,
-		template: `${name} | %s`
+		template: `%s | By ${name}`
 	},
 	pinterest: { richPin: true }
 }
 
-// check post input data before publish
 // apply challenge to protect login and contact
 
 const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) =>

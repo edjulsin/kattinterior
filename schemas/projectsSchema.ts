@@ -20,7 +20,7 @@ export default ({ path, description }: { path: string, description: string }) =>
                 "width": 1200,
                 "height": 630
             },
-            "sameAs": "https://www.instagram.com/kattinterior"
+            "sameAs": process.env.NEXT_PUBLIC_INSTAGRAM_URL
         }
     }
 }

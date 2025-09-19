@@ -18,7 +18,7 @@ export default (project: Project) => {
     return {
         "@context": "https://schema.org",
         "@type": "CreativeWork",
-        "name": project.title,
+        "name": `${project.title} | By ${process.env.NEXT_PUBLIC_SITE_NAME}`,
         "url": `${URL}/projects/${project.slug}`,
         "description": project.description,
         ...image,
@@ -48,7 +48,7 @@ export default (project: Project) => {
                 "width": 1200,
                 "height": 630
             },
-            "sameAs": "https://www.instagram.com/kattinterior"
+            "sameAs": process.env.NEXT_PUBLIC_INSTAGRAM_URL
         }
     }
 }

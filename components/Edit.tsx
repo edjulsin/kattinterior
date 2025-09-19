@@ -16,7 +16,7 @@ import downscale from 'downscale';
 import { v7 as UUIDv7 } from 'uuid'
 import Droppable from './Droppable';
 import { useDrag, UseDragListener } from '@/hook/useDrag';
-import { applyBoxConstrain, between, clamp, curry, toStorageURL } from '@/utility/fn';
+import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternative } from '@/utility/fn';
 
 const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
 
@@ -174,7 +174,7 @@ const MainEditorBody = ({
 	setLayout: (fn: (layout: Layout) => Layout) => void,
 	asset: Asset,
 	setAsset: (fn: (asset: Asset) => Asset) => void
-}) => (
+}) =>
 	layout.items.length > 0
 		? <Editor
 			key={ layout.width }
@@ -184,7 +184,7 @@ const MainEditorBody = ({
 			setLayout={ setLayout }
 		/>
 		: <section className='size-full flex flex-col justify-center items-center'>
-			<div style={ { width: layout.width + 'px', height: '100%' } } className='size-full outline-1 outline-neutral-200 flex flex-col items-center justify-center gap-y-5 px-10'>
+			<div style={ { width: layout.width + 'px', height: '100%' } } className='size-full min-h-100 outline-1 outline-neutral-200 flex flex-col items-center justify-center gap-y-5 px-10'>
 				<div className='flex justify-center items-center gap-x-2'>
 					<AccessibleIcon.Root label='Drop here'>
 						<MoveIcon className='text-neutral-500' />
@@ -194,7 +194,6 @@ const MainEditorBody = ({
 				<small className='text-neutral-500 text-base font-medium'>Drag and drop images from the sidebar here to start editing.</small>
 			</div>
 		</section>
-)
 
 const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMenu }: { onPreview: () => void, published: boolean, onUnpublish: () => void, onPublish: () => void, menu: boolean, setMenu: (value: boolean) => void }) =>
 	<div className='flex size-full justify-between items-center min-h-20 *:w-auto'>
@@ -1467,7 +1466,12 @@ const Edit = ({ project }: { project: Project }) => {
 		updateAsset(asset => {
 			return {
 				...asset,
-				[ x.id ]: { ...x, alt: assetDialog.input }
+				[ x.id ]: {
+					...x,
+					alt: alternative(
+						assetDialog.input.trim()
+					)
+				}
 			}
 		})
 		setAssetDialog({

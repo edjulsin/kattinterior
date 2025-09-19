@@ -319,7 +319,7 @@ export const animate = (duration: number, callback: (number: number) => void) =>
 }
 
 export const alt = (alt: string) => {
-    const trimmed = alt.trim()
+    const trimmed = capitalize(alt.trim())
     return (trimmed ? trimmed : 'Interior') + ` designed by ${process.env.NEXT_PUBLIC_DOMAIN}`
 }
 

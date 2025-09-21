@@ -320,7 +320,7 @@ export const animate = (duration: number, callback: (number: number) => void) =>
 
 export const alt = (alt: string) => {
     const trimmed = capitalize(alt.trim())
-    return (trimmed ? trimmed : 'Interior') + ` designed by ${process.env.NEXT_PUBLIC_DOMAIN}`
+    return (trimmed ? trimmed : 'Interior') + ` Designed By ${process.env.NEXT_PUBLIC_DOMAIN}`
 }
 
 export const toStorageURL = (path: string) =>

@@ -22,7 +22,7 @@ const Chaterina = () =>
                 height={ 1350 }
             />
         </div>
-        <div className='parallax sm:place-self-start sm:row-start-1 sm:col-start-2 sm:row-span-2 sm:col-span-2'>
+        <div className='sm:place-self-start sm:row-start-1 sm:col-start-2 sm:row-span-2 sm:col-span-2'>
             <Image
                 className='w-70 h-100 sm:w-80 sm:h-110 md:w-90 md:h-120 object-left object-cover'
                 src={ second }

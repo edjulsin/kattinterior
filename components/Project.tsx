@@ -124,7 +124,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                             v.h / (v.sh * img.height)
                         )
                         const image = `
-                            .image-${img.id} {
+                            .item-${v.id} > .image-${img.id} {
                                 translate: ${-v.sx * 100}% ${-v.sy * 100}%;
                                 width: ${((img.width * scale) / w) * 100}cqw;
                                 height: ${((img.height * scale) / h) * 100}cqh;

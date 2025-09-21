@@ -774,7 +774,7 @@ const Left = ({ onDelete, asset, onDrag, onDrop }: {
 		)
 
 	return (
-		<div onClick={ () => setActives([]) } className='size-full relative'>
+		<div onClick={ () => setActives([]) } className='size-full relative flex flex-col items-center'>
 			{
 				items.length > 0
 					? <ul ref={ ref } className='size-full p-4 flex flex-col items-center gap-y-4 overflow-y-auto'>
@@ -1482,6 +1482,13 @@ const Edit = ({ project }: { project: Project }) => {
 		setBucket(xs.length === 0)
 	}
 
+	const onEnter = (e: React.KeyboardEvent) => {
+		if(e.key === 'Enter') {
+			e.preventDefault()
+			onNext()
+		}
+	}
+
 	return (
 		<>
 			<section
@@ -1626,7 +1633,7 @@ const Edit = ({ project }: { project: Project }) => {
 			</section>
 			{
 				bucket
-					? <section className='z-50 fixed top-0 left-0 w-2xs h-dvh outline-1 outline-neutral-200 shadow-lg bg-light'>
+					? <section className='z-50 fixed top-0 left-0 w-xs h-dvh outline-1 outline-neutral-200 shadow-lg bg-light'>
 						<Left
 							key={ layout.width + remainingAsset.length }
 							asset={ unusedAsset }
@@ -1719,6 +1726,7 @@ const Edit = ({ project }: { project: Project }) => {
 				<AlertDialog.Portal>
 					<AlertDialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
 					<AlertDialog.Content
+						onKeyDown={ onEnter }
 						autoFocus={ false }
 						className='
 							flex

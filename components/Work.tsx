@@ -29,7 +29,7 @@ const Work = () => getFeaturedProject().then(
 
             return (
                 <section key={ v.id } className='flex flex-col gap-y-20 justify-center items-center'>
-                    <h3 className='font-serif text-gold-900 text-center text-xl/relaxed lg:text-2xl/relaxed'>LATEST WORK</h3>
+                    <h3 className='font-serif text-gold-900 text-center text-xl/relaxed lg:text-2xl/relaxed'>FEATURED WORK</h3>
                     <ul
                         className='
                             grid

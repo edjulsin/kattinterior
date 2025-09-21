@@ -34,7 +34,7 @@ const AboutPage = () =>
             max-w-2xs
             md:max-w-sm
             lg:max-w-full
-            lg:grid-cols-[auto_1fr] 
+            lg:grid-cols-[.45fr_1fr] 
             lg:grid-rows-[1fr_auto]
         '
         >
@@ -44,6 +44,7 @@ const AboutPage = () =>
                 alt='Wall decoration by Chaterina'
                 width={ 1080 }
                 height={ 1350 }
+                priority={ true }
             />
             <div className='flex flex-col gap-y-5'>
                 <h1 className='text-xl/loose md:text-2xl/loose font-serif max-w-3xl full-slide-from-bottom anim-delay-[300ms]'>Luxury Interiors Rooted in Culture, Blending Tradition with Contemporary Style.</h1>

@@ -160,10 +160,10 @@ export const rowTable = (rows: Items[]): Record<string, number> =>
     rows.reduce((a, b, i) => b.reduce((c, d) => ({ ...c, [ d.id ]: i }), a), {})
 
 export const reduceJoins = (joins: Tuple[], acc: Tuple[]): Tuple[] => {
-    const overlapped = (a: Tuple, b: Tuple) =>
-        b.some(c =>
-            between(...a, c)
-        )
+    const overlapped = (a: Tuple, b: Tuple) => b.some(c =>
+        between(...a, c)
+    )
+
     if(joins.length > 1) {
         const [ x, y, ...rest ] = joins.toSorted(([ a ], [ b ]) => a - b)
         if(overlapped(x, y)) {

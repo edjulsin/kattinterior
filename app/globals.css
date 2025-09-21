@@ -165,7 +165,7 @@
 
 @keyframes unfold-x {
 	from {
-		width: 0;
+		width: 0%;
 	}
 
 	to {
@@ -176,7 +176,7 @@
 
 @keyframes unfold-y {
 	from {
-		height: 0;
+		height: 0%;
 	}
 
 	to {

@@ -1,5 +1,5 @@
 import { Items, Project as ProjectType, Item, Photo } from '@/type/editor';
-import { ab, alt, extent, getLayout, ys } from '@/utility/fn';
+import { ab, alt, extent, getLayout, groupByRow, ys } from '@/utility/fn';
 import Image from 'next/image';
 import React from 'react';
 import Style from './Style';
@@ -95,11 +95,11 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
             ...rows.flatMap((row, i) => {
                 const [ sy, ey ] = extent(ys, row)
                 const gap = gaps[ i ]
-                const height = (ey - sy) + gap
+                const height = Math.max(0, (ey - sy) + gap)
                 const section = `
                     .section-${i} {
                         position: relative;
-                        height: ${(height / h) * 100}%;
+                        height: ${(height / h) * 100}cqh;
                     }
                 `
 
@@ -107,7 +107,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                     section,
                     ...row.flatMap(v => {
                         const item = `
-                            .item-${v.id} {
+                            .section-${i} > .item-${v.id} {
                                 position: absolute; 
                                 display: block;
                                 overflow: clip;
@@ -192,6 +192,8 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
 
     const lcp = largest ?? ({ id: '' })
 
+    const formatAlt = (v: string) => `${v} Designed By ${process.env.NEXT_PUBLIC_DOMAIN}`
+
     return (
         <article className='flex flex-col items-center justify-center gap-y-20 py-20 w-full'>
             <header className='flex flex-col items-center justify-center gap-y-15 text-center whitespace-pre-wrap w-full'>
@@ -227,7 +229,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                                                 src={ img.src }
                                                 width={ img.width }
                                                 height={ img.height }
-                                                alt={ alt(img.alt) }
+                                                alt={ formatAlt(img.alt) }
                                                 sizes={ sizes }
                                                 priority={ item.id === lcp.id }
                                             />

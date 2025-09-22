@@ -16,6 +16,8 @@ const Parallax = ({ children, selectors }: { selectors: string[], children?: Rea
 
             element.dataset.px = element.dataset.px ?? '0'
             element.dataset.py = element.dataset.py ?? '-1'
+            element.dataset.rx = element.dataset.rx ?? '1'
+            element.dataset.ry = element.dataset.ry ?? '1'
         })
 
     }, [ selectors ])
@@ -34,22 +36,27 @@ const Parallax = ({ children, selectors }: { selectors: string[], children?: Rea
             const v = element as HTMLElement
             const img = element.firstChild as HTMLImageElement
             const r = element!.getBoundingClientRect()
-            const sw = r.width * s
-            const sh = r.height * s
 
-            const rx = Math.max(0, sw - r.width)
-            const ry = Math.max(0, sh - r.height)
+            const rx = Math.max(0, (r.width * s) - r.width) / 2
+            const ry = Math.max(0, (r.height * s) - r.height) / 2
 
-            const vc = (window.innerHeight / 2)
+            const vc = window.innerHeight / 2
             const ec = (r.top + r.height) / 2
+            const sx = clamp(
+                0,
+                1,
+                Number(v.dataset.rx)
+            )
+            const sy = clamp(
+                0,
+                1,
+                Number(v.dataset.ry)
+            )
 
-            const progress = clamp(-.5, .5, (vc - ec) / window.innerHeight)
+            const progress = clamp(-.5, .5, (vc - ec) / window.innerHeight) * 2
 
-            const dx = Number(v.dataset.px)
-            const dy = Number(v.dataset.py)
-
-            const ox = dx * (progress * 2) * (rx / 2)
-            const oy = dy * (progress * 2) * (ry / 2)
+            const ox = Number(v.dataset.px) * progress * rx * sx
+            const oy = Number(v.dataset.py) * progress * ry * sy
 
             img.style.transform = `translate3d(${ox}px, ${oy}px, 0)`
         })

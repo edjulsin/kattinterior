@@ -55,7 +55,7 @@ export const minMax = (values: number[]): Tuple => ([
 export const overlap = curry((fn: (item: Item) => Tuple, a: Item, b: Item): boolean => {
     const c = fn(a)
     const d = fn(b)
-    return c.map(v => between(...d, v)).some(v => v)
+    return c.map(v => between(...d, v)).includes(true) || d.map(v => between(...c, v)).includes(true)
 })
 
 export const overlapX = overlap(xs)
@@ -64,7 +64,7 @@ export const overlapXY = overlap((v: Item) => {
     return [ ...xs(v), ...ys(v) ]
 })
 
-export const groupByOverlap = curry((overlap: (a: Item, b: Item) => boolean, items: Items) => {
+export const groupByOverlap = curry((overlap: (a: Item, b: Item) => boolean, sort: (a: Item, b: Item) => number, items: Items) => {
     if(items.length > 0) {
         const byItem = (items: Items, acc: Items[]) => {
             if(items.length > 0) {
@@ -148,7 +148,7 @@ export const ab = <T, R>(fn: (a: T, b: T, c: R[]) => R[], values: T[], acc: R[])
 }
 
 export const groupByRow = (items: Items): Items[] =>
-    groupByOverlap(overlapY, items).map((v: Items) =>
+    groupByOverlap(overlapY, (a: Item, b: Item) => a.y - b.y, items).map((v: Items) =>
         v.toSorted((a, b) => a.y - b.y)
     ).toSorted((a: Items, b: Items) => {
         const [ c ] = extent(ys, a)
@@ -318,10 +318,7 @@ export const animate = (duration: number, callback: (number: number) => void) =>
     )
 }
 
-export const alt = (alt: string) => {
-    const trimmed = capitalize(alt.trim())
-    return (trimmed ? trimmed : 'Interior') + ` Designed By ${process.env.NEXT_PUBLIC_DOMAIN}`
-}
+export const alt = (alt: string) => capitalize(alt.trim()) || 'Interior'
 
 export const toStorageURL = (path: string) =>
     `${process.env.NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_BUCKET!}/${path}`

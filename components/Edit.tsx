@@ -676,7 +676,7 @@ const Left = ({ onDelete, asset, onDrag, onDrop }: {
 					className='object-cover object-center w-full h-40 select-none'
 					width={ item.width }
 					height={ item.height }
-					alt={ item.alt }
+					alt={ `${item.alt} Designed By ${process.env.NEXT_PUBLIC_SITE_NAME}` }
 					src={ item.src }
 				/>
 			</li>
@@ -1363,9 +1363,7 @@ const Edit = ({ project }: { project: Project }) => {
 				setTimeout(() => broadcast?.postMessage(current), 2000)
 			]
 
-			return () => {
-				timeouts.forEach(clearTimeout)
-			}
+			return () => { timeouts.forEach(clearTimeout) }
 		}
 	}, [
 		featured,

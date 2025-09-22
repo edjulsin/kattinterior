@@ -532,7 +532,7 @@ const Editable = ({
                                         src={ image.src }
                                         width={ image.width }
                                         height={ image.height }
-                                        alt={ image.alt }
+                                        alt={ `${alternative(image.alt)} Designed By ${process.env.NEXT_PUBLIC_SITE_NAME}` }
                                         onError={ () => setError(true) }
                                         style={ {
                                             transformOrigin: 'top left',

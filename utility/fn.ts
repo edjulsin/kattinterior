@@ -64,7 +64,7 @@ export const overlapXY = overlap((v: Item) => {
     return [ ...xs(v), ...ys(v) ]
 })
 
-export const groupByOverlap = curry((overlap: (a: Item, b: Item) => boolean, sort: (a: Item, b: Item) => number, items: Items) => {
+export const groupByOverlap = curry((overlap: (a: Item, b: Item) => boolean, items: Items) => {
     if(items.length > 0) {
         const byItem = (items: Items, acc: Items[]) => {
             if(items.length > 0) {
@@ -148,7 +148,7 @@ export const ab = <T, R>(fn: (a: T, b: T, c: R[]) => R[], values: T[], acc: R[])
 }
 
 export const groupByRow = (items: Items): Items[] =>
-    groupByOverlap(overlapY, (a: Item, b: Item) => a.y - b.y, items).map((v: Items) =>
+    groupByOverlap(overlapY, items).map((v: Items) =>
         v.toSorted((a, b) => a.y - b.y)
     ).toSorted((a: Items, b: Items) => {
         const [ c ] = extent(ys, a)

@@ -1487,11 +1487,17 @@ const Edit = ({ project }: { project: Project }) => {
 		}
 	}
 
+	const onClear = () => {
+		setMenu(false)
+		setBucket(false)
+	}
+
 	return (
 		<>
 			<section
 				className='min-h-[100dvh] size-full grid grid-rows-[auto_1fr_auto] place-items-center px-10'
-				onClick={ () => { setMenu(false); setBucket(false) } }
+				onClick={ onClear }
+				onContextMenu={ onClear }
 			>
 				<MainHeader
 					onBack={ onBack }

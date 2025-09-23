@@ -33,23 +33,22 @@ const Work = () => getFeaturedProject().then(
                     <ul
                         className='
                             grid
-                            grid-cols-1
-                            sm:grid-cols-[.80fr_.20fr_.80fr]
-                            sm:grid-rows-[.2fr_.8fr]
+                            sm:grid-cols-[.8fr_.2fr_.8fr]
+                            sm:grid-rows-[.1fr_.9fr_.1fr]
                             sm:*:col-span-2
-                            sm:*:nth-[1]:col-start-1
-                            sm:*:nth-[2]:col-start-2
-                            sm:*:nth-[1]:row-start-2
-                            sm:*:nth-[2]:row-start-1
-                            sm:*:nth-[2]:row-span-2
+                            sm:*:row-span-2
+                            sm:*:first:col-start-1
+                            sm:*:last:col-start-2
+                            sm:*:first:row-start-2
+                            sm:*:last:row-start-1
                             sm:*:first:z-10
                         '
                     >
                         {
                             images.map((img, i) =>
-                                <li key={ img.id } className={ clsx({ 'hidden sm:block': i === 1 }, { 'block': i === 0 }) }>
+                                <li key={ img.id } className={ clsx({ 'hidden sm:block': i === 1 }) }>
                                     <Image // use sizes
-                                        className={ clsx('w-70 h-100 object-center object-cover sm:w-80 sm:h-110 lg:w-90 lg:h-120') }
+                                        className='w-70 h-100 object-center object-cover sm:w-80 sm:h-110 lg:w-90 lg:h-120'
                                         alt={ img.alt }
                                         src={ img.src }
                                         width={ img.width }

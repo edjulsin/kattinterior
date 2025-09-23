@@ -61,7 +61,7 @@ const AboutPage = () =>
                 height={ 1350 }
             />
             <div className='max-w-sm'>
-                <h4 className='text-xl/loose md:text-2xl/loose font-serif slide-from-bottom'>Inspired by earth – ignited by fire</h4>
+                <h4 className='text-xl/loose md:text-3xl/loose font-serif slide-from-bottom'>Inspired by earth – ignited by fire</h4>
                 <br />
                 <div className='flex flex-col gap-y-5 font-sans text-base font-semibold md:text-lg slide-from-bottom anim-delay-[100ms]'>
                     <p>Founded in 2018 by interior designer Chaterina Melissa, Katt Interior Studio is a Bali-based design atelier specializing in creating timeless and sophisticated spaces. </p>

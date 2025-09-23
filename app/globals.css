@@ -255,26 +255,38 @@
 }
 
 @utility scale-up {
-	@apply animate-[scale-up_700ms_ease-out_both];
+	&>* {
+		@apply animate-[scale-up_700ms_ease-out_both];
+	}
 
 	&[data-intersected='true'] {
-		animation-play-state: running;
+		&>* {
+			animation-play-state: running;
+		}
 	}
 
 	&[data-intersected='false'] {
-		animation-play-state: paused;
+		&>* {
+			animation-play-state: paused;
+		}
 	}
 }
 
 @utility scale-down {
-	@apply animate-[scale-down_700ms_ease-out_both];
+	&>* {
+		@apply animate-[scale-down_700ms_ease-out_both];
+	}
 
 	&[data-intersected='true'] {
-		animation-play-state: running;
+		&>* {
+			animation-play-state: running;
+		}
 	}
 
 	&[data-intersected='false'] {
-		animation-play-state: paused;
+		&>* {
+			animation-play-state: paused;
+		}
 	}
 }
 

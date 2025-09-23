@@ -55,8 +55,8 @@ const Parallax = ({ children, selectors }: { selectors: string[], children?: Rea
 
             const progress = clamp(-.5, .5, (vc - ec) / window.innerHeight) * 2
 
-            const ox = Number(v.dataset.px) * progress * rx * sx
-            const oy = Number(v.dataset.py) * progress * ry * sy
+            const ox = Number(v.dataset.px) * progress * rx * sx * .8
+            const oy = Number(v.dataset.py) * progress * ry * sy * .8
 
             img.style.transform = `translate3d(${ox}px, ${oy}px, 0)`
         })

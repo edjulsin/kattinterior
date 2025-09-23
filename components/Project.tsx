@@ -222,10 +222,10 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                                     return (
                                         <div
                                             key={ item.id }
-                                            className={ `anim-delay-[100ms] item-${item.id}` + (item.effect ? ` ${item.effect}` : '') }
+                                            className={ `anim-delay-[125ms] item-${item.id}` + (item.effect ? ` ${item.effect}` : '') }
                                         >
                                             <Image
-                                                className={ `size-80 image-${img.id}` }
+                                                className={ `anim-delay-[125ms] size-80 image-${img.id}` }
                                                 src={ img.src }
                                                 width={ img.width }
                                                 height={ img.height }

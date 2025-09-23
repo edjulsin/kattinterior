@@ -12,16 +12,13 @@ const Next = async ({ created_at }: { created_at: string }) =>
         <section className='text-center flex flex-col justify-center items-center gap-y-10 max-w-md lg:max-w-lg'>
             {
                 getNextPublishedProject(1, created_at).then(
-                    v => v.length > 0
-                        ? v.map((v: Project) =>
-                            <React.Fragment key={ v.id }>
-                                <small className='uppercase font-sans text-base font-semibold text-gold-950'>Next</small>
-                                <h5 className='text-2xl/loose font-serif lg:text-4xl/loose'>{ v.name }</h5>
-                                <Link className='text-lg font-semibold font-sans text-amber-600' href={ `/projects/${v.slug}` }>See project &rarr;</Link>
-                            </React.Fragment>
-                        )
-                        : <Link className='text-lg font-semibold font-sans text-amber-600' href='/projects'>All our projects &rarr;</Link>
-                    ,
+                    v => v.map((v: Project) =>
+                        <React.Fragment key={ v.id }>
+                            <small className='uppercase font-sans text-base font-semibold text-gold-950'>Next</small>
+                            <h5 className='text-2xl/loose font-serif lg:text-4xl/loose'>{ v.name }</h5>
+                            <Link className='text-lg font-semibold font-sans text-amber-600' href={ `/projects/${v.slug}` }>See project &rarr;</Link>
+                        </React.Fragment>
+                    ),
                     () => ([])
                 )
             }

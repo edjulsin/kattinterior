@@ -441,12 +441,12 @@
 @layer components {
 	.parallax {
 		overflow: clip;
-		will-change: transform;
 		display: flex;
 		justify-content: center;
 		align-items: center;
 
 		&>* {
+			will-change: transform;
 			scale: 1.2;
 		}
 	}

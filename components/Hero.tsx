@@ -3,9 +3,9 @@ import poster from '@/assets/hero.png'
 
 const Hero = () =>
     <section className='
-        min-h-[83dvh] 
         grid
-        place-items-center
+        justify-center
+        items-center
         gap-y-10
         *:max-w-2xs
         sm:grid-cols-2
@@ -19,16 +19,28 @@ const Hero = () =>
         lg:*:row-start-1
         lg:*:max-w-sm
     '
+        style={ {
+            width: '100%',
+            height: 'calc(100dvh - 152px)'
+        } }
     >
-        <div
-            className='justify-self-center lg:max-w-md'
-            style={ {
-                maskImage: `url(${mask.src})`,
-                maskRepeat: 'no-repeat',
-                maskPosition: 'center center'
-            } }
-        >
-            <video className='size-full object-contain object-center' poster={ poster.src } autoPlay loop playsInline muted disablePictureInPicture disableRemotePlayback>
+        <div className='justify-self-center w-full h-auto relative overflow-clip flex flex-col justify-center items-center' style={ { aspectRatio: '300 / 464' } }>
+            <video
+                className='w-full h-auto object-contain object-center absolute'
+                style={ {
+                    maskImage: `url(${mask.src})`,
+                    maskRepeat: 'no-repeat',
+                    maskPosition: 'center center',
+                    aspectRatio: '400 / 650'
+                } }
+                poster={ poster.src }
+                autoPlay={ true }
+                loop={ true }
+                playsInline={ true }
+                muted={ true }
+                disablePictureInPicture={ true }
+                disableRemotePlayback={ true }
+            >
                 <source src='./hero.mp4' type='video/mp4' />
             </video>
         </div>

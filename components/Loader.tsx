@@ -11,7 +11,7 @@ const Loader = ({ enabled, children, callback }: {
         callback={ callback }
     >
         { children ?? null }
-        { enabled ? <Spinner className='spinner size-8 text-neutral-500' /> : null }
+        { enabled ? <Spinner className='spinner size-8 text-gold-950' /> : null }
     </Intersection>
 
 export default Loader

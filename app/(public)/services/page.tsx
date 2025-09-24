@@ -16,22 +16,20 @@ import Parallax from '@/components/Parallax'
 
 const Projects = async () => getPublishedProjects(0, 5).then(
     (projects: Project[]) => projects.length > 0
-        ? (
-            <Gallery title='Design Stories'>
-                {
-                    projects.map((v, i) =>
-                        <Article
-                            key={ v.id }
-                            index={ i }
-                            project={ v }
-                        />
-                    )
-                }
-                <div className='text center font-semibold font-sans text-gold-950 text-lg'>
-                    <Link href='/projects'>All our projects &rarr;</Link>
-                </div>
-            </Gallery>
-        )
+        ? <Gallery title='Design Stories'>
+            {
+                projects.map((v, i) =>
+                    <Article
+                        key={ v.id }
+                        index={ i }
+                        project={ v }
+                    />
+                )
+            }
+            <div className='text center font-semibold font-sans text-gold-950 text-lg'>
+                <Link href='/projects'>All our projects &rarr;</Link>
+            </div>
+        </Gallery>
         : ([])
     ,
     () => ([])

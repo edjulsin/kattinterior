@@ -7,7 +7,7 @@ const Hero = () =>
         justify-center
         items-center
         gap-y-10
-        *:max-w-2xs
+        *:max-w-3xs
         sm:grid-cols-2
         sm:*:first:col-span-2
         sm:gap-x-15
@@ -21,7 +21,7 @@ const Hero = () =>
     '
         style={ {
             width: '100%',
-            height: 'calc(100dvh - 152px)'
+            minHeight: 'calc(100dvh - 152px)'
         } }
     >
         <div className='justify-self-center w-full h-auto relative overflow-clip flex flex-col justify-center items-center' style={ { aspectRatio: '300 / 464' } }>

@@ -4,7 +4,7 @@ A custom, easy-to-use blog **CMS** designed for kattinterior.
 
 Built with **Next.js**, **Supabase**, and **Tailwind**, it features drag-and-drop editing for simple content management, even for non-advanced users.
 
-![Project Preview](./assets/screenshot.png) <!-- replace with your screenshot -->
+![Project Preview](./assets/screenshot.png)
 
 ---
 
@@ -21,7 +21,7 @@ Built with **Next.js**, **Supabase**, and **Tailwind**, it features drag-and-dro
 
 ## 🚀 Demo
 
-[Live Demo](https://your-demo-link.com) <!-- replace with deployed URL -->
+[Live Demo](https://kattinterior.vercel.app) <!-- replace with deployed URL -->
 
 ---
 

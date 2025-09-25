@@ -1,11 +1,11 @@
 'use client'
 
 import { ExitIcon } from '@radix-ui/react-icons'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { AccessibleIcon } from '@radix-ui/react-accessible-icon'
+
 import { signOut } from '@/action/server'
 import { useRouter } from 'next/navigation'
 import clsx from 'clsx'
+import { AccessibleIcon, DropdownMenu } from 'radix-ui'
 
 const Logout = ({ className }: { className?: string }) => {
     const router = useRouter()
@@ -17,9 +17,9 @@ const Logout = ({ className }: { className?: string }) => {
     return (
         <DropdownMenu.Root>
             <DropdownMenu.Trigger className={ clsx(className, 'outline-1 rounded-lg flex justify-center items-center size-8 gap-x-1 outline-transparent hover:bg-neutral-200 data-[state=open]:bg-neutral-200 cursor-pointer') }>
-                <AccessibleIcon label='Menu'>
+                <AccessibleIcon.Root label='Menu'>
                     <ExitIcon />
-                </AccessibleIcon>
+                </AccessibleIcon.Root>
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
                 <DropdownMenu.Content

@@ -9,7 +9,7 @@ import { VisuallyHidden, Dialog } from 'radix-ui'
 
 const pages = [ 'projects', 'services', 'about', 'contact' ]
 
-const Menu = ({ className = '' }: { className?: string }) => {
+const Menu = () => {
     const [ state, setState ] = useState(false)
     const [ scrollable, setScrollable ] = useState(true)
 
@@ -18,12 +18,10 @@ const Menu = ({ className = '' }: { className?: string }) => {
         setScrollable(document.documentElement.scrollHeight > document.documentElement.clientHeight)
     }
 
-    const Icon = <Hamburger state={ state } />
-
     return (
         <Dialog.Root open={ state } onOpenChange={ onOpenChange }>
-            <Dialog.Trigger className='hamburger'>
-                { Icon }
+            <Dialog.Trigger asChild>
+                <Hamburger />
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Overlay
@@ -42,8 +40,8 @@ const Menu = ({ className = '' }: { className?: string }) => {
                                         <Logo />
                                     </Link>
                                 </Dialog.Close>
-                                <Dialog.Close className='hamburger' data-state={ state ? 'open' : 'closed' }>
-                                    { Icon }
+                                <Dialog.Close data-state={ state ? 'open' : 'closed' } asChild>
+                                    <Hamburger />
                                 </Dialog.Close>
                             </div>
                             <nav className='self-start'>

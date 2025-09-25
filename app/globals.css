@@ -456,51 +456,51 @@
 	.hamburger {
 		@apply bg-gold-100 rounded-full size-16;
 
+		& > *:first-child {
+			@apply stroke-1 stroke-black size-full;
+
+			& > * {
+				@apply origin-center;
+			}
+
+			& > *:first-child {
+				@apply -translate-y-[5px];
+			}
+
+			& > *:last-child {
+				@apply translate-y-[5px];
+			}
+		}
+
 		&[data-state='open'] {
 			@apply animate-[hamburger-open_500ms_both];
+
+			& > *:first-child {
+				& > *:first-child {
+					@apply animate-[hamburger-top-open_500ms_both];
+					@apply translate-y-0;
+				}
+
+				& > *:last-child {
+					@apply animate-[hamburger-bottom-open_500ms_both];
+					@apply translate-y-0;
+				}
+			}
 		}
 
 		&[data-state='closed'] {
 			@apply animate-[hamburger-close_500ms_both];
-		}
-	}
 
-	.hamburger-icon {
-		@apply stroke-1 stroke-black size-full;
+			& > *:first-child {
+				& > *:first-child {
+					@apply animate-[hamburger-top-close_500ms_both];
+					@apply -translate-y-[5px];
+				}
 
-		&>* {
-			@apply origin-center;
-		}
-
-		&>*:first-child {
-			@apply -translate-y-[5px];
-		}
-
-		&>*:last-child {
-			@apply translate-y-[5px];
-		}
-
-		&[data-state='open'] {
-			&>*:first-child {
-				@apply animate-[hamburger-top-open_500ms_both];
-				@apply translate-y-0;
-			}
-
-			&>*:last-child {
-				@apply animate-[hamburger-bottom-open_500ms_both];
-				@apply translate-y-0;
-			}
-		}
-
-		&[data-state='closed'] {
-			&>*:first-child {
-				@apply animate-[hamburger-top-close_500ms_both];
-				@apply -translate-y-[5px];
-			}
-
-			&>*:last-child {
-				@apply animate-[hamburger-bottom-close_500ms_both];
-				@apply translate-y-[5px];
+				& > *:last-child {
+					@apply animate-[hamburger-bottom-close_500ms_both];
+					@apply translate-y-[5px];
+				}
 			}
 		}
 	}

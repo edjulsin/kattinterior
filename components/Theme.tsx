@@ -1,8 +1,8 @@
 'use client'
 
 import { storageAvailable } from '@/utility/fn'
-import * as Switch from '@radix-ui/react-switch'
 import clsx from 'clsx'
+import { Switch } from 'radix-ui'
 import { useEffect, useState } from 'react'
 
 const storage = storageAvailable('localStorage')

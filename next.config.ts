@@ -6,8 +6,8 @@ const bucket = process.env.NEXT_PUBLIC_SUPABASE_BUCKET
 
 const CSP = `
 	default-src 'self';
-	script-src 'self' ${env ? "'unsafe-eval' 'unsafe-inline'" : ''};
-	style-src 'self' ${env ? "'unsafe-inline'" : ''};
+	script-src 'self' ${env ? "'unsafe-eval' 'unsafe-inline'" : "'unsafe-inline'"};
+	style-src 'self' 'unsafe-inline';
 	img-src 'self' blob: data: ${supabase};
 	connect-src 'self' ${supabase};
 	font-src 'self';

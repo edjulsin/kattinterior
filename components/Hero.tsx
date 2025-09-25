@@ -11,7 +11,7 @@ const Hero = () =>
         sm:grid-cols-2
         sm:*:first:col-span-2
         sm:gap-x-15
-        lg:grid-cols-3
+        lg:grid-cols-[1fr_.8fr_1fr]
         lg:*:first:col-span-1
         lg:*:first:cols-start-2
         lg:*:last:cols-start-3

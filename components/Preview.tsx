@@ -17,7 +17,7 @@ const Preview = ({ project }: { project: ProjectType }) => {
             broadcast.removeEventListener('message', callback)
             broadcast.close()
         }
-    }, [])
+    }, [ project.id ])
 
     return <Project { ...data } />
 }

@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Drag & Drop Blog CMS
 
-## Getting Started
+A custom, easy-to-use blog **CMS** designed for kattinterior. 
 
-First, run the development server:
+Built with **Next.js**, **Supabase**, and **Tailwind**, it features drag-and-drop editing for simple content management, even for non-advanced users.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+![Project Preview](./assets/screenshot.png) <!-- replace with your screenshot -->
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ✨ Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 🖼️ **Drag-and-drop editor** – Manage images and layouts with ease  
+- 📝 **Blog CMS** – Optimized for content with heavy image usage  
+- 🔑 **Authentication** – Secure login with Supabase  
+- 📱 **Responsive design** – Works across desktop, tablet and mobile  
+- ⚡ **Built with Next.js** – Fast, SEO-friendly, and scalable
+- 📧 **Contact management** - Automatic email and contact management
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🚀 Demo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[Live Demo](https://your-demo-link.com) <!-- replace with deployed URL -->
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🛠️ Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js](https://nextjs.org/)
+- [Supabase](https://supabase.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Resend](https://resend.com/)

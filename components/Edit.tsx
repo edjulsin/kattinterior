@@ -1193,9 +1193,8 @@ const Edit = ({ project }: { project: Project }) => {
 				description: 'In order to publish, project require at least one image on each viewport.'
 			})
 		} else {
-			const entries: [ string, any ][] = Object.entries(
-				changes(previous, { ...current, published: true })
-			)
+			const changed: Partial<Project> = changes(previous, { ...current, published: true })
+			const entries: [ string, Project[ keyof Project ] ][] = Object.entries(changed)
 
 			const change = entries.reduce(
 				(a, [ k, v ]) => ({

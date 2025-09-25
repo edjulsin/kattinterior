@@ -1,5 +1,5 @@
 import { Items, Project as ProjectType, Item, Photo } from '@/type/editor';
-import { ab, alt, extent, getLayout, groupByRow, ys } from '@/utility/fn';
+import { ab, extent, getLayout, ys } from '@/utility/fn';
 import Image from 'next/image';
 import React from 'react';
 import Style from './Style';

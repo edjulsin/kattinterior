@@ -2,11 +2,10 @@
 
 import clsx from 'clsx'
 import Link from 'next/link'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Close, Content, Description, Portal, Root, Title, Trigger, Overlay } from '@radix-ui/react-dialog'
 import Logo from './Logo'
 import { useState } from 'react'
 import Hamburger from './Hamburger'
+import { VisuallyHidden, Dialog } from 'radix-ui'
 
 const pages = [ 'projects', 'services', 'about', 'contact' ]
 
@@ -20,37 +19,37 @@ const Menu = ({ className = '' }: { className?: string }) => {
     }
 
     return (
-        <Root open={ state } onOpenChange={ onOpenChange }>
-            <Trigger asChild>
+        <Dialog.Root open={ state } onOpenChange={ onOpenChange }>
+            <Dialog.Trigger asChild>
                 <Hamburger className={ className } state={ state } />
-            </Trigger>
-            <Portal>
-                <Overlay
+            </Dialog.Trigger>
+            <Dialog.Portal>
+                <Dialog.Overlay
                     asChild
                     className={ clsx('fixed inset-0 z-50 group bg-dark data-[state=open]:fade-in data-[state=closed]:fade-out data-[state=closed]:anim-delay-[500ms]', { 'overflow-y-scroll': scrollable }) }
                 >
-                    <Content>
+                    <Dialog.Content>
                         <div className='grid size-full grid-rows-[auto_1fr_auto] text-white place-items-center max-w-7xl mx-auto gap-y-[5dvh]'>
-                            <VisuallyHidden>
-                                <Title>Navigation menu</Title>
-                                <Description>Navigate all the pages in Katt Interior Design Website</Description>
-                            </VisuallyHidden>
+                            <VisuallyHidden.Root>
+                                <Dialog.Title>Navigation menu</Dialog.Title>
+                                <Dialog.Description>Navigate all the pages in Katt Interior Design Website</Dialog.Description>
+                            </VisuallyHidden.Root>
                             <div className='h-28 grid grid-cols-3 place-items-center size-full'>
-                                <Close asChild>
+                                <Dialog.Close asChild>
                                     <Link className='col-start-2 h-9' href='/'>
                                         <Logo />
                                     </Link>
-                                </Close>
-                                <Close asChild>
+                                </Dialog.Close>
+                                <Dialog.Close asChild>
                                     <Hamburger state={ state } />
-                                </Close>
+                                </Dialog.Close>
                             </div>
                             <nav className='self-start'>
                                 <ul className='grid justify-center auto-rows-fr grid-cols-[.25fr_1fr] font-serif gap-y-5 lg:gap-y-8 hover:*:hover:opacity-100 hover:*:not-hover:opacity-50'>
                                     {
                                         pages.map((page, i) =>
                                             <li key={ page } className={ clsx('col-span-2 transition-opacity duration-350 ease-in-out overflow-clip', { 'col-start-2': i % 2 === 1 }) } >
-                                                <Close asChild>
+                                                <Dialog.Close asChild>
                                                     <Link className='capitalize flex items-center gap-x-5' href={ `/${page}` }>
                                                         <span className='text-xs'>{ '0' + (i + 1) }</span>
                                                         <span
@@ -68,7 +67,7 @@ const Menu = ({ className = '' }: { className?: string }) => {
                                                             { page }
                                                         </span>
                                                     </Link>
-                                                </Close>
+                                                </Dialog.Close>
                                             </li>
                                         )
                                     }
@@ -76,10 +75,10 @@ const Menu = ({ className = '' }: { className?: string }) => {
                             </nav>
                             <Link target='_blank' className='font-sans text-md font-medium p-5' href={ process.env.NEXT_PUBLIC_INSTAGRAM_URL as string }>INSTAGRAM</Link>
                         </div>
-                    </Content>
-                </Overlay>
-            </Portal>
-        </Root>
+                    </Dialog.Content>
+                </Dialog.Overlay>
+            </Dialog.Portal>
+        </Dialog.Root>
     )
 }
 

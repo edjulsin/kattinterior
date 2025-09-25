@@ -1,5 +1,5 @@
-import { AccessibleIcon } from '@radix-ui/react-accessible-icon'
 import clsx from 'clsx'
+import { AccessibleIcon } from 'radix-ui'
 import { useEffect, useState } from 'react'
 
 const Hamburger = ({ state, className, ...props }: { state: boolean, className?: string }) => {
@@ -13,7 +13,7 @@ const Hamburger = ({ state, className, ...props }: { state: boolean, className?:
 
     return (
         <button className={ clsx(className, 'hamburger', { [ hamburger ]: animate }) } { ...props }>
-            <AccessibleIcon label={ state ? 'open' : 'close' }>
+            <AccessibleIcon.Root label={ state ? 'open' : 'close' }>
                 <svg
                     viewBox='0 0 100 100'
                     className={ clsx('hamburger-icon', { [ icon ]: animate }) }
@@ -32,7 +32,7 @@ const Hamburger = ({ state, className, ...props }: { state: boolean, className?:
                         y2={ '50%' }
                     />
                 </svg>
-            </AccessibleIcon>
+            </AccessibleIcon.Root>
         </button >
     )
 }

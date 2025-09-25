@@ -1,3 +1,5 @@
+'use client'
+
 import clsx from 'clsx'
 import { AccessibleIcon } from 'radix-ui'
 import { useEffect, useState } from 'react'

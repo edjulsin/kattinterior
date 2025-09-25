@@ -18,12 +18,12 @@ const Menu = ({ className = '' }: { className?: string }) => {
         setScrollable(document.documentElement.scrollHeight > document.documentElement.clientHeight)
     }
 
-    const Button = <Hamburger className={ className } state={ state } />
+    const Icon = <Hamburger state={ state } />
 
     return (
         <Dialog.Root open={ state } onOpenChange={ onOpenChange }>
-            <Dialog.Trigger asChild>
-                { Button }
+            <Dialog.Trigger className='hamburger'>
+                { Icon }
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Overlay
@@ -42,8 +42,8 @@ const Menu = ({ className = '' }: { className?: string }) => {
                                         <Logo />
                                     </Link>
                                 </Dialog.Close>
-                                <Dialog.Close asChild>
-                                    { Button }
+                                <Dialog.Close className='hamburger' data-state={ state ? 'open' : 'closed' }>
+                                    { Icon }
                                 </Dialog.Close>
                             </div>
                             <nav className='self-start'>

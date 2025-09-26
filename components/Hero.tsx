@@ -5,9 +5,10 @@ const Hero = () =>
     <section className='
         grid
         justify-center
+        w-full
         items-center
         gap-y-10
-        *:max-w-3xs
+        *:max-w-2xs
         sm:grid-cols-2
         sm:*:first:col-span-2
         sm:gap-x-15
@@ -19,10 +20,7 @@ const Hero = () =>
         lg:*:row-start-1
         lg:*:max-w-sm
     '
-        style={ {
-            width: '100%',
-            minHeight: 'calc(100dvh - 152px)'
-        } }
+        style={ { minHeight: 'calc(100dvh - 152px)' } }
     >
         <div className='justify-self-center w-full h-auto relative overflow-clip flex flex-col justify-center items-center' style={ { aspectRatio: '300 / 464' } }>
             <video

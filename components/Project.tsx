@@ -4,6 +4,8 @@ import Image from 'next/image';
 import React from 'react';
 import Style from './Style';
 
+const domain = process.env.NEXT_PUBLIC_DOMAIN
+
 const Project = ({ name, location, story, tagline, assets, template }: ProjectType) => {
     const atBreakpoint = (breakpoint: number, style: string): string => {
         if(style) {
@@ -192,7 +194,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
 
     const lcp = largest ?? ({ id: '' })
 
-    const formatAlt = (v: string) => `${v} Designed By ${process.env.NEXT_PUBLIC_DOMAIN}`
+    const formatAlt = (v: string) => `${v} Designed By ${domain}`
 
     return (
         <article className='flex flex-col items-center justify-center gap-y-20 py-20 w-full'>

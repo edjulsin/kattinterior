@@ -1,5 +1,8 @@
 import type { MetadataRoute } from 'next'
 
+const development = process.env.NODE_ENV === 'development'
+const URL = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
+
 export default function robots(): MetadataRoute.Robots {
     return {
         rules: {
@@ -7,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: [ '/dashboard', '/auth', '/preview', '/login', '/maintenance' ],
         },
-        sitemap: `${process.env.NEXT_PUBLIC_SITE_URL}/sitemap.xml`
+        sitemap: `${URL}/sitemap.xml`
     }
 }

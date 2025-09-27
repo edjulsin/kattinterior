@@ -1,8 +1,12 @@
 import { Project } from '@/type/editor'
+import { capitalize } from '@/utility/fn'
+
+const url = process.env.NEXT_PUBLIC_SITE_URL
+const name = process.env.NEXT_PUBLIC_SITE_NAME
+const instagram = process.env.NEXT_PUBLIC_INSTAGRAM_URL
+const banner = process.env.NEXT_PUBLIC_BANNER_URL
 
 export default (project: Project) => {
-    const URL = process.env.NEXT_PUBLIC_SITE_URL
-    const name = process.env.NEXT_PUBLIC_SITE_NAME
     const thumbnail = project.assets.find(v => v.thumbnail) ?? project.assets[ 0 ]
     const image = thumbnail
         ? ({
@@ -18,37 +22,37 @@ export default (project: Project) => {
     return {
         "@context": "https://schema.org",
         "@type": "CreativeWork",
-        "name": `${project.title} | By ${process.env.NEXT_PUBLIC_SITE_NAME}`,
-        "url": `${URL}/projects/${project.slug}`,
+        "name": `${project.title} | By ${name}`,
+        "url": `${url}/projects/${project.slug}`,
         "description": project.description,
         ...image,
         "datePublished": project.published_at,
         "dateModified": project.updated_at,
         "locationCreated": {
             "@type": "Place",
-            "name": `${project.location}`
+            "name": project.location
         },
-        "genre": `${project.category} Interior Design`,
+        "genre": `${capitalize(project.category)} Interior Design`,
         "keywords": project.assets.map(v => v.alt.toLowerCase()).filter(v => v),
         "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": `${URL}/projects/${project.slug}`
+            "@id": `${url}/projects/${project.slug}`
         },
         "author": {
             "@type": "Organization",
             "name": name,
-            "url": `${URL}/about`
+            "url": `${url}/about`
         },
         "publisher": {
             "@type": "Organization",
             "name": name,
             "logo": {
                 "@type": "ImageObject",
-                "url": `${URL}/banner.png`,
+                "url": banner,
                 "width": 1200,
                 "height": 630
             },
-            "sameAs": process.env.NEXT_PUBLIC_INSTAGRAM_URL
+            "sameAs": instagram
         }
     }
 }

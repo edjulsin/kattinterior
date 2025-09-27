@@ -20,6 +20,9 @@ import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternat
 
 const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
 
+const domain = process.env.NEXT_PUBLIC_DOMAIN
+const siteName = process.env.NEXT_PUBLIC_SITE_NAME
+
 const urlToPhoto = (url: string): Promise<Photo> => new Promise((resolve, reject) => {
 	const image = new Image()
 	image.onload = () => {
@@ -331,7 +334,7 @@ const RightMain = ({
 				placeholder='Slug'
 				type='url'
 			/>
-			<small className='text-base font-medium text-neutral-500'>{ `${process.env.NEXT_PUBLIC_DOMAIN}/projects/${slug}` }</small>
+			<small className='text-base font-medium text-neutral-500'>{ `${domain}/projects/${slug}` }</small>
 		</div>
 		<div>
 			<label htmlFor='title' className='text-base font-medium sr-only'>Title</label>
@@ -676,7 +679,7 @@ const Left = ({ onDelete, asset, onDrag, onDrop }: {
 					className='object-cover object-center w-full h-40 select-none'
 					width={ item.width }
 					height={ item.height }
-					alt={ `${item.alt} Designed By ${process.env.NEXT_PUBLIC_SITE_NAME}` }
+					alt={ `${item.alt} Designed By ${siteName}` }
 					src={ item.src }
 				/>
 			</li>

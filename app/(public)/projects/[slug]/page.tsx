@@ -11,6 +11,9 @@ import Intersector from '@/components/Intersector'
 import Next from '@/components/Next'
 import Parallax from '@/components/Parallax'
 
+const url = process.env.NEXT_PUBLIC_SITE_URL
+const name = process.env.NEXT_PUBLIC_SITE_NAME
+
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) =>
     params.then(
         v => {
@@ -19,9 +22,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
                 return getPublishedProject(slug).then(
                     v => {
                         const result = v.map((v: ProjectType): Metadata => {
-                            const url = process.env.NEXT_PUBLIC_SITE_URL
                             const path = `/projects/${v.slug}`
-                            const name = process.env.NEXT_PUBLIC_SITE_NAME
                             return {
                                 title: v.title,
                                 description: v.description,

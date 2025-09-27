@@ -9,6 +9,8 @@ import { VisuallyHidden, Dialog } from 'radix-ui'
 
 const pages = [ 'projects', 'services', 'about', 'contact' ]
 
+const instagram = process.env.NEXT_PUBLIC_INSTAGRAM_URL as string
+
 const Menu = () => {
     const [ state, setState ] = useState(false)
     const [ scrollable, setScrollable ] = useState(true)
@@ -73,7 +75,7 @@ const Menu = () => {
                                     }
                                 </ul>
                             </nav>
-                            <Link target='_blank' className='font-sans text-md font-medium p-5' href={ process.env.NEXT_PUBLIC_INSTAGRAM_URL as string }>INSTAGRAM</Link>
+                            <Link target='_blank' className='font-sans text-md font-medium p-5' href={ instagram }>INSTAGRAM</Link>
                         </div>
                     </Dialog.Content>
                 </Dialog.Overlay>

@@ -13,6 +13,8 @@ import { v7 as UUIDv7 } from 'uuid'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
 import Fallback from '@/assets/fallback.svg'
 
+const siteName = process.env.NEXT_PUBLIC_SITE_NAME
+
 type Box = { x: number, y: number, w: number, h: number }
 
 type Result = {
@@ -532,7 +534,7 @@ const Editable = ({
                                         src={ image.src }
                                         width={ image.width }
                                         height={ image.height }
-                                        alt={ `${alternative(image.alt)} Designed By ${process.env.NEXT_PUBLIC_SITE_NAME}` }
+                                        alt={ `${alternative(image.alt)} Designed By ${siteName}` }
                                         onError={ () => setError(true) }
                                         style={ {
                                             transformOrigin: 'top left',

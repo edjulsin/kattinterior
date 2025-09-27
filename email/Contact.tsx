@@ -24,7 +24,7 @@ const Contact = ({ name, email, message }: { name: string, email: string, messag
                 <Container className="mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid p-[20px]">
                     <Section className="mt-[32px]">
                         <Img
-                            src={ process.env.BANNER_URL }
+                            src={ process.env.NEXT_PUBLIC_BANNER_URL }
                             width="1200"
                             height="630"
                             alt="Katt"

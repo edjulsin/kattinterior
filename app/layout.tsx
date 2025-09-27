@@ -27,9 +27,10 @@ const sans = localFont({
 })
 
 const name = process.env.NEXT_PUBLIC_SITE_NAME
+const url = process.env.NEXT_PUBLIC_SITE_URL
 
 export const metadata: Metadata = {
-	metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL as string),
+	metadataBase: new URL(url as string),
 	referrer: 'origin-when-cross-origin',
 	title: {
 		default: `${name} | Interior Designer`,

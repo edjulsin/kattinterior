@@ -6,9 +6,11 @@ import Schema from '@/components/Schema'
 import pageSchema from '@/schemas/pageSchema'
 import { Metadata } from 'next'
 
+const name = process.env.NEXT_PUBLIC_SITE_NAME
+
 export const metadata: Metadata = {
     title: 'Contacts',
-    description: `View and search contact messages for ${process.env.NEXT_PUBLIC_SITE_NAME}`,
+    description: `View and search contact messages for ${name}`,
     alternates: {
         canonical: '/dashboard/contacts'
     }

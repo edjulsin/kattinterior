@@ -4,7 +4,8 @@ import Image from 'next/image';
 import React from 'react';
 import Style from './Style';
 
-const domain = process.env.NEXT_PUBLIC_DOMAIN
+const development = process.env.NODE_ENV === 'development'
+const domain = development ? 'localhost:3000' : process.env.NEXT_PUBLIC_DOMAIN
 
 const Project = ({ name, location, story, tagline, assets, template }: ProjectType) => {
     const atBreakpoint = (breakpoint: number, style: string): string => {

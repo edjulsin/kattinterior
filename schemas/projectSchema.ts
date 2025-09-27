@@ -1,10 +1,11 @@
 import { Project } from '@/type/editor'
 import { capitalize } from '@/utility/fn'
 
-const url = process.env.NEXT_PUBLIC_SITE_URL
+const development = process.env.NODE_ENV === 'development'
+const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
 const name = process.env.NEXT_PUBLIC_SITE_NAME
 const instagram = process.env.NEXT_PUBLIC_INSTAGRAM_URL
-const banner = process.env.NEXT_PUBLIC_BANNER_URL
+const banner = `${url}/banner.png`
 
 export default (project: Project) => {
     const thumbnail = project.assets.find(v => v.thumbnail) ?? project.assets[ 0 ]

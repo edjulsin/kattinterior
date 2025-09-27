@@ -9,9 +9,11 @@ import Schema from "@/components/Schema";
 import Intersector from '@/components/Intersector';
 import Parallax from '@/components/Parallax';
 
+const name = process.env.NEXT_PUBLIC_SITE_NAME
+
 export const metadata: Metadata = {
 	title: 'Interior Designer',
-	description: `Discover professional interior design solutions in Bali with ${process.env.NEXT_PUBLIC_SITE_NAME}. Residential, commercial, and custom projects.`,
+	description: `Discover professional interior design solutions in Bali with ${name}. Residential, commercial, and custom projects.`,
 	alternates: {
 		canonical: '/'
 	}

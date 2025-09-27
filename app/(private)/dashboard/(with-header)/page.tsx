@@ -3,9 +3,11 @@ import { Metadata } from 'next'
 import Dashboard from '@/components/Dashboard'
 import Schema from '@/components/Schema'
 
+const name = process.env.NEXT_PUBLIC_SITE_NAME
+
 export const metadata: Metadata = {
 	title: 'Dashboard',
-	description: `Manage all ${process.env.NEXT_PUBLIC_SITE_NAME} contents and contacts from the dashboard.`,
+	description: `Manage all ${name} contents and contacts from the dashboard.`,
 	alternates: {
 		canonical: '/dashboard'
 	}

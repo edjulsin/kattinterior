@@ -7,6 +7,8 @@ import Schema from '@/components/Schema';
 import Intersector from '@/components/Intersector';
 import Parallax from '@/components/Parallax';
 
+const name = process.env.NEXT_PUBLIC_SITE_NAME as string
+
 export const metadata = {
     title: 'About us',
     description: 'Learn about Katt Interior Studio — a Bali-based interior design studio specializing in residential and commercial spaces. Discover our story, design philosophy, and commitment to timeless, functional interiors.',
@@ -71,7 +73,7 @@ const AboutPage = () =>
                 </div>
             </div>
         </section>
-        <Bottom copy={ `Discover the art of living with ${process.env.NEXT_PUBLIC_SITE_NAME as string}` } />
+        <Bottom copy={ `Discover the art of living with ${name}` } />
     </Schema>
 
 export default AboutPage

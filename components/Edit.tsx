@@ -20,7 +20,8 @@ import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternat
 
 const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
 
-const domain = process.env.NEXT_PUBLIC_DOMAIN
+const development = process.env.NODE_ENV === 'development'
+const domain = development ? 'localhost:3000' : process.env.NEXT_PUBLIC_DOMAIN
 const siteName = process.env.NEXT_PUBLIC_SITE_NAME
 
 const urlToPhoto = (url: string): Promise<Photo> => new Promise((resolve, reject) => {

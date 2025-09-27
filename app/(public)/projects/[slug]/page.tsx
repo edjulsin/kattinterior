@@ -11,7 +11,8 @@ import Intersector from '@/components/Intersector'
 import Next from '@/components/Next'
 import Parallax from '@/components/Parallax'
 
-const url = process.env.NEXT_PUBLIC_SITE_URL
+const development = process.env.NODE_ENV === 'development'
+const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
 const name = process.env.NEXT_PUBLIC_SITE_NAME
 
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) =>

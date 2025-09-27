@@ -15,6 +15,10 @@ import {
     Column
 } from '@react-email/components';
 
+const development = process.env.NODE_ENV === 'development'
+const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
+const banner = `${url}/banner.png`
+
 const Contact = ({ name, email, message }: { name: string, email: string, message: string }) =>
     <Html>
         <Head />
@@ -24,7 +28,7 @@ const Contact = ({ name, email, message }: { name: string, email: string, messag
                 <Container className="mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid p-[20px]">
                     <Section className="mt-[32px]">
                         <Img
-                            src={ process.env.NEXT_PUBLIC_BANNER_URL }
+                            src={ banner }
                             width="1200"
                             height="630"
                             alt="Katt"

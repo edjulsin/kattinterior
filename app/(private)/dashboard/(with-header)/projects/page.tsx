@@ -6,9 +6,11 @@ import Schema from '@/components/Schema';
 import pageSchema from '@/schemas/pageSchema'
 import { Metadata } from 'next'
 
+const name = process.env.NEXT_PUBLIC_SITE_NAME
+
 export const metadata: Metadata = {
     title: 'Projects',
-    description: `Manage and update all ${process.env.NEXT_PUBLIC_SITE_NAME} projects from the dashboard.`,
+    description: `Manage and update all ${name} projects from the dashboard.`,
     alternates: {
         canonical: '/dashboard/contacts'
     }

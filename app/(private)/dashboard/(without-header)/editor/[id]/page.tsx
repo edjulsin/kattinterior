@@ -4,9 +4,11 @@ import { notFound } from 'next/navigation'
 
 import { Metadata } from 'next'
 
+const name = process.env.NEXT_PUBLIC_SITE_NAME
+
 export const metadata: Metadata = {
     title: 'Editor',
-    description: `Edit ${process.env.NEXT_PUBLIC_SITE_NAME} projects from the dashboard.`,
+    description: `Edit ${name} projects from the dashboard.`,
 }
 
 const EditorPage = async ({ params }: { params: Promise<{ id: string }> }) =>

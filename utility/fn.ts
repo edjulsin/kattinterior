@@ -344,12 +344,6 @@ export function storageAvailable(type: 'sessionStorage' | 'localStorage') {
     }
 }
 
-export function isValidEmail(v: string) {
-    if(!v) return false;
-    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    return re.test(v)
-}
-
 export const formatISODate = (now: Date, time: string) => {
     const date = new Date(time)
     const years = timeYear.count(date, now)

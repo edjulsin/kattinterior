@@ -4,11 +4,11 @@ import Logo from './Logo'
 import { signIn } from '@/action/server'
 import { useActionState } from 'react'
 import { CheckCircledIcon, CrossCircledIcon } from '@radix-ui/react-icons'
-import { isValidEmail } from '@/utility/fn'
+import { isEmail } from 'validator'
 
 const login = (state: { message: string, success: boolean }, form: FormData) => {
     const email = (form.get('email') + '').trim()
-    if(isValidEmail(email)) {
+    if(isEmail(email)) {
         return signIn(email).then(
             () => ({ message: 'Check your inbox', success: true }),
             () => ({ message: 'Something is wrong', success: false })

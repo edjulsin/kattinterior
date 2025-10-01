@@ -1,7 +1,6 @@
 'use server'
 
 import Contact from '@/email/Contact'
-import { isValidEmail } from '@/utility/fn'
 import { render } from '@react-email/render'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
@@ -50,7 +49,7 @@ const smtp = () => new Resend(process.env.RESEND_API_KEY!)
 
 export const signIn = async (email: string) => {
     const address = (email + '').trim()
-    if(isValidEmail(address)) {
+    if(isEmail(address)) {
         return client().then(
             client => client.auth.signInWithOtp({
                 email: address,

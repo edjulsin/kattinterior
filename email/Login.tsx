@@ -20,8 +20,8 @@ const Login = ({ confirm, logo }: { confirm: string, logo: string }) =>
         <Preview>Login to Katt</Preview>
         <Tailwind>
             <Body className="mx-auto my-auto bg-white px-2 font-sans">
-                <Container className="mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid p-[20px]">
-                    <Section className="mt-[32px]">
+                <Container className="mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid p-[30px]">
+                    <Section>
                         <Img
                             src={ logo }
                             width="1200"
@@ -30,7 +30,6 @@ const Login = ({ confirm, logo }: { confirm: string, logo: string }) =>
                             className="mx-auto my-0 w-[200px] h-auto"
                         />
                     </Section>
-                    <br />
                     <Heading className="mx-0 my-[30px] p-0 text-center font-normal text-[24px] text-black">
                         Login to <strong>Katt</strong>
                     </Heading>

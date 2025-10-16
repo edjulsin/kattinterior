@@ -25,8 +25,8 @@ const Contact = ({ name, email, message }: { name: string, email: string, messag
         <Preview>Contact from Katt</Preview>
         <Tailwind>
             <Body className="mx-auto my-auto bg-white px-2 font-sans">
-                <Container className="mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid p-[20px]">
-                    <Section className="mt-[32px]">
+                <Container className="mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid p-[30px]">
+                    <Section>
                         <Img
                             src={ banner }
                             width="1200"
@@ -35,8 +35,7 @@ const Contact = ({ name, email, message }: { name: string, email: string, messag
                             className="mx-auto my-0 w-[200px] h-auto"
                         />
                     </Section>
-                    <br />
-                    <Heading className="mx-0 my-[30px] p-0 text-center font-normal text-[24px] text-neutral-800">
+                    <Heading className="mx-0 my-[30px] p-0 text-center font-normal text-[22px] text-neutral-800">
                         Contact from <strong>Katt</strong>
                     </Heading>
                     <Text className="text-[14px] text-neutral-500 leading-[24px]">
@@ -62,7 +61,6 @@ const Contact = ({ name, email, message }: { name: string, email: string, messag
                             </Column>
                         </Row>
                     </Section>
-                    <br />
                     <br />
                     <Hr className="mx-0 my-[5px] w-full border border-[#eaeaea] border-solid" />
                     <Text className="text-neutral-400 text-[12px] leading-[24px]">

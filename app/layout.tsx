@@ -41,6 +41,7 @@ export const metadata: Metadata = {
 }
 
 // apply challenge to protect login and contact
+// register to search engine after domain purchased
 const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) =>
 	<html lang='en'>
 		<body

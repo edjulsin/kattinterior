@@ -40,11 +40,6 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
                                     modifiedTime: v.updated_at,
                                     tags: v.category,
                                     authors: [ `${url}/about` ]
-                                },
-                                twitter: {
-                                    card: 'summary_large_image',
-                                    title: v.title,
-                                    description: v.description
                                 }
                             }
                         })

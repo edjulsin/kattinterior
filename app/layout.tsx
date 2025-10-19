@@ -32,7 +32,7 @@ const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE
 
 export const metadata: Metadata = {
 	metadataBase: new URL(url as string),
-	referrer: 'origin-when-cross-origin',
+	referrer: 'strict-origin-when-cross-origin',
 	title: {
 		default: `${name} | Interior Designer`,
 		template: `%s | ${name}`
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
 const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) =>
 	<html lang='en'>
 		<body
-			className={ `${serif.variable} ${sans.variable} antialiased flex flex-col justify-center items-center bg-light dark:bg-dark dark:text-white transition-colors duration-300 ease-in-out` }>
-			{ children }
+			className={`${serif.variable} ${sans.variable} antialiased flex flex-col justify-center items-center bg-light dark:bg-dark dark:text-white transition-colors duration-300 ease-in-out`}>
+			{children}
 		</body>
 	</html>
 

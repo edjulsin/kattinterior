@@ -47,7 +47,7 @@ export const isAuthorized = async () => client().then(client =>
 
 const smtp = () => new Resend(process.env.RESEND_API_KEY!)
 
-export const signIn = async (email: string) => {
+export const signIn = async (email: string) => { // use redirect based on development or server
     const address = (email + '').trim()
     if(isEmail(address)) {
         return client().then(
@@ -84,11 +84,11 @@ export const sendEmail = async (form: FormData) => {
         message: values.message.length > 10 && values.message.length < 1000
             ? ''
             : 'Message must contain 10 to 1000 characters'
-    }).filter(([ _, v ]) => v)
+    }).filter(([_, v]) => v)
 
     if(errors.length > 0) {
         return Promise.reject(
-            errors.reduce((a, [ k, v ]) => ({ ...a, [ k ]: v }), {})
+            errors.reduce((a, [k, v]) => ({ ...a, [k]: v }), {})
         )
     } else {
         const form = {
@@ -108,7 +108,7 @@ export const sendEmail = async (form: FormData) => {
             render(content),
             render(content, { plainText: true })
         ])
-        return contents.then(([ html, text ]) =>
+        return contents.then(([html, text]) =>
             smtp().emails.send({
                 from: `${form.name} <${process.env.EMAIL_SENDER!}>`, // change this after acquiring domain
                 to: process.env.EMAIL_RECEIVER!,
@@ -242,9 +242,10 @@ export const getAllPublishedProjects = async () =>
 
 export const verifyEmailToken = async (token: string): Promise<void> =>
     client().then(client =>
-        client.auth.verifyOtp({ type: 'email', token_hash: token + '' }).then(v =>
-            v.error === null && v.data.user ? Promise.resolve() : Promise.reject()
-        )
+        client.auth.verifyOtp({ type: 'email', token_hash: token + '' }).then(v => {
+            console.log({ response: v })
+            return v.error === null && v.data.user ? Promise.resolve() : Promise.reject()
+        })
     )
 
 export const getAllContacts = async (start: number, end: number) =>

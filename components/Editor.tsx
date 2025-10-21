@@ -12,6 +12,7 @@ import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent } from '@/hook/us
 import { v7 as UUIDv7 } from 'uuid'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
 import Fallback from '@/assets/fallback.svg'
+import Image from 'next/image'
 
 const siteName = process.env.NEXT_PUBLIC_SITE_NAME
 
@@ -81,7 +82,7 @@ const eventTransformer = <T extends HTMLElement>(e: UseDragEvent<T>): Result => 
 
 const Handle = ({ className, ...rest }: DragPropsType<HTMLSpanElement> & { className: string }) => {
     const ref = useDrag<HTMLSpanElement>({ ...rest })
-    return <span ref={ ref } className={ className }></span>
+    return <span ref={ref} className={className}></span>
 }
 
 const effects = [
@@ -122,8 +123,8 @@ type EditableProps = {
 }
 
 const Editable = ({
-    sizeExtent: [ [ wMin, wMax ], [ hMin, hMax ] ],
-    translateExtent: [ [ xMin, xMax ], [ yMin, yMax ] ],
+    sizeExtent: [[wMin, wMax], [hMin, hMax]],
+    translateExtent: [[xMin, xMax], [yMin, yMax]],
     onCenter,
     onDuplicate,
     onEffect,
@@ -147,10 +148,10 @@ const Editable = ({
     setAsThumbnail,
     setImageAlt
 }: EditableProps) => {
-    const [ alt, setAlt ] = useState('')
-    const [ cropMode, setCropMode ] = useState(false)
-    const [ dialog, setDialog ] = useState(false)
-    const [ error, setError ] = useState(false)
+    const [alt, setAlt] = useState('')
+    const [cropMode, setCropMode] = useState(false)
+    const [dialog, setDialog] = useState(false)
+    const [error, setError] = useState(false)
 
     const modifier = <T extends HTMLElement>(drag: UseDragBehavior<T>) =>
         drag
@@ -204,7 +205,7 @@ const Editable = ({
         onDragEnd: o(onCropEnd, onImage)
     })
 
-    useEffect(() => () => setCropMode(false), [ active ])
+    useEffect(() => () => setCropMode(false), [active])
 
     const resizers = [
         {
@@ -495,48 +496,48 @@ const Editable = ({
 
     return (
         <div
-            ref={ itemRef }
+            ref={itemRef}
             className='absolute bg-neutral-200'
-            onContextMenu={ () => onContextMenu(value) }
-            data-id={ value.id }
-            data-z={ value.z }
-            data-src={ value.src }
-            data-active={ active }
-            data-effect={ value.effect }
-            style={ {
+            onContextMenu={() => onContextMenu(value)}
+            data-id={value.id}
+            data-z={value.z}
+            data-src={value.src}
+            data-active={active}
+            data-effect={value.effect}
+            style={{
                 transform: `translate(${value.x}px, ${value.y}px)`,
                 width: value.w + 'px',
                 height: value.h + 'px',
                 zIndex: value.z + (active ? 10 : 0),
                 pointerEvents: cropMode ? 'none' : 'auto'
-            } }
+            }}
         >
             <ContextMenu.Root>
-                <ContextMenu.Trigger disabled={ cropMode } asChild>
+                <ContextMenu.Trigger disabled={cropMode} asChild>
                     <div className='relative size-full'>
                         <div
                             className='absolute size-full'
-                            style={ { overflow: cropMode ? 'visible' : 'clip' } }
+                            style={{ overflow: cropMode ? 'visible' : 'clip' }}
                         >
                             {
                                 error
                                     ? <img
-                                        ref={ imageRef }
+                                        ref={imageRef}
                                         className='size-full object-cover object-center bg-neutral-200'
-                                        width={ 1000 }
-                                        height={ 1000 }
+                                        width={1000}
+                                        height={1000}
                                         alt='Image not found. Please delete and reupload.'
-                                        src={ Fallback.src }
+                                        src={Fallback.src}
                                     />
-                                    : <img
-                                        ref={ imageRef }
+                                    : <Image
+                                        ref={imageRef}
                                         className='relative max-w-none max-h-none select-none'
-                                        src={ image.src }
-                                        width={ image.width }
-                                        height={ image.height }
-                                        alt={ `${alternative(image.alt)} Designed By ${siteName}` }
-                                        onError={ () => setError(true) }
-                                        style={ {
+                                        src={image.src}
+                                        width={image.width}
+                                        height={image.height}
+                                        alt={`${alternative(image.alt)} Designed By ${siteName}`}
+                                        onError={() => setError(true)}
+                                        style={{
                                             transformOrigin: 'top left',
                                             transform: `scale(${imgScale}) translate(${-sx}px, ${-sy}px)`,
                                             mask: `
@@ -544,27 +545,27 @@ const Editable = ({
                                                 linear-gradient(rgba(0,0,0,0.5) 0 0) no-repeat
                                             `,
                                             pointerEvents: cropMode ? 'auto' : 'none'
-                                        } }
+                                        }}
                                     />
                             }
                         </div>
                         <div className={
                             clsx(
                                 'absolute size-full',
-                                { [ actives[ Number(cropMode) ] ]: active },
-                                { [ hovers[ Number(cropMode) ] ]: interactive }
+                                { [actives[Number(cropMode)]]: active },
+                                { [hovers[Number(cropMode)]]: interactive }
                             )
                         }>
                             {
                                 (cropMode ? croppers : resizers).map(({ style, callback }, i) =>
                                     <Handle
-                                        key={ i + (cropMode ? 'cropper' : 'resizer') }
-                                        className={ clsx('absolute invisible', { 'visible pointer-events-auto': active && interactive }, style) }
-                                        modifier={ modifier }
-                                        onDragStart={ compose(cropMode ? onCropStart : onResizeStart, callback) }
-                                        onDrag={ compose(cropMode ? onCrop : onResize, callback) }
-                                        onDragEnd={ compose(cropMode ? onCropEnd : onResizeEnd, callback) }
-                                        transform={ eventTransformer }
+                                        key={i + (cropMode ? 'cropper' : 'resizer')}
+                                        className={clsx('absolute invisible', { 'visible pointer-events-auto': active && interactive }, style)}
+                                        modifier={modifier}
+                                        onDragStart={compose(cropMode ? onCropStart : onResizeStart, callback)}
+                                        onDrag={compose(cropMode ? onCrop : onResize, callback)}
+                                        onDragEnd={compose(cropMode ? onCropEnd : onResizeEnd, callback)}
+                                        transform={eventTransformer}
                                     />
                                 )
 
@@ -593,26 +594,26 @@ const Editable = ({
                             *:outline-transparent
                             *:data-[highlighted]:bg-neutral-200
                         '
-                        onContextMenu={ e => e.stopPropagation() }
+                        onContextMenu={e => e.stopPropagation()}
                     >
-                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => setCropMode(true) }>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={() => setCropMode(true)}>
                             Crop Image
                         </ContextMenu.Item>
-                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => onCenter(value) }>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={() => onCenter(value)}>
                             Center Horizontally
                         </ContextMenu.Item>
                         <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
-                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => setAsThumbnail({ ...image, thumbnail: true }) }>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={() => setAsThumbnail({ ...image, thumbnail: true })}>
                             Set as Thumbnail
                         </ContextMenu.Item>
-                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => setDialog(true) }>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={() => setDialog(true)}>
                             Set Image Description
                         </ContextMenu.Item>
                         <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
-                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => bringToFront({ ...value, z: value.z + 1 }) }>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={() => bringToFront({ ...value, z: value.z + 1 })}>
                             Bring to Front
                         </ContextMenu.Item>
-                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => sendToBack({ ...value, z: value.z - 1 }) }>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={() => sendToBack({ ...value, z: value.z - 1 })}>
                             Send to Back
                         </ContextMenu.Item>
                         <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
@@ -625,13 +626,13 @@ const Editable = ({
                             </ContextMenu.SubTrigger>
                             <ContextMenu.Portal>
                                 <ContextMenu.SubContent
-                                    onContextMenu={ e => e.stopPropagation() }
-                                    sideOffset={ 5 }
+                                    onContextMenu={e => e.stopPropagation()}
+                                    sideOffset={5}
                                     asChild
                                 >
                                     <ContextMenu.RadioGroup
-                                        value={ value.effect }
-                                        onValueChange={ effect => onEffect({ ...value, effect }) }
+                                        value={value.effect}
+                                        onValueChange={effect => onEffect({ ...value, effect })}
                                         className='
                                             flex
                                             flex-col
@@ -655,9 +656,9 @@ const Editable = ({
                                         {
                                             effects.map(effect =>
                                                 <ContextMenu.RadioItem
-                                                    key={ effect }
-                                                    className={ clsx('px-3 py-1.5', { 'bg-neutral-200': value.effect === effect }) }
-                                                    value={ effect }
+                                                    key={effect}
+                                                    className={clsx('px-3 py-1.5', { 'bg-neutral-200': value.effect === effect })}
+                                                    value={effect}
                                                 >
                                                     {
                                                         capitalize(
@@ -672,13 +673,13 @@ const Editable = ({
                             </ContextMenu.Portal>
                         </ContextMenu.Sub>
                         <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
-                        <ContextMenu.Item className='px-3 py-1.5' onSelect={ () => onDuplicate(value) }>
+                        <ContextMenu.Item className='px-3 py-1.5' onSelect={() => onDuplicate(value)}>
                             Duplicate
                         </ContextMenu.Item>
                     </ContextMenu.Content>
                 </ContextMenu.Portal>
             </ContextMenu.Root>
-            <Dialog.Root open={ dialog } onOpenChange={ setDialog }>
+            <Dialog.Root open={dialog} onOpenChange={setDialog}>
                 <Dialog.Portal>
                     <Dialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
                     <Dialog.Content
@@ -711,17 +712,17 @@ const Editable = ({
                             <label htmlFor='alt' className='sr-only'>Description</label>
                             <input
                                 id='alt'
-                                autoFocus={ true }
+                                autoFocus={true}
                                 className='px-2 py-1 rounded-md bg-neutral-200 outline-1 outline-neutral-200 focus:outline-amber-600 w-full font-semibold text-base'
-                                value={ alt }
-                                onChange={ v => setAlt(v.target.value) }
+                                value={alt}
+                                onChange={v => setAlt(v.target.value)}
                                 type='text'
                                 placeholder='e.g., Scandinavian chair'
                             />
                         </fieldset>
                         <Dialog.Close
                             className='text-center font-bold text-base rounded-md cursor-pointer px-2 py-1 hover:bg-neutral-200 hover:outline-1 hover:outline-neutral-200 w-full'
-                            onClick={ () => setImageAlt({ ...image, alt: alternative(alt) }) }
+                            onClick={() => setImageAlt({ ...image, alt: alternative(alt) })}
                         >
                             Save changes
                         </Dialog.Close>
@@ -732,37 +733,37 @@ const Editable = ({
     )
 }
 
-const offsetX = ([ x, y ]: [ number, number ]): [ number, number ] => ([ Math.floor(x) + .5, Math.round(y) ])
-const offsetY = ([ x, y ]: [ number, number ]): [ number, number ] => ([ Math.round(x), Math.floor(y) + .5 ])
+const offsetX = ([x, y]: [number, number]): [number, number] => ([Math.floor(x) + .5, Math.round(y)])
+const offsetY = ([x, y]: [number, number]): [number, number] => ([Math.round(x), Math.floor(y) + .5])
 const corners = ({ x, y, w, h }: Box) => ([
-    [ x, y ],
-    [ x + w, y ],
-    [ x + w, y + h ],
-    [ x, y + h ]
+    [x, y],
+    [x + w, y],
+    [x + w, y + h],
+    [x, y + h]
 ])
 
-const center = ({ x, y, w, h }: Box) => ([ x + w * .5, y + h * .5 ])
+const center = ({ x, y, w, h }: Box) => ([x + w * .5, y + h * .5])
 
 const centers = ({ x, y, w, h }: Box) => ([
-    [ x, y + h * .5 ],
-    [ x + w * .5, y ],
-    [ x + w, y + h * .5 ],
-    [ x + w * .5, y + h ]
+    [x, y + h * .5],
+    [x + w * .5, y],
+    [x + w, y + h * .5],
+    [x + w * .5, y + h]
 ])
 const eq = (a: number, b: number) => Math.round(a) === Math.round(b)
 
-const toPoints = (item: Box) => ([ ...corners(item), center(item) ])
+const toPoints = (item: Box) => ([...corners(item), center(item)])
 
-const xs = (box: Box) => ([ box.x, box.x + box.w * .5, box.x + box.w ])
-const ys = (box: Box) => ([ box.y, box.y + box.h * .5, box.y + box.h ])
+const xs = (box: Box) => ([box.x, box.x + box.w * .5, box.x + box.w])
+const ys = (box: Box) => ([box.y, box.y + box.h * .5, box.y + box.h])
 const smaller = (a: number, b: number) => Math.min(
     Math.abs(a),
     Math.abs(b)
 )
 const smallest = (a: Box | IndexedBox, b: Box | IndexedBox) => {
     const reducer = (xs: number[], ys: number[]) => {
-        const [ x, ...xss ] = xs
-        const [ y, ...yss ] = ys
+        const [x, ...xss] = xs
+        const [y, ...yss] = ys
         const initial = yss.reduce((a, b) => smaller(a, b - x), y - x)
         return xss.reduce((a, b) => ys.reduce((c, d) => smaller(c, d - b), a), initial)
     }
@@ -772,18 +773,18 @@ const smallest = (a: Box | IndexedBox, b: Box | IndexedBox) => {
     const bys = ys(b)
     const ox = reducer(axs, bxs)
     const oy = reducer(ays, bys)
-    return [ ox, oy ]
+    return [ox, oy]
 }
 
 const snap = (threshold: number, box: Box | IndexedBox, boxes: Box[] | IndexedBox[]) => {
     if(boxes.length === 0) {
-        return [ 0, 0 ]
+        return [0, 0]
     } else {
-        const [ x, ...xs ] = boxes
+        const [x, ...xs] = boxes
         const result = xs.reduce(
-            ([ px, py ], x) => {
-                const [ cx, cy ] = smallest(box, x)
-                return [ smaller(px, cx), smaller(py, cy) ]
+            ([px, py], x) => {
+                const [cx, cy] = smallest(box, x)
+                return [smaller(px, cx), smaller(py, cy)]
             },
             smallest(box, x)
         )
@@ -791,15 +792,15 @@ const snap = (threshold: number, box: Box | IndexedBox, boxes: Box[] | IndexedBo
     }
 }
 
-const intersections = ([ ax, ay ]: number[], points: number[][]): number[][][] => {
+const intersections = ([ax, ay]: number[], points: number[][]): number[][][] => {
     if(points.length > 0) {
-        const [ [ ix, iy ], ...xs ] = points
+        const [[ix, iy], ...xs] = points
         const x = eq(ax, ix)
         const y = eq(ay, iy)
         if(x || y) {
-            return [ [ [ ax, ay ], [ ix, iy ] ] ]
+            return [[[ax, ay], [ix, iy]]]
         } else {
-            return intersections([ ax, ay ], xs)
+            return intersections([ax, ay], xs)
         }
     } else {
         return []
@@ -808,16 +809,16 @@ const intersections = ([ ax, ay ]: number[], points: number[][]): number[][][] =
 
 const removeDuplicateLines = (lines: number[][][], acc: number[][][]) => {
     if(lines.length > 0) {
-        const [ x, ...xs ] = lines
-        const duplicate = ([ , d ]: number[][], [ , f ]: number[][]) => {
-            const [ g, h ] = d
-            const [ i, j ] = f
+        const [x, ...xs] = lines
+        const duplicate = ([, d]: number[][], [, f]: number[][]) => {
+            const [g, h] = d
+            const [i, j] = f
             return eq(g, i) && eq(h, j)
         }
         const ys = xs.filter(y =>
             !duplicate(x, y)
         )
-        return removeDuplicateLines(ys, [ ...acc, x ])
+        return removeDuplicateLines(ys, [...acc, x])
     } else {
         return acc
     }
@@ -839,7 +840,7 @@ const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, 
 }) => {
     const ref = useRef<HTMLDivElement>(null)
 
-    const [ effect, setEffect ] = useState('')
+    const [effect, setEffect] = useState('')
 
     useLayoutEffect(() => {
         const element = ref.current!
@@ -863,13 +864,13 @@ const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, 
         <ContextMenu.Root>
             <ContextMenu.Trigger>
                 <div
-                    ref={ ref }
+                    ref={ref}
                     className='absolute top-0 left-0 outline-1 outline-blue-500 z-20'
-                    style={ {
+                    style={{
                         transform: `translate(${x0}px, ${y0}px)`,
                         width: (x1 - x0) + 'px',
                         height: (y1 - y0) + 'px'
-                    } }
+                    }}
                 />
             </ContextMenu.Trigger>
             <ContextMenu.Portal>
@@ -894,9 +895,9 @@ const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, 
                         *:outline-transparent
                         *:data-[highlighted]:bg-neutral-200
                     '
-                    onContextMenu={ e => e.stopPropagation() }
+                    onContextMenu={e => e.stopPropagation()}
                 >
-                    <ContextMenu.Item className='px-3 py-1.5' onSelect={ onCenter }>
+                    <ContextMenu.Item className='px-3 py-1.5' onSelect={onCenter}>
                         Center Horizontally
                     </ContextMenu.Item>
                     <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
@@ -909,16 +910,16 @@ const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, 
                         </ContextMenu.SubTrigger>
                         <ContextMenu.Portal>
                             <ContextMenu.SubContent
-                                onContextMenu={ e => e.stopPropagation() }
-                                sideOffset={ 5 }
+                                onContextMenu={e => e.stopPropagation()}
+                                sideOffset={5}
                                 asChild
                             >
                                 <ContextMenu.RadioGroup
-                                    value={ effect }
-                                    onValueChange={ effect => {
+                                    value={effect}
+                                    onValueChange={effect => {
                                         setEffect(effect)
                                         onEffect(effect)
-                                    } }
+                                    }}
                                     className='
                                         flex
                                         flex-col
@@ -942,9 +943,9 @@ const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, 
                                     {
                                         effects.map(value =>
                                             <ContextMenu.RadioItem
-                                                key={ value }
-                                                className={ clsx('px-3 py-1.5', { 'bg-neutral-200': effect === value }) }
-                                                value={ value }
+                                                key={value}
+                                                className={clsx('px-3 py-1.5', { 'bg-neutral-200': effect === value })}
+                                                value={value}
                                             >
                                                 {
                                                     capitalize(
@@ -994,11 +995,11 @@ const Edit = ({
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const contextRef = useRef<CanvasRenderingContext2D>(null)
-    const [ actives, setActives ] = useState<string[]>([])
-    const [ interactive, setInteractive ] = useState(true)
-    const [ [ pw, ph ], setParentSize ] = useState([ 0, 0 ])
-    const [ dpr, setDpr ] = useState(1)
-    const [ z, setZ ] = useState(0)
+    const [actives, setActives] = useState<string[]>([])
+    const [interactive, setInteractive] = useState(true)
+    const [[pw, ph], setParentSize] = useState([0, 0])
+    const [dpr, setDpr] = useState(1)
+    const [z, setZ] = useState(0)
 
     const cssSize = { width: Math.round(pw) + 'px', height: Math.round(ph) + 'px' }
 
@@ -1036,17 +1037,17 @@ const Edit = ({
 
         context.save()
 
-        context.setLineDash([ 2, 2 ])
+        context.setLineDash([2, 2])
         context.strokeStyle = blue
 
         context.beginPath()
         context.rect(ox - 1, oy - 1, container.width + 1, container.height + 1)
         context.clip()
 
-        lines.forEach(([ [ sx, sy ], [ ex, ey ] ]) => {
+        lines.forEach(([[sx, sy], [ex, ey]]) => {
             const crisp = eq(sx, ex) ? offsetX : offsetY
-            const start: [ number, number ] = crisp([ sx + ox, sy + oy ])
-            const end: [ number, number ] = crisp([ ex + ox, ey + oy ])
+            const start: [number, number] = crisp([sx + ox, sy + oy])
+            const end: [number, number] = crisp([ex + ox, ey + oy])
             context.beginPath()
             context.moveTo(...start)
             context.lineTo(...end)
@@ -1068,10 +1069,10 @@ const Edit = ({
         const orange = 'oklch(0.705 0.213 47.604)'
         const path = new Path2D()
 
-        lines.forEach(([ [ sx, sy ], [ ex, ey ] ]) => {
+        lines.forEach(([[sx, sy], [ex, ey]]) => {
             const crisp = eq(sx, ex) ? offsetX : offsetY
-            const start: [ number, number ] = crisp([ sx + ox, sy + oy ])
-            const end: [ number, number ] = crisp([ ex + ox, ey + oy ])
+            const start: [number, number] = crisp([sx + ox, sy + oy])
+            const end: [number, number] = crisp([ex + ox, ey + oy])
             path.moveTo(...start)
             path.lineTo(...end)
         })
@@ -1100,18 +1101,18 @@ const Edit = ({
 
         const resizer = new ResizeObserver(() => {
             const { width, height } = root.getBoundingClientRect()
-            setParentSize([ width, height ])
+            setParentSize([width, height])
         })
         const dpr = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
         const onDPRChange = () => setDpr(window.devicePixelRatio || 1)
 
         const onDelete = (e: { key: string }) => {
             if(e.key === 'Delete') {
-                const actives = [ ...container.children ].reduce<string[]>((a, b) => {
+                const actives = [...container.children].reduce<string[]>((a, b) => {
                     const item = b as HTMLDivElement
                     const active = item.dataset.active === 'true'
                     if(active) {
-                        return [ ...a, item.dataset.id as string ]
+                        return [...a, item.dataset.id as string]
                     } else {
                         return a
                     }
@@ -1177,7 +1178,7 @@ const Edit = ({
                     )
 
                     const c = canvas.getBoundingClientRect()
-                    const childrens = [ ...container.children ]
+                    const childrens = [...container.children]
                     const actives = childrens.reduce<string[]>((acc, curr) => {
                         const rect = curr.getBoundingClientRect()
                         const element = curr as HTMLDivElement
@@ -1198,7 +1199,7 @@ const Edit = ({
                             clamp(t, b, y + h) === y + h
 
                         if(xs && ys) {
-                            return acc.concat([ element.dataset.id as string ])
+                            return acc.concat([element.dataset.id as string])
                         } else {
                             return acc
                         }
@@ -1266,14 +1267,14 @@ const Edit = ({
         const cy = item.y + item.h * .5
 
         drawBlueLines([
-            [ [ 0, cy ], [ item.x, cy ] ],
-            [ [ cx, 0 ], [ cx, item.y ] ]
+            [[0, cy], [item.x, cy]],
+            [[cx, 0], [cx, item.y]]
         ])
     }
 
     const onContextMenu = curry((index: number, item: Item) => {
         setInteractive(true)
-        setActives([ item.id ])
+        setActives([item.id])
 
         drawActiveLines(item)
     })
@@ -1292,7 +1293,7 @@ const Edit = ({
         const container = containerRef.current!
         const c = container.getBoundingClientRect()
 
-        const [ actives, inactives ] = [ ...container.children ].reduce<IndexedBox[][]>(([ actives, inactives ], curr, i) => {
+        const [actives, inactives] = [...container.children].reduce<IndexedBox[][]>(([actives, inactives], curr, i) => {
             const item = curr as HTMLDivElement
             const active = item.dataset.active === 'true'
             const r = item.getBoundingClientRect()
@@ -1304,11 +1305,11 @@ const Edit = ({
                 h: r.height
             }
             if(active) {
-                return [ actives.concat([ next ]), inactives ]
+                return [actives.concat([next]), inactives]
             } else {
-                return [ actives, inactives.concat([ next ]) ]
+                return [actives, inactives.concat([next])]
             }
-        }, [ [], [] ])
+        }, [[], []])
 
         const group = itemsToGroup(0, 0, actives)
 
@@ -1334,7 +1335,7 @@ const Edit = ({
 
         const canvas = centers({ ...constrain, h: c.height })
 
-        const [ ox, oy ] = snap(5, moved, [ { ...constrain, h: c.height }, ...inactives ])
+        const [ox, oy] = snap(5, moved, [{ ...constrain, h: c.height }, ...inactives])
 
         const result = applyBoxConstrain(constrain, { ...moved, x: moved.x + ox, y: moved.y + oy })
 
@@ -1347,7 +1348,7 @@ const Edit = ({
                     const result = points.flatMap(point =>
                         intersections(point, lines)
                     )
-                    return [ ...acc, ...result ]
+                    return [...acc, ...result]
                 },
                 points.flatMap(point =>
                     intersections(point, canvas)
@@ -1362,7 +1363,7 @@ const Edit = ({
         setLayout((layout: Layout) => {
             const items = actives.reduce(
                 (a, b) => {
-                    const item = layout.items[ b.i ]
+                    const item = layout.items[b.i]
                     return a.with(b.i, {
                         ...item,
                         x: item.x + dx,
@@ -1392,7 +1393,7 @@ const Edit = ({
         } else {
             const container = containerRef.current!
             const c = container.getBoundingClientRect()
-            const items = [ ...container.children ]
+            const items = [...container.children]
             const index = items.findIndex(v => {
                 const r = v.getBoundingClientRect()
                 const x = r.x - c.x
@@ -1406,7 +1407,7 @@ const Edit = ({
             if(index < 0) {
                 setActives([])
             } else {
-                const el = items[ index ]
+                const el = items[index]
                 const r = el.getBoundingClientRect()
                 const element = el as HTMLDivElement
                 const item = {
@@ -1418,10 +1419,10 @@ const Edit = ({
                 const cx = item.x + item.w * .5
                 const cy = item.y + item.h * .5
 
-                setActives([ element.dataset.id as string ])
+                setActives([element.dataset.id as string])
                 drawBlueLines([
-                    [ [ 0, cy ], [ item.x, cy ] ],
-                    [ [ cx, 0 ], [ cx, item.y ] ]
+                    [[0, cy], [item.x, cy]],
+                    [[cx, 0], [cx, item.y]]
                 ])
             }
         }
@@ -1429,16 +1430,16 @@ const Edit = ({
 
     const onGroupCenter = (group: Items) => () => {
         setLayout((layout: Layout) => {
-            const [ min, max ] = extent(v => ([ v.x, v.x + v.w ]), group)
+            const [min, max] = extent(v => ([v.x, v.x + v.w]), group)
             const delta = (layout.width / 2) - ((min + max) / 2)
-            const table: Record<string, number> = layout.items.reduce((a, b, i) => ({ ...a, [ b.id ]: i }), {})
-            const indexes = group.map(v => table[ v.id ])
+            const table: Record<string, number> = layout.items.reduce((a, b, i) => ({ ...a, [b.id]: i }), {})
+            const indexes = group.map(v => table[v.id])
             const items = indexes.reduce((a, b) =>
                 a.with(
                     b,
                     applyBoxConstrain(
                         { x: 0, y: 0, w: layout.width, h: Infinity },
-                        { ...a[ b ], x: a[ b ].x + delta }
+                        { ...a[b], x: a[b].x + delta }
                     )
                 ),
                 layout.items
@@ -1449,26 +1450,26 @@ const Edit = ({
 
     const onGroupEffect = curry((group: Items, effect: string) => {
         setLayout((layout: Layout) => {
-            const table: Record<string, number> = layout.items.reduce((a, b, i) => ({ ...a, [ b.id ]: i }), {})
-            const indexes = group.map(v => table[ v.id ])
-            const items = indexes.reduce((a, b) => a.with(b, { ...a[ b ], effect }), layout.items)
+            const table: Record<string, number> = layout.items.reduce((a, b, i) => ({ ...a, [b.id]: i }), {})
+            const indexes = group.map(v => table[v.id])
+            const items = indexes.reduce((a, b) => a.with(b, { ...a[b], effect }), layout.items)
             return { ...layout, items }
         })
     })
 
     const sizeExtent = [
-        [ 15, layout.width ],
-        [ 15, Infinity ]
+        [15, layout.width],
+        [15, Infinity]
     ]
 
     const translateExtent = [
-        [ 0, layout.width ],
-        [ 0, Infinity ]
+        [0, layout.width],
+        [0, Infinity]
     ]
 
     const onMoveStart = curry((index: number, item: Item) => {
         setInteractive(true)
-        setActives([ item.id ])
+        setActives([item.id])
         drawActiveLines(item)
     })
 
@@ -1481,7 +1482,7 @@ const Edit = ({
             h: c.height
         }
         const constrain = { ...container, h: Infinity }
-        const others = [ ...containerRef.current!.children ].reduce<Box[]>((a, b) => {
+        const others = [...containerRef.current!.children].reduce<Box[]>((a, b) => {
             const next = b as HTMLDivElement
             const id = next.dataset.id as string
             if(item.id === id) {
@@ -1494,11 +1495,11 @@ const Edit = ({
                     w: r.width,
                     h: r.height
                 }
-                return a.concat([ box ])
+                return a.concat([box])
             }
         }, [])
 
-        const [ ox, oy ] = snap(5, item, [ constrain, ...others ])
+        const [ox, oy] = snap(5, item, [constrain, ...others])
 
         const result = applyBoxConstrain(constrain, {
             ...item,
@@ -1517,7 +1518,7 @@ const Edit = ({
                     const result = points.flatMap(point =>
                         intersections(point, lines)
                     )
-                    return [ ...acc, ...result ]
+                    return [...acc, ...result]
                 },
                 points.flatMap(point =>
                     intersections(point, canvas)
@@ -1569,7 +1570,7 @@ const Edit = ({
     const onDuplicate = curry((_index: number, item: Item) => {
         const id = UUIDv7()
 
-        setActives([ id ])
+        setActives([id])
         setLayout((layout: Layout) => {
             const c = containerRef.current!.getBoundingClientRect()
             const items = layout.items.concat([
@@ -1607,15 +1608,15 @@ const Edit = ({
     })
 
     const setAsThumbnail = (image: Photo) => setAsset(asset =>
-        Object.entries(asset).reduce((a, [ k, v ]) => ({
+        Object.entries(asset).reduce((a, [k, v]) => ({
             ...a,
-            [ k ]: { ...v, thumbnail: image.id === k }
+            [k]: { ...v, thumbnail: image.id === k }
         }), {})
     )
 
     const setImageAlt = (image: Photo) =>
         setAsset((asset: Asset) => {
-            return { ...asset, [ image.id ]: image }
+            return { ...asset, [image.id]: image }
         })
 
     const group = actives.length > 1
@@ -1626,65 +1627,65 @@ const Edit = ({
 
     return ( // add sticky effect
         <section
-            ref={ rootRef }
-            className={ clsx('relative size-full flex flex-col items-center', className) }
+            ref={rootRef}
+            className={clsx('relative size-full flex flex-col items-center', className)}
         >
             <div
-                ref={ containerRef }
+                ref={containerRef}
                 className='outline-1 outline-neutral-200'
-                style={ {
+                style={{
                     width: layout.width + 'px',
                     height: layout.height + 'px'
-                } }
+                }}
             >
                 {
                     layout.items.map((item, i) =>
                         <Editable
-                            key={ item.id + i }
-                            container={ containerRef }
-                            active={ actives.includes(item.id) }
-                            interactive={ interactive }
-                            image={ asset[ item.src ] }
-                            value={ item }
-                            sizeExtent={ sizeExtent }
-                            translateExtent={ translateExtent }
-                            onContextMenu={ onContextMenu(i) }
-                            bringToFront={ bringToFront(i) }
-                            sendToBack={ sendToBack(i) }
-                            setAsThumbnail={ setAsThumbnail }
-                            setImageAlt={ setImageAlt }
-                            onMoveStart={ onMoveStart(i) }
-                            onMove={ onMove(i) }
-                            onMoveEnd={ onMoveEnd(i) }
-                            onCropStart={ onCropStart(i) }
-                            onCrop={ onCrop(i) }
-                            onCropEnd={ onCropEnd(i) }
-                            onResizeStart={ onResizeStart(i) }
-                            onResize={ onResize(i) }
-                            onResizeEnd={ onResizeEnd(i) }
-                            onDuplicate={ onDuplicate(i) }
-                            onCenter={ onCenter(i) }
-                            onEffect={ onEffect(i) }
+                            key={item.id + i}
+                            container={containerRef}
+                            active={actives.includes(item.id)}
+                            interactive={interactive}
+                            image={asset[item.src]}
+                            value={item}
+                            sizeExtent={sizeExtent}
+                            translateExtent={translateExtent}
+                            onContextMenu={onContextMenu(i)}
+                            bringToFront={bringToFront(i)}
+                            sendToBack={sendToBack(i)}
+                            setAsThumbnail={setAsThumbnail}
+                            setImageAlt={setImageAlt}
+                            onMoveStart={onMoveStart(i)}
+                            onMove={onMove(i)}
+                            onMoveEnd={onMoveEnd(i)}
+                            onCropStart={onCropStart(i)}
+                            onCrop={onCrop(i)}
+                            onCropEnd={onCropEnd(i)}
+                            onResizeStart={onResizeStart(i)}
+                            onResize={onResize(i)}
+                            onResizeEnd={onResizeEnd(i)}
+                            onDuplicate={onDuplicate(i)}
+                            onCenter={onCenter(i)}
+                            onEffect={onEffect(i)}
                         />
                     )
                 }
             </div>
             <canvas
-                ref={ canvasRef }
+                ref={canvasRef}
                 className='pointer-events-none absolute bg-transparent'
-                style={ { ...cssSize, zIndex: z || 'auto' } }
-                { ...attSize }
+                style={{ ...cssSize, zIndex: z || 'auto' }}
+                {...attSize}
             />
             {
                 group.length > 1
                     ? <Group
-                        container={ containerRef }
-                        onDragStart={ onGroupDragStart }
-                        onDrag={ onGroupDrag }
-                        onDragEnd={ onGroupDragEnd }
-                        onCenter={ onGroupCenter(group) }
-                        onEffect={ onGroupEffect(group) }
-                        { ...calculateGroup(group) }
+                        container={containerRef}
+                        onDragStart={onGroupDragStart}
+                        onDrag={onGroupDrag}
+                        onDragEnd={onGroupDragEnd}
+                        onCenter={onGroupCenter(group)}
+                        onEffect={onGroupEffect(group)}
+                        {...calculateGroup(group)}
                     />
                     : null
             }

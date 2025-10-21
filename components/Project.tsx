@@ -25,27 +25,27 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
     const layout = getLayout(template)
 
     const table = (items: Items): Record<string, Item> =>
-        items.reduce((a, b) => ({ ...a, [ b.id ]: b }), {})
+        items.reduce((a, b) => ({ ...a, [b.id]: b }), {})
 
     const desktop = table(template.desktop.items)
     const tablet = table(template.tablet.items)
     const mobile = table(template.mobile.items)
 
     const desktops = layout.map(v =>
-        v.filter(v => v.id in desktop).map(v => desktop[ v.id ])
+        v.filter(v => v.id in desktop).map(v => desktop[v.id])
     )
 
     const tablets = layout.map(v =>
-        v.filter(v => v.id in tablet).map(v => tablet[ v.id ])
+        v.filter(v => v.id in tablet).map(v => tablet[v.id])
     )
 
     const mobiles = layout.map(v =>
-        v.filter(v => v.id in mobile).map(v => mobile[ v.id ])
+        v.filter(v => v.id in mobile).map(v => mobile[v.id])
     )
 
     const getGaps = (rows: Items[]) => {
         if(rows.length > 0) {
-            const [ initial ] = rows
+            const [initial] = rows
             return ab(
                 (a, b, c: number[]) => {
                     const x = Math.max(
@@ -54,7 +54,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                     const y = Math.min(
                         ...extent(ys, b)
                     )
-                    return [ ...c, y - x ]
+                    return [...c, y - x]
                 },
                 rows,
                 [
@@ -68,21 +68,21 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         }
     }
 
-    const desktopExcludes = [ ...template.tablet.items, ...template.mobile.items ]
+    const desktopExcludes = [...template.tablet.items, ...template.mobile.items]
         .filter(v => !(v.id in desktop))
-        .reduce<Items>((a, b) => a.some(v => b.id === v.id) ? a : a.concat([ b ]), [])
+        .reduce<Items>((a, b) => a.some(v => b.id === v.id) ? a : a.concat([b]), [])
 
-    const tabletExcludes = [ ...template.desktop.items, ...template.mobile.items ]
+    const tabletExcludes = [...template.desktop.items, ...template.mobile.items]
         .filter(v => !(v.id in tablet))
-        .reduce<Items>((a, b) => a.some(v => b.id === v.id) ? a : a.concat([ b ]), [])
+        .reduce<Items>((a, b) => a.some(v => b.id === v.id) ? a : a.concat([b]), [])
 
-    const mobileExcludes = [ ...template.desktop.items, ...template.tablet.items ]
+    const mobileExcludes = [...template.desktop.items, ...template.tablet.items]
         .filter(v => !(v.id in mobile))
-        .reduce<Items>((a, b) => a.some(v => b.id === v.id) ? a : a.concat([ b ]), [])
+        .reduce<Items>((a, b) => a.some(v => b.id === v.id) ? a : a.concat([b]), [])
 
     const asset = Object.fromEntries(
         assets.map(v => {
-            return [ v.id, v ]
+            return [v.id, v]
         })
     )
 
@@ -96,8 +96,8 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         return [
             container,
             ...rows.flatMap((row, i) => {
-                const [ sy, ey ] = extent(ys, row)
-                const gap = gaps[ i ]
+                const [sy, ey] = extent(ys, row)
+                const gap = gaps[i]
                 const height = Math.max(0, (ey - sy) + gap)
                 const section = `
                     .section-${i} {
@@ -110,7 +110,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                     section,
                     ...row.flatMap(v => {
                         const item = `
-                            .section-${i} > .item-${v.id} {
+                            .item-${v.id} {
                                 position: absolute; 
                                 display: block;
                                 overflow: clip;
@@ -121,7 +121,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                                 height: ${(v.h / h) * 100}cqh;
                             }
                         `
-                        const img = asset[ v.src ]
+                        const img = asset[v.src]
                         const scale = Math.max(
                             v.w / (v.sw * img.width),
                             v.h / (v.sh * img.height)
@@ -135,12 +135,14 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                                 max-height: none;
                             }   
                         `
-                        return [ item, image ]
+                        return [item, image]
                     })
                 ]
             })
         ]
     }
+
+    console.log({ tablets, tabletExcludes })
 
     const styles = [
         join([
@@ -189,7 +191,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         return `(max-width: ${width}px) ${((image.width * scale) / width) * 100}vw`
     }
 
-    const [ largest ] = (layout.at(0) ?? ([])).toSorted((a: Item, b: Item) => {
+    const [largest] = (layout.at(0) ?? ([])).toSorted((a: Item, b: Item) => {
         return (b.w * b.h) - (a.w * a.h)
     })
 
@@ -201,40 +203,40 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         <article className='flex flex-col items-center justify-center gap-y-20 py-20 w-full'>
             <header className='flex flex-col items-center justify-center gap-y-15 text-center whitespace-pre-wrap w-full'>
                 <div className='flex flex-col items-center justify-center gap-y-5'>
-                    <h1 className='font-serif text-2xl/relaxed sm:text-3xl/relaxed max-w-2xs sm:max-w-md'>{ name }</h1>
-                    <h2 className='font-serif text-sm/loose sm:text-base/loose max-w-2xs sm:max-w-sm'>{ location }</h2>
+                    <h1 className='font-serif text-2xl/relaxed sm:text-3xl/relaxed max-w-2xs sm:max-w-md'>{name}</h1>
+                    <h2 className='font-serif text-sm/loose sm:text-base/loose max-w-2xs sm:max-w-sm'>{location}</h2>
                 </div>
                 <p className='font-sans font-semibold text-base slide-from-bottom max-w-2xs sm:max-w-md md:max-w-lg md:text-lg'>
-                    { story }
+                    {story}
                 </p>
                 <h3 className='font-serif text-sm/loose sm:text-base/loose md:text-lg/loose slide-from-bottom max-w-2xs sm:max-w-lg md:max-w-xl lg:max-w-2xl'>
-                    { tagline }
+                    {tagline}
                 </h3>
             </header>
-            <div className='w-full layout' style={ { containerType: 'size' } }>
+            <div className='w-full layout' style={{ containerType: 'size' }}>
                 {
                     layout.map((items, i) =>
-                        <section key={ i } className={ `w-full section-${i}` }>
+                        <section key={i} className={`w-full section-${i}`}>
                             {
                                 items.map(item => {
-                                    const img = asset[ item.src ]
-                                    const small = item.id in mobile ? generateSize(template.mobile.width, mobile[ item.id ], img) : ''
-                                    const medium = item.id in tablet ? generateSize(template.tablet.width, tablet[ item.id ], img) : ''
-                                    const large = item.id in desktop ? generateSize(template.desktop.width, desktop[ item.id ], img) : ''
-                                    const sizes = [ small, medium, large ].filter(v => v).join(', ')
+                                    const img = asset[item.src]
+                                    const small = item.id in mobile ? generateSize(template.mobile.width, mobile[item.id], img) : ''
+                                    const medium = item.id in tablet ? generateSize(template.tablet.width, tablet[item.id], img) : ''
+                                    const large = item.id in desktop ? generateSize(template.desktop.width, desktop[item.id], img) : ''
+                                    const sizes = [small, medium, large].filter(v => v).join(', ')
                                     return (
                                         <div
-                                            key={ item.id }
-                                            className={ `anim-delay-[125ms] item-${item.id}` + (item.effect ? ` ${item.effect}` : '') }
+                                            key={item.id}
+                                            className={`anim-delay-[125ms] item-${item.id}` + (item.effect ? ` ${item.effect}` : '')}
                                         >
                                             <Image
-                                                className={ `anim-delay-[125ms] size-80 image-${img.id}` }
-                                                src={ img.src }
-                                                width={ img.width }
-                                                height={ img.height }
-                                                alt={ formatAlt(img.alt) }
-                                                sizes={ sizes }
-                                                priority={ item.id === lcp.id }
+                                                className={`anim-delay-[125ms] size-80 image-${img.id}`}
+                                                src={img.src}
+                                                width={img.width}
+                                                height={img.height}
+                                                alt={formatAlt(img.alt)}
+                                                sizes={sizes}
+                                                priority={item.id === lcp.id}
                                             />
                                         </div>
                                     )
@@ -243,7 +245,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                         </section>
                     )
                 }
-                <Style style={ join(styles) } />
+                <Style style={join(styles)} />
             </div>
         </article>
     )

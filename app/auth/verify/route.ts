@@ -1,15 +1,15 @@
 import { type NextRequest } from 'next/server'
 import { redirect } from 'next/navigation'
 import { verifyEmailToken } from '@/action/server'
-import sanitize from 'sanitize-html'
 import { isURL } from 'validator'
 
+const development = process.env.NODE_ENV === 'development'
+const tld = development ? false : true
+
 const split = (v: string) => {
-    const sanitized = sanitize(
-        (v + '').trim()
-    )
-    if(isURL(sanitized)) {
-        const token = (new URL(sanitized).searchParams.get('token') ?? '') + ''
+    const trimmed = (v + '').trim()
+    if(isURL(trimmed, { require_tld: tld })) {
+        const token = (new URL(trimmed).searchParams.get('token') ?? '') + ''
         return token ? Promise.resolve(token) : Promise.reject()
     } else {
         return Promise.reject()

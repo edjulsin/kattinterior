@@ -11,6 +11,8 @@ import Parallax from '@/components/Parallax';
 
 const name = process.env.NEXT_PUBLIC_SITE_NAME
 
+export const dynamic = 'force-static'
+
 export const metadata: Metadata = {
 	description: `Discover professional interior design solutions in Bali with ${name}. Residential, commercial, and custom projects.`,
 	alternates: {
@@ -28,7 +30,7 @@ const HomePage = () =>
 		}
 	>
 		<Intersector />
-		<Parallax selectors={ [ '.parallax' ] } />
+		<Parallax selectors={['.parallax']} />
 		<Hero />
 		<Work />
 		<Intro />

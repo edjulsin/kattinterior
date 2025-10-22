@@ -1,8 +1,14 @@
-import { getNextPublishedProject } from "@/action/server";
+import { getNextPublishedProject } from "@/action/admin";
 import { Project } from "@/type/editor";
 import Link from "next/link";
 import React from "react";
 import Bottom from "./Bottom";
+
+const defaultVisit = {
+    title: 'Gallery',
+    destination: '/projects',
+    copy: 'See all projects'
+}
 
 const Next = async ({ created_at }: { created_at: string }) =>
     <>
@@ -12,11 +18,17 @@ const Next = async ({ created_at }: { created_at: string }) =>
         <section className='text-center flex flex-col justify-center items-center gap-y-10 max-w-md lg:max-w-lg'>
             {
                 getNextPublishedProject(1, created_at).then(
-                    v => v.map((v: Project) =>
-                        <React.Fragment key={ v.id }>
+                    v => v.map((v: Project) => {
+                        return {
+                            title: v.name,
+                            destination: `/projects/${v.slug}`,
+                            copy: 'See project'
+                        }
+                    }).concat([defaultVisit]).slice(0, 1).map(({ title, destination, copy }) =>
+                        <React.Fragment key={title + destination + copy}>
                             <small className='uppercase font-sans text-base font-semibold text-gold-950'>Next</small>
-                            <h5 className='text-2xl/loose font-serif lg:text-4xl/loose'>{ v.name }</h5>
-                            <Link className='text-lg font-semibold font-sans text-amber-600' href={ `/projects/${v.slug}` }>See project &rarr;</Link>
+                            <h5 className='text-2xl/loose font-serif lg:text-4xl/loose capitalize'>{title}</h5>
+                            <Link className='text-lg font-semibold font-sans text-amber-600' href={destination}>{copy} &rarr;</Link>
                         </React.Fragment>
                     ),
                     () => ([])

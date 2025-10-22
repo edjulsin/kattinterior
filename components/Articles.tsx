@@ -5,12 +5,12 @@ import Loader from './Loader'
 import Message from './Message'
 import Article from './Article'
 import { Project } from '@/type/editor'
-import { getPublishedProjects } from '@/action/server'
+import { getPublishedProjects } from '@/action/admin'
 
 const Articles = ({ start, count }: { start: number, count: number }) => {
-    const [ data, setData ] = useState<Project[]>([])
-    const [ loader, setLoader ] = useState(true)
-    const [ error, setError ] = useState(false)
+    const [data, setData] = useState<Project[]>([])
+    const [loader, setLoader] = useState(true)
+    const [error, setError] = useState(false)
 
     const callback = (entries: IntersectionObserverEntry[]) => {
         const intersects = entries.filter(v => v.isIntersecting)
@@ -35,17 +35,17 @@ const Articles = ({ start, count }: { start: number, count: number }) => {
     }
 
     return (
-        <Loader key={ data.length } enabled={ loader } callback={ callback }>
+        <Loader key={data.length} enabled={loader} callback={callback}>
             {
                 data.map((v, i) =>
                     <Article
-                        index={ i }
-                        key={ v.id }
-                        project={ v }
+                        index={i}
+                        key={v.id}
+                        project={v}
                     />
                 )
             }
-            { error ? <Message message='Something wrong' /> : null }
+            {error ? <Message message='Something wrong' /> : null}
         </Loader>
     )
 }

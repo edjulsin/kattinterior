@@ -1,7 +1,6 @@
 import { getPublishedProject } from '@/action/server'
 import { notFound } from 'next/navigation'
 import Project from '@/components/Project'
-import sanitize from 'sanitize-html'
 import { isSlug } from 'validator'
 import { Project as ProjectType } from '@/type/editor'
 import { Metadata } from "next";
@@ -10,15 +9,26 @@ import Schema from '@/components/Schema'
 import Intersector from '@/components/Intersector'
 import Next from '@/components/Next'
 import Parallax from '@/components/Parallax'
+import { getAllPublishedProjects } from '@/action/admin'
 
 const development = process.env.NODE_ENV === 'development'
 const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
 const name = process.env.NEXT_PUBLIC_SITE_NAME
 
+export const dynamicParams = false
+
+export const generateStaticParams = async () =>
+    getAllPublishedProjects().then(
+        v => v.map((v: ProjectType) => {
+            return { slug: v.slug }
+        }),
+        () => ([])
+    )
+
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) =>
     params.then(
         v => {
-            const slug = sanitize(v.slug + '').trim().toLowerCase()
+            const slug = (v.slug + '').trim().toLowerCase()
             if(isSlug(slug)) {
                 return getPublishedProject(slug).then(
                     v => {
@@ -39,12 +49,12 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
                                     publishedTime: v.published_at,
                                     modifiedTime: v.updated_at,
                                     tags: v.category,
-                                    authors: [ `${url}/about` ]
+                                    authors: [`${url}/about`]
                                 }
                             }
                         })
                         if(result.length > 0) {
-                            const [ opengraph ] = result
+                            const [opengraph] = result
                             return opengraph
                         } else {
                             return {}
@@ -61,15 +71,15 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
 
 const ProjectPage = async ({ params }: { params: Promise<{ slug: string }> }) =>
     params.then(v => {
-        const slug = sanitize(v.slug + '').trim().toLowerCase()
+        const slug = (v.slug + '').trim().toLowerCase()
         if(isSlug(slug)) {
             return getPublishedProject(slug).then(
                 v => v.map((v: ProjectType) =>
-                    <Schema key={ v.id } value={ projectSchema(v) }>
+                    <Schema key={v.id} value={projectSchema(v)}>
                         <Intersector />
-                        <Parallax selectors={ [ '.parallax' ] } />
-                        <Project { ...v } />
-                        <Next created_at={ v.created_at } />
+                        <Parallax selectors={['.parallax']} />
+                        <Project {...v} />
+                        <Next created_at={v.created_at} />
                     </Schema>
                 ),
                 () => { notFound() }

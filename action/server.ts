@@ -8,6 +8,11 @@ import { Resend } from 'resend'
 import sanitizer from 'sanitize-html'
 import crypto from 'crypto';
 import { isEmail } from 'validator'
+import { revalidatePath } from 'next/cache'
+
+export const rebuildPath = async (path: string, type?: 'page' | 'layout') => {
+    revalidatePath(path, type ?? 'page')
+}
 
 const sanitize = (string: string) => sanitizer(string, {
     allowedTags: [],

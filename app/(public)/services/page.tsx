@@ -1,4 +1,4 @@
-import { getPublishedProjects } from '@/action/server'
+import { getPublishedProjects } from '@/action/admin'
 import Bottom from '@/components/Bottom'
 import { Project } from '@/type/editor'
 import Image from 'next/image'
@@ -20,9 +20,9 @@ const Projects = async () => getPublishedProjects(0, 5).then(
             {
                 projects.map((v, i) =>
                     <Article
-                        key={ v.id }
-                        index={ i }
-                        project={ v }
+                        key={v.id}
+                        index={i}
+                        project={v}
                     />
                 )
             }
@@ -35,6 +35,7 @@ const Projects = async () => getPublishedProjects(0, 5).then(
     () => ([])
 )
 
+export const dynamic = 'force-static'
 
 export const metadata = {
     title: 'Services',
@@ -54,7 +55,7 @@ const ServicesPage = async () =>
         }
     >
         <Intersector />
-        <Parallax selectors={ [ '.parallax' ] } />
+        <Parallax selectors={['.parallax']} />
         <section
             className='
                 grid 
@@ -75,9 +76,9 @@ const ServicesPage = async () =>
         >
             <Image
                 className='rounded-tl-full rounded-tr-full w-full max-w-sm h-auto object-cover object-center'
-                src={ image1 }
-                width={ 1080 }
-                height={ 1350 }
+                src={image1}
+                width={1080}
+                height={1350}
                 alt='Chaterina working in Gallery'
             />
             <div className='flex flex-col justify-center items-center gap-y-10 lg:items-baseline'>
@@ -107,18 +108,18 @@ const ServicesPage = async () =>
                 <div className='col-span-2 col-start-1 row-start-1 row-span-2'>
                     <Image
                         className='w-full h-100 hidden sm:block md:h-120 object-cover object-center'
-                        src={ image2 }
-                        width={ 1080 }
-                        height={ 1440 }
+                        src={image2}
+                        width={1080}
+                        height={1440}
                         alt='Chaterina working in Gallery'
                     />
                 </div>
                 <div className='parallax w-full col-span-2 col-start-2 row-start-2 row-span-2 rounded-tl-full rounded-tr-full'>
                     <Image
                         className='z-10 w-full h-90 sm:w-55 sm:h-70 md:h-90 md:w-70 object-cover object-center'
-                        src={ image3 }
-                        width={ 1440 }
-                        height={ 1080 }
+                        src={image3}
+                        width={1440}
+                        height={1080}
                         alt='Chaterina working in Gallery'
                     />
                 </div>
@@ -138,10 +139,10 @@ const ServicesPage = async () =>
         <section className='flex flex-col lg:flex-row-reverse gap-y-15 justify-center items-center gap-x-10 max-w-2xs sm:max-w-sm md:max-w-md lg:max-w-full'>
             <Image
                 className='w-full h-auto max-w-md object-cover object-center'
-                src={ image4 }
+                src={image4}
                 alt='Beautifull custom wall decoration by Chaterina.'
-                width={ 1080 }
-                height={ 1350 }
+                width={1080}
+                height={1350}
             />
             <div className='font-sans font-semibold lg:max-w-md'>
                 <p className='text-base sm:text-lg slide-from-bottom anim-delay-[100ms]'>

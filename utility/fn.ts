@@ -13,7 +13,7 @@ export const o = (a: Function, b: Function) => (c: any) => a(
 export const compose = (...fns: Function[]) => (...args: any[]) =>
     fns.slice(0, -1).reduceRight(
         (a, b) => b(a),
-        fns[ fns.length - 1 ](...args)
+        fns[fns.length - 1](...args)
     )
 
 export const clamp = (min: number, max: number, value: number) => Math.min(Math.max(min, value), max)
@@ -40,12 +40,12 @@ export const applyBoxConstrain = <T extends Box>(container: Box | T, item: T): T
     }
 }
 
-export type Tuple = [ any, any ]
+export type Tuple = [any, any]
 
 export const between = (min: number, max: number, value: number) => Math.min(Math.max(min, value), max) === value
 
-export const xs = (item: Item): Tuple => ([ item.x, item.x + item.w ])
-export const ys = (item: Item): Tuple => ([ item.y, item.y + item.h ])
+export const xs = (item: Item): Tuple => ([item.x, item.x + item.w])
+export const ys = (item: Item): Tuple => ([item.y, item.y + item.h])
 
 export const minMax = (values: number[]): Tuple => ([
     Math.min(...values),
@@ -61,41 +61,41 @@ export const overlap = curry((fn: (item: Item) => Tuple, a: Item, b: Item): bool
 export const overlapX = overlap(xs)
 export const overlapY = overlap(ys)
 export const overlapXY = overlap((v: Item) => {
-    return [ ...xs(v), ...ys(v) ]
+    return [...xs(v), ...ys(v)]
 })
 
 export const groupByOverlap = curry((overlap: (a: Item, b: Item) => boolean, items: Items) => {
     if(items.length > 0) {
         const byItem = (items: Items, acc: Items[]) => {
             if(items.length > 0) {
-                const [ x, ...xs ] = items
+                const [x, ...xs] = items
                 const ys = xs.filter(y =>
                     overlap(x, y)
                 )
-                return byItem(xs, [ ...acc, [ x, ...ys ] ])
+                return byItem(xs, [...acc, [x, ...ys]])
             } else {
                 return acc
             }
         }
         const byGroup = (groups: Items[], acc: Items[]) => {
             if(groups.length > 0) {
-                const [ x, ...xs ] = groups
-                const [ a, b ] = xs.reduce<[ Items, Items[] ]>(([ a, b ], c) => {
+                const [x, ...xs] = groups
+                const [a, b] = xs.reduce<[Items, Items[]]>(([a, b], c) => {
                     if(c.some(x => a.some(y => x.id === y.id))) {
-                        const r = [ ...a, ...c ].reduce<Items>((a, b) =>
+                        const r = [...a, ...c].reduce<Items>((a, b) =>
                             a.some(x => x.id === b.id)
                                 ? a
-                                : a.concat([ b ])
+                                : a.concat([b])
                             ,
                             []
                         )
-                        return [ r, b ]
+                        return [r, b]
                     } else {
-                        return [ a, [ ...b, c ] ]
+                        return [a, [...b, c]]
                     }
-                }, [ x, [] ])
+                }, [x, []])
 
-                return byGroup(b, [ ...acc, a ])
+                return byGroup(b, [...acc, a])
             } else {
                 return acc
             }
@@ -109,37 +109,37 @@ export const groupByOverlap = curry((overlap: (a: Item, b: Item) => boolean, ite
 
 export const extent = <T,>(fn: (item: T) => Tuple, items: T[]): Tuple => items
     .reduce(
-        ([ min, max ], b) => {
-            const [ c, d ] = fn(b)
-            return [ Math.min(min, c), Math.max(max, d) ]
+        ([min, max], b) => {
+            const [c, d] = fn(b)
+            return [Math.min(min, c), Math.max(max, d)]
         },
-        [ Infinity, -Infinity ]
+        [Infinity, -Infinity]
     )
     .map(v => Number.isFinite(v) ? v : 0) as Tuple
 
 
 
-export const extents = <T, R>(fn: (item: T) => [ Tuple, Tuple ], items: T[]): [ Tuple, Tuple ] => items
+export const extents = <T, R>(fn: (item: T) => [Tuple, Tuple], items: T[]): [Tuple, Tuple] => items
     .reduce(
-        ([ [ sx, sy ], [ ex, ey ] ], b) => {
-            const [ [ xMin, yMin ], [ xMax, yMax ] ] = fn(b)
+        ([[sx, sy], [ex, ey]], b) => {
+            const [[xMin, yMin], [xMax, yMax]] = fn(b)
             return [
-                [ Math.min(sx, xMin), Math.min(sy, yMin) ],
-                [ Math.max(ex, xMax), Math.max(ey, yMax) ]
+                [Math.min(sx, xMin), Math.min(sy, yMin)],
+                [Math.max(ex, xMax), Math.max(ey, yMax)]
             ]
         },
-        [ [ Infinity, -Infinity ], [ Infinity, -Infinity ] ]
+        [[Infinity, -Infinity], [Infinity, -Infinity]]
     )
     .map(v =>
         v.map(v => Number.isFinite(v) ? v : 0)
-    ) as [ Tuple, Tuple ]
+    ) as [Tuple, Tuple]
 
 export const ab = <T, R>(fn: (a: T, b: T, c: R[]) => R[], values: T[], acc: R[]): R[] => {
     if(values.length > 1) {
-        const [ a, b, ...next ] = values
+        const [a, b, ...next] = values
         return ab(
             fn,
-            [ b, ...next ],
+            [b, ...next],
             fn(a, b, acc)
         )
     } else {
@@ -151,13 +151,13 @@ export const groupByRow = (items: Items): Items[] =>
     groupByOverlap(overlapY, items).map((v: Items) =>
         v.toSorted((a, b) => a.y - b.y)
     ).toSorted((a: Items, b: Items) => {
-        const [ c ] = extent(ys, a)
-        const [ d ] = extent(ys, b)
+        const [c] = extent(ys, a)
+        const [d] = extent(ys, b)
         return c - d
     })
 
 export const rowTable = (rows: Items[]): Record<string, number> =>
-    rows.reduce((a, b, i) => b.reduce((c, d) => ({ ...c, [ d.id ]: i }), a), {})
+    rows.reduce((a, b, i) => b.reduce((c, d) => ({ ...c, [d.id]: i }), a), {})
 
 export const reduceJoins = (joins: Tuple[], acc: Tuple[]): Tuple[] => {
     const overlapped = (a: Tuple, b: Tuple) => b.some(c =>
@@ -165,14 +165,14 @@ export const reduceJoins = (joins: Tuple[], acc: Tuple[]): Tuple[] => {
     )
 
     if(joins.length > 1) {
-        const [ x, y, ...rest ] = joins.toSorted(([ a ], [ b ]) => a - b)
+        const [x, y, ...rest] = joins.toSorted(([a], [b]) => a - b)
         if(overlapped(x, y)) {
-            return reduceJoins([ minMax([ ...x, ...y ]), ...rest ], acc)
+            return reduceJoins([minMax([...x, ...y]), ...rest], acc)
         } else {
-            return reduceJoins([ y, ...rest ], [ ...acc, x ])
+            return reduceJoins([y, ...rest], [...acc, x])
         }
     } else {
-        return [ ...acc, ...joins ]
+        return [...acc, ...joins]
     }
 }
 
@@ -183,10 +183,10 @@ export const layoutJoins = (xs: Items[], ys: Items[]): Tuple[] => {
     )
 
     const rows = _ys.map(v =>
-        v.map(v => table[ v.id ]).reduce<number[]>(
+        v.map(v => table[v.id]).reduce<number[]>(
             (a, b) => a.some(c => b === c)
                 ? a
-                : a.concat([ b ]),
+                : a.concat([b]),
             []
         )
     )
@@ -196,7 +196,7 @@ export const layoutJoins = (xs: Items[], ys: Items[]): Tuple[] => {
     const byRows = ab(
         (a, b, c: Tuple[]) => {
             if(a.some(x => b.some(y => x > y))) {
-                return [ ...c, minMax([ ...a, ...b ]) ]
+                return [...c, minMax([...a, ...b])]
             } else {
                 return c
             }
@@ -204,7 +204,7 @@ export const layoutJoins = (xs: Items[], ys: Items[]): Tuple[] => {
         rows,
         []
     )
-    return reduceJoins([ ...byRow, ...byRows ], [])
+    return reduceJoins([...byRow, ...byRows], [])
 }
 
 export const getLayout = (template: Template) => {
@@ -220,7 +220,7 @@ export const getLayout = (template: Template) => {
         []
     )
 
-    const changes = joins.map(([ a, b ]) =>
+    const changes = joins.map(([a, b]) =>
         desktop.slice(a, b + 1).flat()
     )
 
@@ -230,40 +230,40 @@ export const getLayout = (template: Template) => {
         )
     )
 
-    const rows = [ ...changes, ...unchanges ]
+    const rows = [...changes, ...unchanges]
         .map(v => v.toSorted((a, b) => a.y - b.y))
-        .toSorted(([ a ], [ b ]) => a.y - b.y)
+        .toSorted(([a], [b]) => a.y - b.y)
 
     const reduceLayout = (a: Items[], b: Items[]) => {
         const tableA = rowTable(a)
         const tableB = rowTable(b)
         const update = (row: number, items: Items, acc: Items[]) => {
             if(row in acc) {
-                return acc.with(row, [ ...acc[ row ], ...items ])
+                return acc.with(row, [...acc[row], ...items])
             } else {
-                return [ ...acc, items ]
+                return [...acc, items]
             }
         }
 
-        const [ withSiblings, withoutSiblings ] = b.reduce<[ Items[], Items[] ]>(([ a, b ], c) => {
+        const [withSiblings, withoutSiblings] = b.reduce<[Items[], Items[]]>(([a, b], c) => {
             if(c.some(v => !(v.id in tableA))) {
                 if(c.some(v => v.id in tableA)) {
-                    return [ [ ...a, c ], b ]
+                    return [[...a, c], b]
                 } else {
-                    return [ a, [ ...b, c ] ]
+                    return [a, [...b, c]]
                 }
             } else {
-                return [ a, b ]
+                return [a, b]
             }
-        }, [ [], [] ])
+        }, [[], []])
 
         return withoutSiblings.reduce(
             (e, f) => {
-                const [ item ] = f
-                const prev = tableB[ item.id ] - 1
+                const [item] = f
+                const prev = tableB[item.id] - 1
                 if(prev in b) {
-                    const [ exist ] = b[ prev ]
-                    const row = tableA[ exist.id ]
+                    const [exist] = b[prev]
+                    const row = tableA[exist.id]
                     return update(row, f, e)
                 } else {
                     const row = 0
@@ -272,7 +272,7 @@ export const getLayout = (template: Template) => {
             },
             withSiblings.reduce((c, d) => {
                 const exist = d.find(v => v.id in tableA)!
-                const row = tableA[ exist.id ]
+                const row = tableA[exist.id]
                 const uniques = d.filter(v =>
                     !(v.id in tableA)
                 )
@@ -281,7 +281,7 @@ export const getLayout = (template: Template) => {
         )
     }
 
-    return [ tablet, mobile ].reduce(reduceLayout, rows)
+    return [tablet, mobile].reduce(reduceLayout, rows)
 }
 
 export const throttle = <T extends any[]>(delay: number, callback: (...args: T) => any) => {
@@ -328,7 +328,7 @@ export const toPathURL = (url: string) => url.split('/').slice(-2).join('/')
 export function storageAvailable(type: 'sessionStorage' | 'localStorage') {
     let storage;
     try {
-        storage = window[ type ]
+        storage = window[type]
         const x = '__storage_test__'
         storage.setItem(x, x)
         storage.removeItem(x)
@@ -363,8 +363,8 @@ export const formatISODate = (now: Date, time: string) => {
 
 export const capitalize = (string: string) => {
     const splitted = string.split(' ')
-    const capitalized = splitted.map(([ x, ...xs ]) => {
-        return [ x.toUpperCase(), ...xs ].join('')
+    const capitalized = splitted.map(([x, ...xs]) => {
+        return [x.toUpperCase(), ...xs].join('')
     })
     return capitalized.join(' ')
 }

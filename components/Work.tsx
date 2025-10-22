@@ -1,4 +1,4 @@
-import { getFeaturedProject } from '@/action/server';
+import { getFeaturedProject } from '@/action/admin';
 import { Project } from '@/type/editor';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -14,21 +14,21 @@ const thumbnail = () => ({
     thumbnail: false
 })
 
-const defaultImages = [ thumbnail(), thumbnail() ]
+const defaultImages = [thumbnail(), thumbnail()]
 
 const Work = () => getFeaturedProject().then(
     (projects: Project[]) =>
         projects.map(v => {
             const asset = Object.fromEntries(
                 v.assets.map(v => {
-                    return [ v.id, v ]
+                    return [v.id, v]
                 })
             )
 
-            const images = [ ...v.template.desktop.items.slice(0, 2).map(v => asset[ v.src ]), ...defaultImages ].slice(0, 2)
+            const images = [...v.template.desktop.items.slice(0, 2).map(v => asset[v.src]), ...defaultImages].slice(0, 2)
 
             return (
-                <section key={ v.id } className='flex flex-col gap-y-20 justify-center items-center'>
+                <section key={v.id} className='flex flex-col gap-y-20 justify-center items-center'>
                     <h3 className='font-serif text-gold-900 text-center text-xl/relaxed lg:text-2xl/relaxed'>FEATURED WORK</h3>
                     <ul
                         className='
@@ -46,21 +46,21 @@ const Work = () => getFeaturedProject().then(
                     >
                         {
                             images.map((img, i) =>
-                                <li key={ img.id } className={ clsx({ 'hidden sm:block': i === 1 }) }>
+                                <li key={img.id} className={clsx({ 'hidden sm:block': i === 1 })}>
                                     <Image // use sizes
                                         className='w-70 h-100 object-center object-cover sm:w-80 sm:h-110 lg:w-90 lg:h-120'
-                                        alt={ img.alt }
-                                        src={ img.src }
-                                        width={ img.width }
-                                        height={ img.height }
+                                        alt={img.alt}
+                                        src={img.src}
+                                        width={img.width}
+                                        height={img.height}
                                     />
                                 </li>
                             )
                         }
                     </ul>
                     <div className='flex flex-col justify-center align-center text-center'>
-                        <h2 className='text-2xl/normal font-serif capitalize'>{ v.name }</h2>
-                        <small className='text-gold-900 font-sans font-semibold capitalize text-lg'>{ v.location }</small>
+                        <h2 className='text-2xl/normal font-serif capitalize'>{v.name}</h2>
+                        <small className='text-gold-900 font-sans font-semibold capitalize text-lg'>{v.location}</small>
                     </div>
                 </section>
             )

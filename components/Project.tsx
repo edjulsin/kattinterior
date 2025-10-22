@@ -1,4 +1,4 @@
-import { Items, Project as ProjectType, Item, Photo } from '@/type/editor';
+import { Items, Project as ProjectType, Item } from '@/type/editor';
 import { ab, extent, getLayout, ys } from '@/utility/fn';
 import Image from 'next/image';
 import React from 'react';
@@ -142,8 +142,6 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         ]
     }
 
-    console.log({ tablets, tabletExcludes })
-
     const styles = [
         join([
             ...responsiveStyles(
@@ -183,14 +181,6 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         )
     ].filter(v => v)
 
-    const generateSize = (width: number, item: Item, image: Photo) => {
-        const scale = Math.max(
-            item.w / (item.sw * image.width),
-            item.h / (item.sh * image.height)
-        )
-        return `(max-width: ${width}px) ${((image.width * scale) / width) * 100}vw`
-    }
-
     const [largest] = (layout.at(0) ?? ([])).toSorted((a: Item, b: Item) => {
         return (b.w * b.h) - (a.w * a.h)
     })
@@ -200,7 +190,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
     const formatAlt = (v: string) => `${v} Designed By ${domain}`
 
     return (
-        <article className='flex flex-col items-center justify-center gap-y-20 py-20 w-full'>
+        <article className='flex flex-col items-center justify-center gap-y-30 py-20 w-full'>
             <header className='flex flex-col items-center justify-center gap-y-15 text-center whitespace-pre-wrap w-full'>
                 <div className='flex flex-col items-center justify-center gap-y-5'>
                     <h1 className='font-serif text-2xl/relaxed sm:text-3xl/relaxed max-w-2xs sm:max-w-md'>{name}</h1>
@@ -220,10 +210,6 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                             {
                                 items.map(item => {
                                     const img = asset[item.src]
-                                    const small = item.id in mobile ? generateSize(template.mobile.width, mobile[item.id], img) : ''
-                                    const medium = item.id in tablet ? generateSize(template.tablet.width, tablet[item.id], img) : ''
-                                    const large = item.id in desktop ? generateSize(template.desktop.width, desktop[item.id], img) : ''
-                                    const sizes = [small, medium, large].filter(v => v).join(', ')
                                     return (
                                         <div
                                             key={item.id}
@@ -235,7 +221,6 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                                                 width={img.width}
                                                 height={img.height}
                                                 alt={formatAlt(img.alt)}
-                                                sizes={sizes}
                                                 priority={item.id === lcp.id}
                                             />
                                         </div>

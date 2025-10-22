@@ -46,8 +46,8 @@ const defaultThumbnail = {
 
 const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter: string) => void, filter: string, className?: string }) =>
     <DropdownMenu.Root>
-        <DropdownMenu.Trigger className={ clsx('flex justify-between items-center gap-x-1 group font-sans font-semibold rounded-lg cursor-pointer bg-neutral-200 outline-transparent', className) }>
-            <span>{ filter }</span>
+        <DropdownMenu.Trigger className={clsx('flex justify-between items-center gap-x-1 group font-sans font-semibold rounded-lg cursor-pointer bg-neutral-200 outline-transparent', className)}>
+            <span>{filter}</span>
             <span>
                 <AccessibleIcon.Root label='Filter posts'>
                     <CaretDownIcon className='text-neutral-500 transition-transform duration-200 group-data-[state=open]:rotate-180 group-hover:text-amber-600' />
@@ -57,12 +57,12 @@ const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter
         <DropdownMenu.Portal>
             <DropdownMenu.Content
                 align='end'
-                sideOffset={ 5 }
+                sideOffset={5}
                 asChild
             >
                 <DropdownMenu.RadioGroup
-                    value={ filter || 'All' }
-                    onValueChange={ filter => onFilterChange(filter) }
+                    value={filter || 'All'}
+                    onValueChange={filter => onFilterChange(filter)}
                     className='
                         flex 
                         flex-col 
@@ -89,16 +89,16 @@ const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter
                     {
                         filters.map(name =>
                             <DropdownMenu.RadioItem
-                                key={ name }
+                                key={name}
                                 className={
                                     clsx(
                                         'px-3 py-1.5 flex w-full justify center items-center cursor-pointer hover:bg-neutral-200 outline-transparent outline-1',
                                         { 'bg-neutral-200': filter === name }
                                     )
                                 }
-                                value={ name }
+                                value={name}
                             >
-                                { name }
+                                {name}
                             </DropdownMenu.RadioItem>
                         )
                     }
@@ -115,22 +115,22 @@ const List = ({ projects }: { projects: Project[] }) => {
             {
                 projects.map(project => {
                     const thumbnail = project.assets.length > 0
-                        ? project.assets.find(v => v.thumbnail) ?? project.assets[ 0 ]
+                        ? project.assets.find(v => v.thumbnail) ?? project.assets[0]
                         : defaultThumbnail
 
                     const time = formatISODate(now, project.created_at)
 
                     return (
-                        <li key={ project.id }>
-                            <Link href={ `/dashboard/editor/${project.id}` }>
+                        <li key={project.id}>
+                            <Link href={`/dashboard/editor/${project.id}`}>
                                 <figure className='flex flex-col justify-center items-center gap-y-3'>
                                     <div className='relative bg-neutral-200'>
-                                        <Image // use sizes
+                                        <Image
                                             className='w-70 h-90 object-cover object-center'
-                                            src={ thumbnail.src }
-                                            width={ thumbnail.width }
-                                            height={ thumbnail.height }
-                                            alt={ thumbnail.alt }
+                                            src={thumbnail.src}
+                                            width={thumbnail.width}
+                                            height={thumbnail.height}
+                                            alt={thumbnail.alt}
                                         />
                                         {
                                             project.featured
@@ -142,11 +142,11 @@ const List = ({ projects }: { projects: Project[] }) => {
                                                 : null
                                         }
                                         <div className='backdrop-blur-xl bg-neutral-600/50 w-full px-2 py-1 absolute bottom-0 left-0 flex justify-between items-center text-sm'>
-                                            <time className='text-light/70'>{ time }</time>
-                                            <small className='uppercase text-light/70 font-medium'>{ project.published ? 'published' : 'draft' }</small>
+                                            <time className='text-light/70'>{time}</time>
+                                            <small className='uppercase text-light/70 font-medium'>{project.published ? 'published' : 'draft'}</small>
                                         </div>
                                     </div>
-                                    <figcaption className='text-xl max-w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-center font-medium'>{ project.name || '(Untitled)' }</figcaption>
+                                    <figcaption className='text-xl max-w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-center font-medium'>{project.name || '(Untitled)'}</figcaption>
                                 </figure>
                             </Link>
                         </li>
@@ -158,12 +158,12 @@ const List = ({ projects }: { projects: Project[] }) => {
 }
 
 const Projects = ({ fetchCount, projects }: { fetchCount: number, projects: Project[] }) => {
-    const [ data, setData ] = useState(projects)
-    const [ filter, setFilter ] = useState('All')
-    const [ loader, setLoader ] = useState(projects.length >= fetchCount)
-    const [ error, setError ] = useState(false)
-    const [ search, setSearch ] = useState('')
-    const [ result, setResult ] = useState<Project[]>([])
+    const [data, setData] = useState(projects)
+    const [filter, setFilter] = useState('All')
+    const [loader, setLoader] = useState(projects.length >= fetchCount)
+    const [error, setError] = useState(false)
+    const [search, setSearch] = useState('')
+    const [result, setResult] = useState<Project[]>([])
 
     const action = () => createProject().then(
         id => { router.push('/dashboard/editor/' + id) },
@@ -178,7 +178,7 @@ const Projects = ({ fetchCount, projects }: { fetchCount: number, projects: Proj
     const onFilterChange = (filter: string) => {
         setFilter(filter)
         setLoader(false)
-        queries[ filter ](0, fetchCount - 1).then(
+        queries[filter](0, fetchCount - 1).then(
             v => {
                 setData(v)
                 setLoader(v.length >= fetchCount)
@@ -246,7 +246,7 @@ const Projects = ({ fetchCount, projects }: { fetchCount: number, projects: Proj
             const values = (count === 0 || count % fetchCount) ? ([]) : intersects
 
             values.forEach(() =>
-                (queries[ filter ])(count, count + fetchCount).then(
+                (queries[filter])(count, count + fetchCount).then(
                     v => {
                         setLoader(v.length >= fetchCount)
                         setData(data =>
@@ -266,12 +266,12 @@ const Projects = ({ fetchCount, projects }: { fetchCount: number, projects: Proj
     const terms = search.trim().toLocaleLowerCase()
 
     const filtered = terms
-        ? ([ ...data, ...result ]).filter(v =>
+        ? ([...data, ...result]).filter(v =>
             v.name.toLowerCase().includes(terms)
         ).reduce<Project[]>((a, b) => a.concat(
             a.some(v => v.id === b.id)
                 ? ([])
-                : ([ b ])
+                : ([b])
         ), [])
         : data
 
@@ -280,25 +280,25 @@ const Projects = ({ fetchCount, projects }: { fetchCount: number, projects: Proj
             <div className='z-50 sticky top-0 py-10 rounded-lg grid grid-cols-2 md:grid-cols-3 font-semibold size-full items-center justify-between text-sm md:text-base *:px-3 *:py-1.5'>
                 <button
                     className='bg-neutral-200 flex justify-center items-center gap-x-1 cursor-pointer rounded-lg justify-self-start group'
-                    onClick={ action }
+                    onClick={action}
                 >
                     <span>New Project</span>
                     <span><PlusIcon className='text-neutral-500 group-hover:text-amber-600' /></span>
                 </button>
                 <div className='flex justify-center items-center bg-neutral-200 rounded-xl justify-self-end md:justify-self-center focus-within:outline-1 focus-within:outline-amber-600'>
                     <MagnifyingGlassIcon className='text-neutral-500' />
-                    <input value={ search } onChange={ e => onSearch(e.target.value) } className='max-h-6 max-w-30 size-full p-2 outline-1 outline-transparent' placeholder='Find projects...' />
+                    <input value={search} onChange={e => onSearch(e.target.value)} className='max-h-6 max-w-30 size-full p-2 outline-1 outline-transparent' placeholder='Find projects...' />
                 </div>
-                <Filter filter={ filter } onFilterChange={ onFilterChange } className='hidden md:flex bg-light justify-self-end outline-2 outline-neutral-200' />
+                <Filter filter={filter} onFilterChange={onFilterChange} className='hidden md:flex bg-light justify-self-end outline-2 outline-neutral-200' />
             </div>
             <section className='py-15 flex flex-col justify-center items-center gap-y-5'>
-                <List projects={ filtered } />
-                { filtered.length === 0 && (!loader) ? <Message message={ 'No projects found' } /> : null }
-                { error ? <Message message='Database error' /> : null }
+                <List projects={filtered} />
+                {filtered.length === 0 && (!loader) ? <Message message={'No projects found'} /> : null}
+                {error ? <Message message='Database error' /> : null}
                 <Loader
-                    key={ (filter + search).length + result.length + data.length }
-                    enabled={ loader }
-                    callback={ onIntersecting }
+                    key={(filter + search).length + result.length + data.length}
+                    enabled={loader}
+                    callback={onIntersecting}
                 />
             </section>
         </section>

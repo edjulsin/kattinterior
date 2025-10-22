@@ -11,14 +11,14 @@ const send = (state: { message: string, token: string, name: string, email: stri
     )
 
 const Contact = () => {
-    const [ state, action, pending ] = useActionState(send, { other: '', name: '', email: '', message: '', success: false, error: false })
+    const [state, action, pending] = useActionState(send, { other: '', name: '', email: '', message: '', success: false, error: false })
 
-    const Failed = ({ error }: { error: string }) => (
+    const Failed = ({ error }: { error: string }) =>
         <div className='flex justify-center items-center gap-x-1'>
             <CrossCircledIcon className='text-red-500' />
-            <small className='text-base text-center'>{ error }</small>
+            <small className='text-base text-center'>{error}</small>
         </div>
-    )
+
     const Success = (
         <div className='flex justify-center items-center gap-x-1'>
             <CheckCircledIcon className='text-green-500' />
@@ -26,10 +26,11 @@ const Contact = () => {
         </div>
     )
 
-    const Error = ({ error }: { error: string }) => <small className='text-red-500 text-base'>{ error }</small>
+    const Error = ({ error }: { error: string }) =>
+        <small className='text-red-500 text-base'>{error}</small>
 
     return (
-        <form action={ action } className='grid grid-rows-[auto_auto_auto] items-center max-w-md size-full gap-y-4 p-4 font-sans rounded-md text-base font-semibold'>
+        <form action={action} className='grid grid-rows-[auto_auto_auto] items-center max-w-md size-full gap-y-4 p-4 font-sans rounded-md text-base font-semibold'>
             <div className='flex flex-col gap-y-1 size-full'>
                 <label className='font-bold text-md sr-only' htmlFor='name'>Name <span>*</span></label>
                 <input
@@ -38,11 +39,11 @@ const Contact = () => {
                     id='name'
                     type='text'
                     name='name'
-                    minLength={ 2 }
-                    maxLength={ 50 }
+                    minLength={2}
+                    maxLength={50}
                     required
                 />
-                { state.error && state.name ? <Error error={ state.name } /> : null }
+                {state.error && state.name ? <Error error={state.name} /> : null}
             </div>
             <div className='flex flex-col gap-y-1 size-full'>
                 <label className='font-bold text-md sr-only' htmlFor='email'>Email <span>*</span></label>
@@ -54,7 +55,7 @@ const Contact = () => {
                     name='email'
                     required
                 />
-                { state.error && state.email ? <Error error={ state.email } /> : null }
+                {state.error && state.email ? <Error error={state.email} /> : null}
             </div>
             <div className='flex flex-col gap-y-1 size-full'>
                 <label className='font-bold text-md sr-only' htmlFor='message'>Message <span>*</span></label>
@@ -63,19 +64,19 @@ const Contact = () => {
                     placeholder='Message'
                     id='message'
                     name='message'
-                    minLength={ 10 }
-                    maxLength={ 1000 }
+                    minLength={10}
+                    maxLength={1000}
                     required
                 />
-                { state.error && state.message ? <Error error={ state.message } /> : null }
+                {state.error && state.message ? <Error error={state.message} /> : null}
             </div>
             <button
                 className='font-bold rounded-lg cursor-pointer py-2 px-3 ring-neutral-200 ring-1 shadow-sm disabled:text-neutral-500 disabled:cursor-not-allowed'
-                disabled={ pending || state.success }
+                disabled={pending || state.success}
             >
                 Submit &rarr;
             </button>
-            { state.success ? Success : state.error && state.other ? <Failed error={ state.other } /> : null }
+            {state.success ? Success : state.error && state.other ? <Failed error={state.other} /> : null}
         </form>
     )
 }

@@ -1,4 +1,4 @@
-import { getPublishedProjects } from '@/action/server'
+import { getPublishedProjects } from '@/action/admin'
 import Article from '@/components/Article'
 import Articles from '@/components/Articles'
 import Bottom from '@/components/Bottom'
@@ -12,8 +12,10 @@ const count = 6
 
 const Message = ({ message }: { message: string }) =>
     <section className='flex flex-col justify-center items-center min-h-[50dvh]'>
-        <h1 className='text-center font-serif text-3xl max-w-lg leading-loose'>{ message }</h1>
+        <h1 className='text-center font-serif text-3xl max-w-lg leading-loose'>{message}</h1>
     </section>
+
+export const dynamic = 'force-static'
 
 export const metadata: Metadata = {
     title: 'Projects',
@@ -31,15 +33,15 @@ const ProjectsPage = async () => getPublishedProjects(0, count - 1).then(
                 {
                     projects.map((v, i) =>
                         <Article
-                            index={ i }
-                            key={ v.id }
-                            project={ v }
+                            index={i}
+                            key={v.id}
+                            project={v}
                         />
                     )
                 }
                 {
                     projects.length >= count
-                        ? <Articles start={ projects.length } count={ count } />
+                        ? <Articles start={projects.length} count={count} />
                         : null
                 }
             </Gallery>
@@ -54,7 +56,7 @@ const ProjectsPage = async () => getPublishedProjects(0, count - 1).then(
             })
         }
     >
-        { children }
+        {children}
         <Bottom />
     </Schema>
 )

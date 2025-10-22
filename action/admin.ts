@@ -67,3 +67,19 @@ export const getNextPublishedProject = async (limit: number, created_at: string)
                 return Promise.reject()
             }
         })
+
+export const getPublishedProject = async (slug: string) =>
+    client()
+        .from('projects')
+        .select('*')
+        .eq('published', true)
+        .eq('slug', slug)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .then((v) => {
+            if(v.error === null) {
+                return Promise.resolve(v.data ?? ([]))
+            } else {
+                return Promise.reject()
+            }
+        })

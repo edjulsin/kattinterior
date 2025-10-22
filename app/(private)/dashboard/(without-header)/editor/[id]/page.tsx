@@ -14,9 +14,15 @@ export const metadata: Metadata = {
 const EditorPage = async ({ params }: { params: Promise<{ id: string }> }) =>
     params.then(v =>
         getProject(v.id).then(
-            v => v.map(v =>
-                <Edit key={ v.id } project={ v } />
-            ),
+            v => {
+                if(v.length > 0) {
+                    return v.map(v =>
+                        <Edit key={v.id} project={v} />
+                    )
+                } else {
+                    notFound()
+                }
+            },
             () => { notFound() }
         )
     )

@@ -1,4 +1,4 @@
-import { getPublishedProject } from '@/action/server'
+import { getPublishedProject } from '@/action/admin'
 import { notFound } from 'next/navigation'
 import Project from '@/components/Project'
 import { isSlug } from 'validator'
@@ -74,14 +74,20 @@ const ProjectPage = async ({ params }: { params: Promise<{ slug: string }> }) =>
         const slug = (v.slug + '').trim().toLowerCase()
         if(isSlug(slug)) {
             return getPublishedProject(slug).then(
-                v => v.map((v: ProjectType) =>
-                    <Schema key={v.id} value={projectSchema(v)}>
-                        <Intersector />
-                        <Parallax selectors={['.parallax']} />
-                        <Project {...v} />
-                        <Next created_at={v.created_at} />
-                    </Schema>
-                ),
+                v => {
+                    if(v.length > 0) {
+                        return v.map((v: ProjectType) =>
+                            <Schema key={v.id} value={projectSchema(v)}>
+                                <Intersector />
+                                <Parallax selectors={['.parallax']} />
+                                <Project {...v} />
+                                <Next created_at={v.created_at} />
+                            </Schema>
+                        )
+                    } else {
+                        notFound()
+                    }
+                },
                 () => { notFound() }
             )
         } else {

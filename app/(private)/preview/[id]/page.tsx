@@ -16,14 +16,20 @@ export const metadata: Metadata = {
 const PreviewPage = async ({ params }: { params: Promise<{ id: string }> }) =>
     params.then(v =>
         getProject(v.id).then(
-            v => v.map((v: Project) =>
-                <React.Fragment key={ v.id }>
-                    <Intersector />
-                    <Parallax selectors={ [ '.parallax' ] } />
-                    <Preview project={ v } />
-                    <Next created_at={ v.created_at } />
-                </React.Fragment>
-            ),
+            v => {
+                if(v.length > 0) {
+                    return v.map((v: Project) =>
+                        <React.Fragment key={v.id}>
+                            <Intersector />
+                            <Parallax selectors={['.parallax']} />
+                            <Preview project={v} />
+                            <Next created_at={v.created_at} />
+                        </React.Fragment>
+                    )
+                } else {
+                    notFound()
+                }
+            },
             () => { notFound() }
         )
     )

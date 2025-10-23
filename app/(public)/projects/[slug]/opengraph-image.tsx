@@ -84,7 +84,7 @@ const Opengraph = async ({ params }: { params: { slug: string } }) => {
                         size
                     )
                 })
-                if(result.length) {
+                if(result.length > 0) {
                     const [response] = result
                     return response
                 } else {

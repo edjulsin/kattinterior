@@ -14,9 +14,7 @@ const meta = {
 export const metadata: Metadata = pageMeta(meta)
 
 const DashboardPage = () =>
-	<Schema
-		value={pageSchema(meta)}
-	>
+	<Schema value={pageSchema(meta)}>
 		<Dashboard />
 	</Schema>
 

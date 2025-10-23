@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 import Project from '@/components/Project'
 import { isSlug } from 'validator'
 import { Project as ProjectType } from '@/type/editor'
-import { Metadata } from "next";
 import projectSchema from '@/schemas/projectSchema'
 import Schema from '@/components/Schema'
 import Intersector from '@/components/Intersector'
@@ -28,8 +27,8 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
         if(isSlug(slug)) {
             return getPublishedProject(slug).then(
                 v => {
-                    const result = v.map((v: ProjectType): Metadata => {
-                        return projectMeta({
+                    const result = v.map((v: ProjectType) =>
+                        projectMeta({
                             title: v.title,
                             description: v.description,
                             path: `/projects/${v.slug}`,
@@ -38,36 +37,10 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
                             published_at: v.published_at,
                             updated_at: v.updated_at
                         })
-                    })
+                    )
                     if(result.length > 0) {
-                        const [opengraph] = result
-                        return opengraph
-                    } else {
-                        return {}
-                    }
-                },
-                () => { notFound() }
-            )
-        } else {
-            notFound()
-        }
-    })
-
-const ProjectPage = async ({ params }: { params: Promise<{ slug: string }> }) =>
-    params.then(v => {
-        const slug = (v.slug + '').trim().toLowerCase()
-        if(isSlug(slug)) {
-            return getPublishedProject(slug).then(
-                v => {
-                    if(v.length > 0) {
-                        return v.map((v: ProjectType) =>
-                            <Schema key={v.id} value={projectSchema(v)}>
-                                <Intersector />
-                                <Parallax selectors={['.parallax']} />
-                                <Project {...v} />
-                                <Next created_at={v.created_at} />
-                            </Schema>
-                        )
+                        const [metadata] = result
+                        return metadata
                     } else {
                         notFound()
                     }
@@ -78,5 +51,34 @@ const ProjectPage = async ({ params }: { params: Promise<{ slug: string }> }) =>
             notFound()
         }
     })
+
+const ProjectPage = async ({ params }: { params: Promise<{ slug: string }> }) =>
+    params.then(
+        v => {
+            const slug = (v.slug + '').trim().toLowerCase()
+            if(isSlug(slug)) {
+                return getPublishedProject(slug).then(
+                    (v: ProjectType[]) => {
+                        if(v.length > 0) {
+                            const [project] = v
+                            return (
+                                <Schema value={projectSchema(project)}>
+                                    <Intersector />
+                                    <Parallax selectors={['.parallax']} />
+                                    <Project {...project} />
+                                    <Next created_at={project.created_at} />
+                                </Schema>
+                            )
+                        } else {
+                            notFound()
+                        }
+                    },
+                    () => { notFound() }
+                )
+            } else {
+                notFound()
+            }
+        }
+    )
 
 export default ProjectPage

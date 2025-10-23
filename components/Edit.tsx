@@ -1560,7 +1560,7 @@ const Edit = ({ project }: { project: Project }) => {
 							noClick={true}
 							onDrop={uploadAssets}
 						>
-							<article className='flex flex-col items-center size-full py-20 gap-y-30'>
+							<article className='flex flex-col items-center size-full py-10 gap-y-30'>
 								<MainEditorHeader
 									errors={errors}
 									name={name}

@@ -132,7 +132,7 @@ const MainEditorHeader = ({ errors, name, location, story, tagline, setName, set
 	setTagline: (value: string) => void
 }) => (
 	<header className='w-full h-auto max-w-3xl flex flex-col justify-center items-center gap-y-10 *:w-full'>
-		<div className='flex flex-col gap-y-5 justify-center items-center font-serif'>
+		<div className='flex flex-col gap-y-3 justify-center items-center font-serif'>
 			<input
 				required={true}
 				className={clsx('w-full text-2xl py-2 px-4 text-center focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('name') })}

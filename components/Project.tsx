@@ -191,15 +191,15 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
 
     return (
         <article className='flex flex-col items-center justify-center gap-y-30 py-10 w-full'>
-            <header className='flex flex-col items-center justify-center gap-y-15 text-center whitespace-pre-wrap w-full'>
-                <div className='flex flex-col items-center justify-center gap-y-5'>
-                    <h1 className='font-serif text-2xl/relaxed sm:text-3xl/relaxed max-w-2xs sm:max-w-md'>{name}</h1>
-                    <h2 className='font-serif text-sm/loose sm:text-base/loose max-w-2xs sm:max-w-sm'>{location}</h2>
+            <header className='flex flex-col items-center justify-center gap-y-10 text-center whitespace-pre-wrap w-full'>
+                <div className='flex flex-col items-center justify-center gap-y-3'>
+                    <h1 className='font-serif text-2xl/relaxed md:text-3xl/relaxed max-w-2xs md:max-w-md capitalize'>{name}</h1>
+                    <h2 className='font-serif text-sm/relaxed md:text-base/relaxed max-w-2xs md:max-w-sm capitalize'>{location}</h2>
                 </div>
-                <p className='font-sans font-semibold text-base slide-from-bottom max-w-2xs sm:max-w-md md:max-w-lg md:text-lg'>
+                <p className='font-sans font-semibold text-base md:text-lg slide-from-bottom max-w-2xs md:max-w-md xl:max-w-lg'>
                     {story}
                 </p>
-                <h3 className='font-serif text-sm/loose sm:text-base/loose md:text-lg/loose slide-from-bottom max-w-2xs sm:max-w-lg md:max-w-xl lg:max-w-2xl'>
+                <h3 className='font-serif text-sm/loose md:text-base/loose xl:text-lg/loose slide-from-bottom max-w-2xs md:max-w-lg xl:max-w-2xl'>
                     {tagline}
                 </h3>
             </header>

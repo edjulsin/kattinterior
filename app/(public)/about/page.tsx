@@ -28,37 +28,42 @@ const AboutPage = () =>
             items-center
             max-w-2xs
             md:max-w-sm
-            lg:max-w-full
-            lg:grid-cols-[.45fr_1fr] 
-            lg:grid-rows-[1fr_auto]
+            xl:max-w-full
+            xl:grid-cols-[.4fr_1fr] 
+            xl:grid-rows-[1fr_auto]
         '
         >
             <Image
-                className='w-full h-auto object-cover object-center lg:row-span-2 max-w-sm unfold-y self-end anim-delay-100'
+                className='w-full h-auto object-cover object-center xl:row-span-2 max-w-sm unfold-y justify-self-center self-end anim-delay-100'
                 src={image1}
                 alt='Wall decoration by Chaterina'
                 width={1080}
                 height={1350}
                 priority={true}
             />
-            <div className='flex flex-col gap-y-5'>
-                <h1 className='text-xl/loose md:text-2xl/loose font-serif max-w-3xl full-slide-from-bottom anim-delay-[300ms]'>Luxury Interiors Rooted in Culture, Blending Tradition with Contemporary Style.</h1>
-                <p className='font-sans text-base md:text-lg font-semibold max-w-md full-slide-from-bottom'>We specialize in crafting luxury residential and commercial interiors, tailored for private clients and developers seeking timeless elegance and exceptional design.</p>
+            <div className='flex flex-col justify-center gap-y-5'>
+                <h1 className='text-lg/relaxed md:text-xl/relaxed xl:text-2xl/relaxed font-serif max-w-3xl full-slide-from-bottom anim-delay-[300ms]'>
+                    Luxury Interiors Rooted in Culture, Blending Tradition with Contemporary Style.
+                </h1>
+                <p className='font-sans text-base md:text-lg font-semibold max-w-lg full-slide-from-bottom'>
+                    We specialize in crafting luxury residential and commercial interiors, tailored for private clients and developers seeking timeless elegance and exceptional design.
+                </p>
             </div>
             <span className='block font-sans text-6xl text-center lg:text-left lg:self-end'>&darr;</span>
         </section>
-        <section className='flex flex-col lg:flex-row-reverse lg:items-start gap-x-15 justify-center items-center gap-y-10 max-w-2xs md:max-w-sm lg:max-w-4xl'>
+        <section className='flex flex-col xl:flex-row-reverse xl:items-start gap-y-10 justify-center items-center max-w-2xs md:max-w-sm xl:max-w-full'>
             <Image
-                className='w-full h-100 md:h-120 lg:h-140 rounded-tl-full rounded-tr-full object-cover object-center'
+                className='w-full h-auto aspect-[4_/_5.5] max-w-md rounded-tl-full rounded-tr-full object-cover object-center'
                 src={image2}
                 alt='Chaterina in an Art Gallery'
                 width={1080}
                 height={1350}
             />
-            <div className='max-w-sm'>
-                <h4 className='text-xl/loose md:text-3xl/loose font-serif slide-from-bottom'>Inspired by earth – ignited by fire</h4>
-                <br />
-                <div className='flex flex-col gap-y-5 font-sans text-base font-semibold md:text-lg slide-from-bottom anim-delay-[100ms]'>
+            <div className='flex flex-col justify-center gap-y-5'>
+                <h4 className='text-xl/relaxed md:text-2xl/relaxed xl:text-3xl/relaxed font-serif slide-from-bottom max-w-xl'>
+                    Grounded by the earth, awakened by the fire within
+                </h4>
+                <div className='max-w-sm flex flex-col gap-y-5 justify-center font-sans text-base font-semibold md:text-lg slide-from-bottom anim-delay-[100ms]'>
                     <p>Founded in 2018 by interior designer Chaterina Melissa, Katt Interior Studio is a Bali-based design atelier specializing in creating timeless and sophisticated spaces. </p>
                     <p>With years of experience designing high-end residential and commercial projects across Bali, Chaterina brings a deep understanding of aesthetics, functionality, and local craftsmanship.</p>
                     <p>At Katt interior studio, we believe every space tells a story. Our design philosophy blends modern elegance with Bali’s rich cultural heritage, crafting interiors that are not only visually stunning but also deeply connected to their surroundings. </p>

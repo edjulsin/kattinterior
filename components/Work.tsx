@@ -28,8 +28,8 @@ const Work = () => getFeaturedProject().then(
             const images = [...v.template.desktop.items.slice(0, 2).map(v => asset[v.src]), ...defaultImages].slice(0, 2)
 
             return (
-                <section key={v.id} className='flex flex-col gap-y-20 justify-center items-center'>
-                    <h3 className='font-serif text-gold-900 text-center text-xl/relaxed lg:text-2xl/relaxed'>FEATURED WORK</h3>
+                <section key={v.id} className='flex flex-col gap-y-10 md:gap-y-15 xl:gap-y-20 justify-center items-center'>
+                    <h3 className='font-serif text-gold-900 text-center text-xl/relaxed md:text-2xl/relaxed'>FEATURED WORK</h3>
                     <ul
                         className='
                             grid
@@ -59,8 +59,8 @@ const Work = () => getFeaturedProject().then(
                         }
                     </ul>
                     <div className='flex flex-col justify-center align-center text-center'>
-                        <h2 className='text-2xl/normal font-serif capitalize'>{v.name}</h2>
-                        <small className='text-gold-900 font-sans font-semibold capitalize text-lg'>{v.location}</small>
+                        <h2 className='text-xl/relaxed md:text-2xl/relaxed xl:text-3xl/relaxed font-serif capitalize'>{v.name}</h2>
+                        <small className='text-gold-900 font-sans font-semibold capitalize text-base md:text-lg'>{v.location}</small>
                     </div>
                 </section>
             )

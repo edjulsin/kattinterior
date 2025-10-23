@@ -19,22 +19,21 @@ const Contact = () => {
             <small className='text-base text-center'>{error}</small>
         </div>
 
-    const Success = (
+    const Success =
         <div className='flex justify-center items-center gap-x-1'>
             <CheckCircledIcon className='text-green-500' />
             <small className='text-base text-center'>Your message has been sent</small>
         </div>
-    )
 
     const Error = ({ error }: { error: string }) =>
         <small className='text-red-500 text-base'>{error}</small>
 
     return (
-        <form action={action} className='grid grid-rows-[auto_auto_auto] items-center max-w-md size-full gap-y-4 p-4 font-sans rounded-md text-base font-semibold'>
+        <form action={action} className='grid grid-rows-[auto_auto_auto] items-center max-w-lg size-full gap-y-10 p-4 font-sans rounded-md text-xl'>
             <div className='flex flex-col gap-y-1 size-full'>
                 <label className='font-bold text-md sr-only' htmlFor='name'>Name <span>*</span></label>
                 <input
-                    className='rounded-lg outline-1 outline-neutral-200 py-1 px-2 focus:outline-1 focus:outline-amber-500'
+                    className='border-b-1 border-b-gold-200 py-1 px-2 focus:outline-1 focus:outline-transparent focus:border-b-amber-500'
                     placeholder='Name'
                     id='name'
                     type='text'
@@ -48,7 +47,7 @@ const Contact = () => {
             <div className='flex flex-col gap-y-1 size-full'>
                 <label className='font-bold text-md sr-only' htmlFor='email'>Email <span>*</span></label>
                 <input
-                    className='rounded-lg outline-1 outline-neutral-200 py-1 px-2 focus:outline-1 focus:outline-amber-500'
+                    className='border-b-1 border-b-gold-200 py-1 px-2 focus:outline-1 focus:outline-transparent focus:border-b-amber-500'
                     placeholder='Email'
                     id='email'
                     type='email'
@@ -60,7 +59,7 @@ const Contact = () => {
             <div className='flex flex-col gap-y-1 size-full'>
                 <label className='font-bold text-md sr-only' htmlFor='message'>Message <span>*</span></label>
                 <textarea
-                    className='rounded-lg outline-1 outline-neutral-200 py-1 px-2 min-h-36 focus:outline-1 focus:outline-amber-500'
+                    className='border-b-1 border-b-gold-200 py-1 px-2 min-h-36 focus:outline-1 focus:outline-transparent focus:border-b-amber-500'
                     placeholder='Message'
                     id='message'
                     name='message'
@@ -68,10 +67,15 @@ const Contact = () => {
                     maxLength={1000}
                     required
                 />
+                <style jsx>{`
+                    #message {
+                        scrollbar-width: thin;
+                    }
+                `}</style>
                 {state.error && state.message ? <Error error={state.message} /> : null}
             </div>
             <button
-                className='font-bold rounded-lg cursor-pointer py-2 px-3 ring-neutral-200 ring-1 shadow-sm disabled:text-neutral-500 disabled:cursor-not-allowed'
+                className='font-semibold rounded-full cursor-pointer py-2 px-3 outline-1 outline-gold-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed'
                 disabled={pending || state.success}
             >
                 Submit &rarr;

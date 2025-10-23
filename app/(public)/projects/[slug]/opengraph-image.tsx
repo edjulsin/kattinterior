@@ -1,4 +1,5 @@
 import { getPublishedProject } from '@/action/server'
+import { getAllPublishedProjects } from '@/action/admin'
 import { Project } from '@/type/editor'
 import { isSlug } from 'validator'
 import { ImageResponse } from 'next/og'
@@ -13,6 +14,17 @@ const defaultOG = () => new ImageResponse(
     </div>,
     size
 )
+
+export const dynamic = 'force-static'
+
+export const generateStaticParams = async () =>
+    getAllPublishedProjects().then(
+        v => v.map((v: Project) => {
+            return { slug: v.slug }
+        }),
+        () => ([])
+    )
+
 export const generateImageMetadata = async ({ params }: { params: { slug: string } }) => {
     const slug = (params.slug + '').trim().toLowerCase()
     if(isSlug(slug)) {

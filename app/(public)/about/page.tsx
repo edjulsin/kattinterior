@@ -6,28 +6,21 @@ import pageSchema from '@/schemas/pageSchema';
 import Schema from '@/components/Schema';
 import Intersector from '@/components/Intersector';
 import Parallax from '@/components/Parallax';
+import pageMeta from '@/meta/page';
 
 const name = process.env.NEXT_PUBLIC_SITE_NAME as string
-
-export const metadata = {
-    title: 'About us',
+const meta = {
+    title: 'About',
     description: 'Learn about Katt Interior Studio — a Bali-based interior design studio specializing in residential and commercial spaces. Discover our story, design philosophy, and commitment to timeless, functional interiors.',
-    alternates: {
-        canonical: '/about'
-    }
+    path: '/about'
 }
 
+export const metadata = pageMeta(meta)
+
 const AboutPage = () =>
-    <Schema
-        value={
-            pageSchema({
-                path: '/about',
-                description: metadata.description as string
-            })
-        }
-    >
+    <Schema value={pageSchema(meta)}>
         <Intersector />
-        <Parallax selectors={ [ '.parallax' ] } />
+        <Parallax selectors={['.parallax']} />
         <section className='
             grid 
             gap-10
@@ -42,11 +35,11 @@ const AboutPage = () =>
         >
             <Image
                 className='w-full h-auto object-cover object-center lg:row-span-2 max-w-sm unfold-y self-end anim-delay-100'
-                src={ image1 }
+                src={image1}
                 alt='Wall decoration by Chaterina'
-                width={ 1080 }
-                height={ 1350 }
-                priority={ true }
+                width={1080}
+                height={1350}
+                priority={true}
             />
             <div className='flex flex-col gap-y-5'>
                 <h1 className='text-xl/loose md:text-2xl/loose font-serif max-w-3xl full-slide-from-bottom anim-delay-[300ms]'>Luxury Interiors Rooted in Culture, Blending Tradition with Contemporary Style.</h1>
@@ -57,10 +50,10 @@ const AboutPage = () =>
         <section className='flex flex-col lg:flex-row-reverse lg:items-start gap-x-15 justify-center items-center gap-y-10 max-w-2xs md:max-w-sm lg:max-w-4xl'>
             <Image
                 className='w-full h-100 md:h-120 lg:h-140 rounded-tl-full rounded-tr-full object-cover object-center'
-                src={ image2 }
+                src={image2}
                 alt='Chaterina in an Art Gallery'
-                width={ 1080 }
-                height={ 1350 }
+                width={1080}
+                height={1350}
             />
             <div className='max-w-sm'>
                 <h4 className='text-xl/loose md:text-3xl/loose font-serif slide-from-bottom'>Inspired by earth – ignited by fire</h4>
@@ -73,7 +66,7 @@ const AboutPage = () =>
                 </div>
             </div>
         </section>
-        <Bottom copy={ `Discover the art of living with ${name}` } />
+        <Bottom copy={`Discover the art of living with ${name}`} />
     </Schema>
 
 export default AboutPage

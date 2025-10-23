@@ -315,7 +315,7 @@ const RightMain = ({
 				{
 					['Residential', 'Commercial'].map(v =>
 						<div key={v} className='flex gap-x-2 items-center justify-center'>
-							<RadioGroup.Item value={v} id={v.toLowerCase()} className='size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-400'>
+							<RadioGroup.Item value={v.toLowerCase()} id={v.toLowerCase()} className='size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-400'>
 								<RadioGroup.Indicator className='rounded-full size-2 bg-neutral-600' />
 							</RadioGroup.Item>
 							<label className='text-base font-medium' htmlFor={v.toLowerCase()}>{v}</label>

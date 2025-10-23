@@ -1,17 +1,17 @@
-export type SchemaObject = Record<string, unknown>
+import type { WithContext, Thing } from 'schema-dts'
 
 const Schema = ({ value, children }: {
-    value: SchemaObject,
+    value: WithContext<Thing>,
     children: React.ReactNode
 }) =>
     <>
         <script
             type='application/ld+json'
-            dangerouslySetInnerHTML={ {
+            dangerouslySetInnerHTML={{
                 __html: JSON.stringify(value)
-            } }
+            }}
         />
-        { children }
+        {children}
     </>
 
 export default Schema

@@ -13,6 +13,18 @@ import Gallery from '@/components/Gallery'
 import Article from '@/components/Article'
 import Intersector from '@/components/Intersector'
 import Parallax from '@/components/Parallax'
+import { Metadata } from 'next'
+import pageMeta from '@/meta/page'
+
+export const dynamic = 'force-static'
+
+const meta = {
+    title: 'Services',
+    description: 'Explore expert interior design services by Katt Interior Studio in Bali. We specialize in modern, functional, and aesthetic spaces tailored to your needs.',
+    path: '/services'
+}
+
+export const metadata: Metadata = pageMeta(meta)
 
 const Projects = async () => getPublishedProjects(0, 5).then(
     (projects: Project[]) => projects.length > 0
@@ -35,25 +47,8 @@ const Projects = async () => getPublishedProjects(0, 5).then(
     () => ([])
 )
 
-export const dynamic = 'force-static'
-
-export const metadata = {
-    title: 'Services',
-    description: 'Explore expert interior design services by Katt Interior Studio in Bali. We specialize in modern, functional, and aesthetic spaces tailored to your needs.',
-    alternates: {
-        canonical: '/services'
-    }
-}
-
 const ServicesPage = async () =>
-    <Schema
-        value={
-            pageSchema({
-                path: '/services',
-                description: metadata.description as string
-            })
-        }
-    >
+    <Schema value={pageSchema(meta)}>
         <Intersector />
         <Parallax selectors={['.parallax']} />
         <section

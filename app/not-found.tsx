@@ -1,5 +1,10 @@
 import Link from 'next/link';
 
+export const metadata = {
+    title: 'Not Found',
+    description: 'The page you’re looking for doesn’t exist or has been moved.'
+}
+
 const NotFound = () =>
     <div className='flex flex-col max-w-7xl size-full gap-y-10 justify-center items-center *:w-full'>
         <main className='flex flex-col gap-y-40 justify-center items-center *:w-full'>

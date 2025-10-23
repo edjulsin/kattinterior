@@ -3,32 +3,27 @@ import { getAllContacts } from '@/action/server'
 import Contacts from '@/components/Contacts'
 import Error from '@/components/Error'
 import Schema from '@/components/Schema'
+import pageMeta from '@/meta/page'
 import pageSchema from '@/schemas/pageSchema'
 import { Metadata } from 'next'
 
 const name = process.env.NEXT_PUBLIC_SITE_NAME
-
-export const metadata: Metadata = {
+const meta = {
     title: 'Contacts',
     description: `View and search contact messages for ${name}`,
-    alternates: {
-        canonical: '/dashboard/contacts'
-    }
+    path: '/dashboard/contacts'
 }
 
+export const metadata: Metadata = pageMeta(meta)
+
 const ContactsDashboard = async () => getAllContacts(0, 20).then(
-    contacts => <Contacts fetchCount={ 20 } contacts={ contacts } />,
+    contacts => <Contacts fetchCount={20} contacts={contacts} />,
     () => <Error title='Database Error' />
 ).then(content =>
     <Schema
-        value={
-            pageSchema({
-                path: metadata.alternates?.canonical as string,
-                description: metadata.description as string
-            })
-        }
+        value={pageSchema(meta)}
     >
-        { content }
+        {content}
     </Schema>
 )
 

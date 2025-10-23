@@ -5,26 +5,43 @@ import Next from '@/components/Next'
 import { Project } from '@/type/editor'
 import React from 'react'
 import Intersector from '@/components/Intersector'
-import { Metadata } from 'next'
 import Parallax from '@/components/Parallax'
+import pageMeta from '@/meta/page'
+import Schema from '@/components/Schema'
+import pageSchema from '@/schemas/pageSchema'
 
-export const metadata: Metadata = {
-    title: 'Preview',
-    description: `Preview ${process.env.NEXT_PUBLIC_SITE_NAME} projects before publishing.`,
-}
+const name = process.env.NEXT_PUBLIC_SITE_NAME
+
+export const generateMetadata = async ({ params }: { params: Promise<{ id: string }> }) =>
+    params.then(v =>
+        pageMeta({
+            title: 'Preview',
+            description: `Preview ${name} project before publishing.`,
+            path: `/preview/${v.id}`
+        })
+    )
 
 const PreviewPage = async ({ params }: { params: Promise<{ id: string }> }) =>
     params.then(v =>
         getProject(v.id).then(
-            v => {
+            (v: Project[]) => {
                 if(v.length > 0) {
-                    return v.map((v: Project) =>
-                        <React.Fragment key={v.id}>
+                    const [project] = v
+                    return (
+                        <Schema
+                            value={
+                                pageSchema({
+                                    title: project.title,
+                                    description: project.description,
+                                    path: `/preview/${project.id}`
+                                })
+                            }
+                        >
                             <Intersector />
                             <Parallax selectors={['.parallax']} />
-                            <Preview project={v} />
-                            <Next created_at={v.created_at} />
-                        </React.Fragment>
+                            <Preview project={project} />
+                            <Next created_at={project.created_at} />
+                        </Schema>
                     )
                 } else {
                     notFound()

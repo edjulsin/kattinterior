@@ -4,40 +4,34 @@ import pageSchema from '@/schemas/pageSchema';
 import Schema from '@/components/Schema';
 import Intersector from '@/components/Intersector';
 import Parallax from '@/components/Parallax';
+import pageMeta from '@/meta/page';
 
-export const metadata = {
+const meta = {
     title: 'Commercial Interior Design',
     description: 'Create impactful and functional spaces for your business with Katt Interior Studio’s Commercial Design Package. Specialized interior design for retail, office, hospitality, and more in Bali.',
-    alternates: {
-        canonical: '/services/commercial-design'
-    }
+    path: '/services/commercial-design'
 }
 
+export const metadata = pageMeta(meta)
+
 const CommercialPage = () =>
-    <Schema
-        value={
-            pageSchema({
-                path: 'services/commercial-design',
-                description: metadata.description as string
-            })
-        }
-    >
+    <Schema value={pageSchema(meta)}>
         <Intersector />
-        <Parallax selectors={ [ '.parallax' ] } />
+        <Parallax selectors={['.parallax']} />
         <Guide
-            thumbnail={ {
+            thumbnail={{
                 src: image,
                 alt: 'Villa Arunika by Chaterina',
                 width: 1080,
                 height: 1440
-            } }
+            }}
             title='Commercial Design'
-            description={ [
+            description={[
                 'Discover our interior packages to explore our services and pricing. We can also tailor a package to fit your needs.',
                 'Ready to get started? Contact us for a complimentary consultation, and let’s bring your dream interior to life!'
-            ] }
+            ]}
             contentTitle='Our commercial code'
-            contentList={ [
+            contentList={[
                 [
                     'Critical Call',
                     'Here, we discuss your vision and budget—the first step toward a standout brand interior.'
@@ -82,7 +76,7 @@ const CommercialPage = () =>
                     'Creation',
                     'We perfect your interior with full-service styling, down to the finest details.'
                 ]
-            ] }
+            ]}
             contactCopy='For more details'
         />
     </Schema>

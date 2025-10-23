@@ -4,40 +4,34 @@ import pageSchema from '@/schemas/pageSchema';
 import Schema from '@/components/Schema';
 import Intersector from '@/components/Intersector';
 import Parallax from '@/components/Parallax';
+import pageMeta from '@/meta/page';
 
-export const metadata = {
+const meta = {
     title: 'Residential Interior Design',
     description: 'Professional residential interior design services for villas, apartments, and private homes in Bali. Designed to reflect your lifestyle and create a comfortable, personalized living space.',
-    alternates: {
-        canonical: '/services/residential-design'
-    }
+    path: '/services/residential-design'
 }
 
+export const metadata = pageMeta(meta)
+
 const ResidentialPage = () =>
-    <Schema
-        value={
-            pageSchema({
-                path: '/services/residential-design',
-                description: metadata.description as string
-            })
-        }
-    >
+    <Schema value={pageSchema(meta)}>
         <Intersector />
-        <Parallax selectors={ [ '.parallax' ] } />
+        <Parallax selectors={['.parallax']} />
         <Guide
-            thumbnail={ {
+            thumbnail={{
                 src: image,
                 alt: 'Villa Arunika by Chaterina',
                 width: 1080,
                 height: 1440
-            } }
+            }}
             title='Residential Design'
-            description={ [
+            description={[
                 'Discover our interior packages to explore our services and pricing. We can also tailor a package to fit your needs',
                 'Ready to get started? Contact us for a complimentary consultation, and let’s bring your dream interior to life!'
-            ] }
+            ]}
             contentTitle='Our residential packages'
-            contentList={ [
+            contentList={[
                 [
                     'Interior Interview',
                     'Get inspired with our Interior Interview—an in-depth brainstorming session where we explore your lifestyle, spaces, and design dreams, leaving you ready to transform your home.'
@@ -66,7 +60,7 @@ const ResidentialPage = () =>
                     'Styling',
                     'At Katt Interior Design Studio, we curate furniture, lighting, and décor to transform your space into your dream home. Share your style, and we’ll handle the shopping and styling—so you can simply relax and enjoy your new interior.'
                 ]
-            ] }
+            ]}
             contactCopy='Package pricing details'
         />
     </Schema>

@@ -1,5 +1,6 @@
 import { Project } from '@/type/editor'
 import { capitalize } from '@/utility/fn'
+import { CreativeWork, WithContext, ImageObject } from 'schema-dts'
 
 const development = process.env.NODE_ENV === 'development'
 const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
@@ -7,15 +8,15 @@ const name = process.env.NEXT_PUBLIC_SITE_NAME
 const instagram = process.env.NEXT_PUBLIC_INSTAGRAM_URL
 const banner = `${url}/banner.png`
 
-export default (project: Project) => {
-    const thumbnail = project.assets.find(v => v.thumbnail) ?? project.assets[ 0 ]
-    const image = thumbnail
+export default (project: Project): WithContext<CreativeWork> => {
+    const thumbnail = project.assets.find(v => v.thumbnail) ?? project.assets[0]
+    const image: ImageObject | ({}) = thumbnail
         ? ({
             "image": {
                 "@type": "ImageObject",
                 "url": thumbnail.src,
-                "width": thumbnail.width,
-                "height": thumbnail.height
+                "width": { "@type": "QuantitativeValue", value: thumbnail.width },
+                "height": { "@type": "QuantitativeValue", value: thumbnail.height }
             }
         })
         : ({})
@@ -23,10 +24,9 @@ export default (project: Project) => {
     return {
         "@context": "https://schema.org",
         "@type": "CreativeWork",
-        "name": `${project.title} | By ${name}`,
+        "name": `${project.name}`,
+        "description": project.story,
         "url": `${url}/projects/${project.slug}`,
-        "description": project.description,
-        ...image,
         "datePublished": project.published_at,
         "dateModified": project.updated_at,
         "locationCreated": {
@@ -37,7 +37,9 @@ export default (project: Project) => {
         "keywords": project.assets.map(v => v.alt.toLowerCase()).filter(v => v),
         "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": `${url}/projects/${project.slug}`
+            "@id": `${url}/projects/${project.slug}`,
+            "name": project.title,
+            "description": project.description
         },
         "author": {
             "@type": "Organization",
@@ -50,10 +52,11 @@ export default (project: Project) => {
             "logo": {
                 "@type": "ImageObject",
                 "url": banner,
-                "width": 1200,
-                "height": 630
+                "width": { "@type": "QuantitativeValue", value: 1200 },
+                "height": { "@type": "QuantitativeValue", value: 630 }
             },
             "sameAs": instagram
-        }
+        },
+        ...image
     }
 }

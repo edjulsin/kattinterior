@@ -10,10 +10,7 @@ import Intersector from '@/components/Intersector'
 import Next from '@/components/Next'
 import Parallax from '@/components/Parallax'
 import { getAllPublishedProjects } from '@/action/admin'
-
-const development = process.env.NODE_ENV === 'development'
-const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
-const name = process.env.NEXT_PUBLIC_SITE_NAME
+import projectMeta from '@/meta/project'
 
 export const dynamicParams = false
 
@@ -26,48 +23,35 @@ export const generateStaticParams = async () =>
     )
 
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) =>
-    params.then(
-        v => {
-            const slug = (v.slug + '').trim().toLowerCase()
-            if(isSlug(slug)) {
-                return getPublishedProject(slug).then(
-                    v => {
-                        const result = v.map((v: ProjectType): Metadata => {
-                            const path = `/projects/${v.slug}`
-                            return {
-                                title: v.title,
-                                description: v.description,
-                                alternates: {
-                                    canonical: path
-                                },
-                                openGraph: {
-                                    siteName: name,
-                                    title: v.title,
-                                    description: v.description,
-                                    url: url + path,
-                                    type: 'article',
-                                    publishedTime: v.published_at,
-                                    modifiedTime: v.updated_at,
-                                    tags: v.category,
-                                    authors: [`${url}/about`]
-                                }
-                            }
+    params.then(v => {
+        const slug = (v.slug + '').trim().toLowerCase()
+        if(isSlug(slug)) {
+            return getPublishedProject(slug).then(
+                v => {
+                    const result = v.map((v: ProjectType): Metadata => {
+                        return projectMeta({
+                            title: v.title,
+                            description: v.description,
+                            path: `/projects/${v.slug}`,
+                            tags: v.assets.map(v => v.alt),
+                            type: v.category,
+                            published_at: v.published_at,
+                            updated_at: v.updated_at
                         })
-                        if(result.length > 0) {
-                            const [opengraph] = result
-                            return opengraph
-                        } else {
-                            return {}
-                        }
-                    },
-                    () => ({})
-                )
-            } else {
-                return {}
-            }
-        },
-        () => ({})
-    )
+                    })
+                    if(result.length > 0) {
+                        const [opengraph] = result
+                        return opengraph
+                    } else {
+                        return {}
+                    }
+                },
+                () => { notFound() }
+            )
+        } else {
+            notFound()
+        }
+    })
 
 const ProjectPage = async ({ params }: { params: Promise<{ slug: string }> }) =>
     params.then(v => {

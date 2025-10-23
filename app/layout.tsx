@@ -27,16 +27,11 @@ const sans = localFont({
 })
 
 const development = process.env.NODE_ENV === 'development'
-const name = process.env.NEXT_PUBLIC_SITE_NAME
 const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
 
 export const metadata: Metadata = {
 	metadataBase: new URL(url as string),
 	referrer: 'strict-origin-when-cross-origin',
-	title: {
-		default: `${name} | Interior Designer`,
-		template: `%s | ${name}`
-	},
 	pinterest: { richPin: true }
 }
 

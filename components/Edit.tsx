@@ -132,10 +132,10 @@ const MainEditorHeader = ({ errors, name, location, story, tagline, setName, set
 	setTagline: (value: string) => void
 }) => (
 	<header className='w-full h-auto max-w-3xl flex flex-col justify-center items-center gap-y-10 *:w-full'>
-		<div className='flex flex-col gap-y-3 justify-center items-center font-serif'>
+		<div className='flex flex-col justify-center items-center font-serif'>
 			<input
 				required={true}
-				className={clsx('w-full text-2xl py-2 px-4 text-center focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('name') })}
+				className={clsx('text-2xl py-2 px-4 text-center focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('name') })}
 				type='text'
 				placeholder='Name'
 				value={name}
@@ -143,29 +143,27 @@ const MainEditorHeader = ({ errors, name, location, story, tagline, setName, set
 			/>
 			<input
 				required={true}
-				className={clsx('w-full text-sm py-2 px-4 text-center focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('location') })}
+				className={clsx('text-sm py-2 px-4 text-center focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('location') })}
 				type='text'
 				placeholder='Location'
 				value={location}
 				onChange={e => setLocation(e.target.value)}
 			/>
 		</div>
-		<div className='flex flex-col gap-y-10 justify-center items-center'>
-			<TextArea
-				required={true}
-				className={clsx('w-full py-2 px-4 max-w-lg font-sans text-lg font-semibold text-center focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('story') })}
-				placeholder='Story'
-				value={story}
-				onChange={setStory}
-			/>
-			<TextArea
-				required={true}
-				className={clsx('w-full py-2 px-4 font-serif text-lg leading-9 text-center focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('tagline') })}
-				placeholder='Tagline'
-				value={tagline}
-				onChange={setTagline}
-			/>
-		</div>
+		<TextArea
+			required={true}
+			className={clsx('py-2 px-4 max-w-lg font-sans text-lg font-semibold text-center focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('story') })}
+			placeholder='Story'
+			value={story}
+			onChange={setStory}
+		/>
+		<TextArea
+			required={true}
+			className={clsx('py-2 px-4 font-serif text-lg leading-9 text-center focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('tagline') })}
+			placeholder='Tagline'
+			value={tagline}
+			onChange={setTagline}
+		/>
 	</header>
 )
 

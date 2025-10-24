@@ -60,7 +60,7 @@ const Work = () => getFeaturedProject().then(
                     </ul>
                     <div className='flex flex-col justify-center align-center text-center'>
                         <h2 className='text-xl/relaxed md:text-2xl/relaxed xl:text-3xl/relaxed font-serif capitalize'>{v.name}</h2>
-                        <small className='text-gold-900 font-sans font-semibold capitalize text-base md:text-lg'>{v.location}</small>
+                        <small className='text-gold-900 font-sans font-semibold capitalize text-base/relaxed md:text-lg/relaxed'>{v.location}</small>
                     </div>
                 </section>
             )

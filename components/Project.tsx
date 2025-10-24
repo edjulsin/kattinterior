@@ -190,9 +190,9 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
     const formatAlt = (v: string) => `${v} Designed By ${domain}`
 
     return (
-        <article className='flex flex-col items-center justify-center gap-y-30 py-10 w-full'>
+        <article className='flex flex-col items-center justify-center gap-y-30 py-5 w-full'>
             <header className='flex flex-col items-center justify-center gap-y-10 text-center whitespace-pre-wrap w-full'>
-                <div className='flex flex-col items-center justify-center gap-y-3'>
+                <div className='flex flex-col items-center justify-center gap-y-5'>
                     <h1 className='font-serif text-2xl/relaxed md:text-3xl/relaxed max-w-2xs md:max-w-md capitalize'>{name}</h1>
                     <h2 className='font-serif text-sm/relaxed md:text-base/relaxed max-w-2xs md:max-w-sm capitalize'>{location}</h2>
                 </div>

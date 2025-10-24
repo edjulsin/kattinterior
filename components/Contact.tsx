@@ -75,7 +75,7 @@ const Contact = () => {
                 {state.error && state.message ? <Error error={state.message} /> : null}
             </div>
             <button
-                className='font-semibold rounded-full cursor-pointer py-2 px-3 outline-1 outline-gold-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                className='font-semibold rounded-lg cursor-pointer py-2 px-3 outline-1 outline-gold-200 disabled:opacity-50 disabled:cursor-not-allowed'
                 disabled={pending || state.success}
             >
                 Submit &rarr;

@@ -15,8 +15,6 @@ const defaultOG = () => new ImageResponse(
     size
 )
 
-export const dynamic = 'force-static'
-
 export const generateStaticParams = async () =>
     getAllPublishedProjects().then(
         v => v.map((v: Project) => {

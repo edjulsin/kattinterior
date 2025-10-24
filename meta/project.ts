@@ -14,7 +14,7 @@ const projectMeta = (v: Project): Metadata => ({
         siteName: name,
         title: `${v.title} | By ${name}`,
         description: v.description,
-        url: `${url}/${v.slug}`,
+        url: `${url}/projects/${v.slug}`,
         section: v.category,
         tags: v.assets.map(v => v.alt.toLowerCase()),
         authors: `${url}/about`,

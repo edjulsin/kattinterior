@@ -26,18 +26,8 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
         const slug = (v.slug + '').trim().toLowerCase()
         if(isSlug(slug)) {
             return getPublishedProject(slug).then(
-                v => {
-                    const result = v.map((v: ProjectType) =>
-                        projectMeta({
-                            title: v.title,
-                            description: v.description,
-                            path: `/projects/${v.slug}`,
-                            tags: v.assets.map(v => v.alt),
-                            type: v.category,
-                            published_at: v.published_at,
-                            updated_at: v.updated_at
-                        })
-                    )
+                (v: ProjectType[]) => {
+                    const result = v.map(projectMeta)
                     if(result.length > 0) {
                         const [metadata] = result
                         return metadata

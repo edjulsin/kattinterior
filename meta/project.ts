@@ -1,28 +1,25 @@
+import { Project } from '@/type/editor';
 import { Metadata } from "next";
 
 const development = process.env.NODE_ENV === 'development'
 const name = process.env.NEXT_PUBLIC_SITE_NAME as string
 const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
 
-const projectMeta = ({
-    title, description, path, type, tags, published_at, updated_at
-}: {
-    type: string, published_at: string, updated_at: string, tags: string[], title: string, description: string, path: string
-}): Metadata => ({
-    title: `${title} | By ${name}`,
-    description: description,
-    alternates: { canonical: url + path },
+const projectMeta = (v: Project): Metadata => ({
+    title: `${v.title} | By ${name}`,
+    description: v.description,
+    alternates: { canonical: `${url}/${v.slug}` },
     openGraph: {
         type: 'article',
         siteName: name,
-        title: `${title} | By ${name}`,
-        description: description,
-        url: url + path,
-        section: type,
-        tags: tags.map(v => v.toLowerCase()),
+        title: `${v.title} | By ${name}`,
+        description: v.description,
+        url: `${url}/${v.slug}`,
+        section: v.category,
+        tags: v.assets.map(v => v.alt.toLowerCase()),
         authors: `${url}/about`,
-        publishedTime: published_at,
-        modifiedTime: updated_at
+        publishedTime: v.published_at,
+        modifiedTime: v.updated_at
     }
 })
 

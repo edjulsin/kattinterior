@@ -1,5 +1,4 @@
-import { getPublishedProject } from '@/action/server'
-import { getAllPublishedProjects } from '@/action/admin'
+import { getAllPublishedProjects, getPublishedProject } from '@/action/admin'
 import { Project } from '@/type/editor'
 import { isSlug } from 'validator'
 import { ImageResponse } from 'next/og'

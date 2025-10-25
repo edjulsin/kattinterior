@@ -1,4 +1,4 @@
-import { getPublishedProject } from '@/action/admin'
+import { getPublishedProject, getAllPublishedProjects } from '@/action/admin'
 import { notFound } from 'next/navigation'
 import Project from '@/components/Project'
 import { isSlug } from 'validator'
@@ -8,7 +8,6 @@ import Schema from '@/components/Schema'
 import Intersector from '@/components/Intersector'
 import Next from '@/components/Next'
 import Parallax from '@/components/Parallax'
-import { getAllPublishedProjects } from '@/action/admin'
 import projectMeta from '@/meta/project'
 
 export const dynamicParams = false

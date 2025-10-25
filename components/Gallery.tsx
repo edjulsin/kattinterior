@@ -1,6 +1,14 @@
-const Gallery = ({ title, children }: { title: React.ReactNode, children: React.ReactNode }) =>
+import React from 'react'
+
+const Gallery = ({ heading, children }: { heading: string, children: React.ReactNode }) =>
     <section className='flex flex-col gap-y-16'>
-        {title}
+        {
+            React.createElement(
+                heading,
+                { className: 'text-center font-serif text-lg full-slide-from-bottom anim-delay-[100ms]' },
+                'Design Stories'
+            )
+        }
         <section
             className='
                 grid 

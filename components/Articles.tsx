@@ -7,7 +7,7 @@ import Article from './Article'
 import { Project } from '@/type/editor'
 import { getPublishedProjects } from '@/action/admin'
 
-const Articles = ({ start, count }: { start: number, count: number }) => {
+const Articles = ({ heading, start, count }: { heading: string, start: number, count: number }) => {
     const [data, setData] = useState<Project[]>([])
     const [loader, setLoader] = useState(true)
     const [error, setError] = useState(false)
@@ -39,6 +39,7 @@ const Articles = ({ start, count }: { start: number, count: number }) => {
             {
                 data.map((v, i) =>
                     <Article
+                        heading={heading}
                         index={i}
                         key={v.id}
                         project={v}

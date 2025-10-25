@@ -28,17 +28,12 @@ export const metadata: Metadata = pageMeta(meta)
 
 const Projects = async () => getPublishedProjects(0, 5).then(
     (projects: Project[]) => projects.length > 0
-        ? <Gallery
-            title={
-                <h4 className='text-center font-serif text-lg full-slide-from-bottom anim-delay-[100ms]'>
-                    Design Stories
-                </h4>
-            }
-        >
+        ? <Gallery heading='h4'>
 
             {
                 projects.map((v, i) =>
                     <Article
+                        heading='h5'
                         key={v.id}
                         index={i}
                         project={v}

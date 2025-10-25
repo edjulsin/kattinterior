@@ -30,17 +30,12 @@ const ProjectsPage = async () => getPublishedProjects(0, count - 1).then(
     (projects: Project[]) =>
         projects.length === 0
             ? <Message message='Oops! Looks like we don’t have any projects right now. Stay tuned!' />
-            : <Gallery
-                title={
-                    <h1 className='text-center font-serif text-lg full-slide-from-bottom anim-delay-[100ms]'>
-                        Design Stories
-                    </h1>
-                }
-            >
+            : <Gallery heading='h1'>
 
                 {
                     projects.map((v, i) =>
                         <Article
+                            heading='h2'
                             index={i}
                             key={v.id}
                             project={v}
@@ -49,7 +44,11 @@ const ProjectsPage = async () => getPublishedProjects(0, count - 1).then(
                 }
                 {
                     projects.length >= count
-                        ? <Articles start={projects.length} count={count} />
+                        ? <Articles
+                            heading='h2'
+                            start={projects.length}
+                            count={count}
+                        />
                         : null
                 }
             </Gallery>

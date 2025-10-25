@@ -13,7 +13,7 @@ const defaultVisit = {
 const Next = async ({ created_at }: { created_at: string }) =>
     <>
         <section className='text-center font-serif slide-from-bottom anim-delay-[100ms] text-sm/loose sm:text-base/loose md:text-lg/loose font-medium max-w-2xs sm:max-w-md md:max-w-xl lg:max-w-2xl'>
-            <p>Let’s talk about your project. <Link className='underline' href='/contact'>Contact</Link> us to discuss the possibilities for your space.</p>
+            <h4>Let’s talk about your project. <Link className='underline' href='/contact'>Contact</Link> us to discuss the possibilities for your space.</h4>
         </section>
         <section className='text-center flex flex-col justify-center items-center gap-y-5 max-w-md xl:max-w-lg'>
             {

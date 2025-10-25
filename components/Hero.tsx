@@ -27,6 +27,7 @@ const Hero = () =>
     >
         <div className='justify-self-center w-full h-auto relative overflow-clip flex flex-col justify-center items-center' style={{ aspectRatio: '300 / 465' }}>
             <video
+                preload='auto'
                 className='w-full h-auto object-contain object-center absolute'
                 style={{
                     maskImage: `url(${mask.src})`,
@@ -54,10 +55,10 @@ const Hero = () =>
             </p>
         </div>
         <div className='text-center md:text-left md:justify-self-start md:self-baseline md:translate-y-1/2 xl:self-center'>
-            <h1 className='font-serif text-lg/relaxed md:text-xl/relaxed xl:text-3xl/relaxed slide-from-left anim-delay-[500ms]'>
+            <h2 className='font-serif text-lg/relaxed md:text-xl/relaxed xl:text-3xl/relaxed slide-from-left anim-delay-[500ms]'>
                 <span>PERSONALIZED{' '}<span className='text-gold-900'>Interiors</span>{', '}</span>
                 <span>TIMELESS{' '}<span className='text-gold-900'>Beauty</span></span>
-            </h1>
+            </h2>
         </div>
     </section>
 

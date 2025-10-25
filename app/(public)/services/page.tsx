@@ -28,7 +28,14 @@ export const metadata: Metadata = pageMeta(meta)
 
 const Projects = async () => getPublishedProjects(0, 5).then(
     (projects: Project[]) => projects.length > 0
-        ? <Gallery title='Design Stories'>
+        ? <Gallery
+            title={
+                <h4 className='text-center font-serif text-lg full-slide-from-bottom anim-delay-[100ms]'>
+                    Design Stories
+                </h4>
+            }
+        >
+
             {
                 projects.map((v, i) =>
                     <Article
@@ -95,11 +102,11 @@ const ServicesPage = async () =>
                 Whether offering advice or full turn-key transformations—including art, decor, and furnishings—we bring originality to every project, from hotels and offices to mid-century homes.
             </p>
         </section>
-        <section className='text-center max-w-2xs sm:max-w-md'>
-            <h4 className='font-serif text-base/loose md:text-lg/loose xl:text-xl/loose slide-from-bottom anim-delay-[100ms]'>
+        <div className='text-center max-w-2xs sm:max-w-md'>
+            <p className='font-serif text-base/loose md:text-lg/loose xl:text-xl/loose slide-from-bottom anim-delay-[100ms]'>
                 Authentic spaces bring comfort and ease. Every interior tells a story—it’s a reflection of you.
-            </h4>
-        </section>
+            </p>
+        </div>
         <section className='max-w-2xs sm:max-w-sm md:max-w-md lg:max-w-full flex flex-col lg:flex-row gap-y-10 gap-x-10 justify-center items-center'>
             <div className='grid justify-center items-center'>
                 <div className='col-span-2 col-start-1 row-start-1 row-span-2'>
@@ -122,7 +129,7 @@ const ServicesPage = async () =>
                 </div>
             </div>
             <div className='flex flex-col justify-center gap-y-5 lg:max-w-md'>
-                <h3 className='font-serif text-2xl md:text-3xl slide-from-bottom anim-delay-[100ms]'>How we work</h3>
+                <h2 className='font-serif text-2xl md:text-3xl slide-from-bottom anim-delay-[100ms]'>How we work</h2>
                 <p className='font-sans text-base md:text-lg font-semibold slide-from-bottom'>
                     At Katt Interior Studio, we craft bespoke interiors with a meticulous, personalized approach.
                     From concept to execution, we design spaces that fit your lifestyle—considering everything from morning rituals to architectural history—ensuring your space not only looks beautiful but truly works for you.
@@ -149,13 +156,13 @@ const ServicesPage = async () =>
         </section>
         <section className='flex flex-col xl:flex-row items-center justify-center max-w-2xs md:max-w-sm xl:max-w-full xl:*:max-w-md text-center gap-x-35 gap-y-20'>
             <div className='flex flex-col gap-y-5'>
-                <h1 className='text-xl md:text-2xl font-serif'>Commercial design</h1>
+                <h3 className='text-xl md:text-2xl font-serif'>Commercial design</h3>
                 <p className='text-base md:text-lg font-sans font-semibold'>For commercial spaces—boutique B&Bs, hotels, offices, restaurants, and more—pricing is available upon request.</p>
                 <p className='text-base md:text-lg font-sans font-semibold'>Reach out for a personalized quote—we’re flexible and ready to work with you!</p>
                 <Link href='/services/commercial-design' className='text-sm md:text-base xl:text-lg font-sans font-semibold uppercase text-gold-950'>Read our code for commercial interiors</Link>
             </div>
             <div className='flex flex-col gap-y-5'>
-                <h1 className='text-xl md:text-2xl font-serif'>Residential design</h1>
+                <h3 className='text-xl md:text-2xl font-serif'>Residential design</h3>
                 <p className='text-base md:text-lg font-sans font-semibold'>For residential spaces, we offer fixed-price packages. Need something unique? We can tailor a custom package to fit your vision.</p>
                 <p className='text-base md:text-lg font-sans font-semibold'>Let’s transform your space into your dream home together.</p>
                 <Link href='/services/residential-design' className='font-sans text-sm md:text-base xl:text-lg font-semibold uppercase text-gold-950'>See our residential packages</Link>

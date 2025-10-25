@@ -49,7 +49,7 @@ const AboutPage = () =>
                     We specialize in crafting luxury residential and commercial interiors, tailored for private clients and developers seeking timeless elegance and exceptional design.
                 </p>
             </div>
-            <span className='block font-sans text-6xl text-center lg:text-left lg:self-end'>&darr;</span>
+            <span className='block font-sans text-6xl text-center xl:text-left xl:self-end'>&darr;</span>
         </section>
         <section className='flex flex-col xl:flex-row-reverse xl:items-start gap-y-10 justify-center items-center max-w-2xs md:max-w-sm xl:max-w-full'>
             <Image
@@ -60,9 +60,9 @@ const AboutPage = () =>
                 height={1350}
             />
             <div className='flex flex-col justify-center gap-y-5'>
-                <h4 className='text-xl/relaxed md:text-2xl/relaxed xl:text-3xl/relaxed font-serif slide-from-bottom max-w-xl'>
+                <h2 className='text-xl/relaxed md:text-2xl/relaxed xl:text-3xl/relaxed font-serif slide-from-bottom max-w-xl'>
                     Grounded by the earth, awakened by the fire within
-                </h4>
+                </h2>
                 <div className='max-w-sm flex flex-col gap-y-5 justify-center font-sans text-base font-semibold md:text-lg slide-from-bottom anim-delay-[100ms]'>
                     <p>Founded in 2018 by interior designer Chaterina Melissa, Katt Interior Studio is a Bali-based design atelier specializing in creating timeless and sophisticated spaces. </p>
                     <p>With years of experience designing high-end residential and commercial projects across Bali, Chaterina brings a deep understanding of aesthetics, functionality, and local craftsmanship.</p>

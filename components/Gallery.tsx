@@ -1,6 +1,6 @@
-const Gallery = ({ title, children }: { title: string, children: React.ReactNode }) =>
+const Gallery = ({ title, children }: { title: React.ReactNode, children: React.ReactNode }) =>
     <section className='flex flex-col gap-y-16'>
-        <h5 className='text-center font-serif text-lg full-slide-from-bottom anim-delay-[100ms]'>{ title }</h5>
+        {title}
         <section
             className='
                 grid 
@@ -20,7 +20,7 @@ const Gallery = ({ title, children }: { title: string, children: React.ReactNode
                 xl:gap-y-30
             '
         >
-            { children }
+            {children}
         </section>
     </section>
 

@@ -362,7 +362,7 @@ export const formatISODate = (now: Date, time: string) => {
 }
 
 export const capitalize = (string: string) => {
-    const splitted = string.split(' ')
+    const splitted = string.split(' ').filter(v => v)
     const capitalized = splitted.map(([x, ...xs]) => {
         return [x.toUpperCase(), ...xs].join('')
     })

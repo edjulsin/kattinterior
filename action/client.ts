@@ -13,16 +13,16 @@ const client = () => createBrowserClient(
 
 export const uploadFiles = (
     signal: AbortSignal,
-    files: [ string, Blob ][]
+    files: [string, Blob][]
 ) =>
     client().auth.getSession().then(({ data }) =>
         data?.session?.access_token
             ? Promise.all(
-                files.map(([ name, file ]) =>
+                files.map(([name, file]) =>
                     new Promise<void>((resolve, reject) => {
                         const upload = new tus.Upload(file, {
                             endpoint: `${process.env.NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/upload/resumable`,
-                            retryDelays: [ 0, 3000, 5000, 10000, 20000 ],
+                            retryDelays: [0, 3000, 5000, 10000, 20000],
                             removeFingerprintOnSuccess: true,
                             headers: {
                                 authorization: `Bearer ${data.session.access_token}`
@@ -49,7 +49,7 @@ export const uploadFiles = (
                         upload.findPreviousUploads().then(
                             v => {
                                 if(v.length) {
-                                    upload.resumeFromPreviousUpload(v[ 0 ])
+                                    upload.resumeFromPreviousUpload(v[0])
                                 }
 
                                 upload.start()
@@ -82,7 +82,7 @@ export const signOut = () => client().auth.signOut()
 
 export const createProject = async () => {
     const id = UUIDv7()
-    const category = 'Residential'
+    const category = 'residential'
     const template = {
         desktop: {
             edited: false,

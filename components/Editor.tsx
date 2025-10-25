@@ -756,10 +756,11 @@ const toPoints = (item: Box) => ([...corners(item), center(item)])
 
 const xs = (box: Box) => ([box.x, box.x + box.w * .5, box.x + box.w])
 const ys = (box: Box) => ([box.y, box.y + box.h * .5, box.y + box.h])
-const smaller = (a: number, b: number) => Math.min(
-    Math.abs(a),
-    Math.abs(b)
-)
+const smaller = (a: number, b: number) => {
+    const c = Math.abs(a)
+    const d = Math.abs(b)
+    return Math.min(c, d) === c ? a : b
+}
 const smallest = (a: Box | IndexedBox, b: Box | IndexedBox) => {
     const reducer = (xs: number[], ys: number[]) => {
         const [x, ...xss] = xs

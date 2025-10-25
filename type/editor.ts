@@ -48,7 +48,7 @@ export type Project = {
     published_at: string,
     featured: boolean,
     published: boolean,
-    category: 'Residential' | 'Commercial',
+    category: 'residential' | 'commercial',
     name: string,
     location: string,
     story: string,

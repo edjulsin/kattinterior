@@ -16,7 +16,7 @@ import downscale from 'downscale';
 import { v7 as UUIDv7 } from 'uuid'
 import Droppable from './Droppable';
 import { useDrag, UseDragListener } from '@/hook/useDrag';
-import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternative } from '@/utility/fn';
+import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternative, capitalize } from '@/utility/fn';
 import { rebuildPath } from '@/action/server';
 
 const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
@@ -311,12 +311,12 @@ const RightMain = ({
 			<small className='text-base font-semibold text-neutral-500'>Category:</small>
 			<RadioGroup.Root value={category} onValueChange={v => setCategory(v as Project['category'])} className='flex gap-x-4'>
 				{
-					['Residential', 'Commercial'].map(v =>
+					['residential', 'commercial'].map(v =>
 						<div key={v} className='flex gap-x-2 items-center justify-center'>
-							<RadioGroup.Item value={v.toLowerCase()} id={v.toLowerCase()} className='size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-400'>
+							<RadioGroup.Item value={v} id={v} className='size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-400'>
 								<RadioGroup.Indicator className='rounded-full size-2 bg-neutral-600' />
 							</RadioGroup.Item>
-							<label className='text-base font-medium' htmlFor={v.toLowerCase()}>{v}</label>
+							<label className='text-base font-medium' htmlFor={v}>{capitalize(v)}</label>
 						</div>
 					)
 				}

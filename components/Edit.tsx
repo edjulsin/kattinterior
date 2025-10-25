@@ -16,7 +16,7 @@ import downscale from 'downscale';
 import { v7 as UUIDv7 } from 'uuid'
 import Droppable from './Droppable';
 import { useDrag, UseDragListener } from '@/hook/useDrag';
-import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternative, capitalize } from '@/utility/fn';
+import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternative, capitalize, groupByRow, extent, ab } from '@/utility/fn';
 import { rebuildPath } from '@/action/server';
 
 const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
@@ -1536,6 +1536,71 @@ const Edit = ({ project }: { project: Project }) => {
 		setBucket(false)
 	}
 
+	const onAutoFormat = () =>
+		updateLayout(layout => {
+			if(layout.items.length > 0) {
+				const [r, ...rs] = groupByRow(layout.items).map(row => {
+					const [min, max] = extent(v => ([v.x, v.x + v.w]), row)
+					const delta = (layout.width / 2) - ((min + max) / 2)
+					return row.map(v =>
+						applyBoxConstrain(
+							{ x: 0, y: 0, w: layout.width, h: Infinity },
+							{ ...v, x: v.x + delta }
+						)
+					)
+				})
+				const delta = -1 * Math.min(
+					...r.map(v => v.y)
+				)
+				const m = .035
+				const gs = [1, 2, 3, 4, 5].map(v => v * m * layout.width)
+
+				const items = rs.reduce(
+					(a, b) => {
+						const c = a[a.length - 1]
+						const min = Math.max(
+							...c.map(v => v.y + v.h)
+						)
+						const max = Math.min(
+							...b.map(v => v.y)
+						)
+						const diff = max - min
+						const [delta] = gs.toSorted((a, b) =>
+							Math.abs(a - diff) - Math.abs(b - diff)
+						)
+						const d = b.map(v => {
+							return {
+								...v,
+								y: Math.max(
+									0,
+									v.y + (delta - diff)
+								)
+							}
+						})
+						return [...a, d]
+					},
+					[
+						r.map(v => {
+							return {
+								...v,
+								y: Math.max(0, v.y + delta)
+							}
+						})
+					]
+				).flat()
+
+				const height = items.length > 0
+					? Math.max(
+						...items.map(v => v.y + v.h)
+					)
+					: 0
+
+				return { ...layout, height, items }
+			} else {
+				return layout
+			}
+		})
+
 	return (
 		<>
 			<section
@@ -1593,7 +1658,7 @@ const Edit = ({ project }: { project: Project }) => {
 				{
 					assets.length > 0
 						? <div className='sticky bottom-0 left-0 right-0 size-full flex justify-center items-center min-h-20 pointer-events-none z-50'>
-							<ul className='flex justify-center items-center rounded-md p-1 bg-light outline-1 outline-neutral-200 *:size-full gap-x-5 *:*:flex *:*:justify-center *:*:items-center *:*:p-2 *:*:rounded-md *:*:hover:bg-neutral-200 *:*:pointer-events-auto *:*:cursor-pointer'>
+							<ul className='flex justify-center items-center rounded-md p-1 bg-light outline-1 outline-neutral-200 *:size-full gap-x-5 *:*:flex *:*:justify-center *:*:items-center *:*:p-2 *:*:rounded-md *:*:hover:not-disabled:bg-neutral-200 *:*:pointer-events-auto *:*:cursor-pointer'>
 								<li>
 									<button
 										className={clsx('relative', { 'bg-neutral-200': bucket })}
@@ -1613,7 +1678,10 @@ const Edit = ({ project }: { project: Project }) => {
 								</li>
 								<li>
 									<DropdownMenu.Root>
-										<DropdownMenu.Trigger className='data-[state=open]:bg-neutral-200 outline-1 outline-transparent'>
+										<DropdownMenu.Trigger
+											disabled={layout.items.length === 0}
+											className='data-[state=open]:bg-neutral-200 outline-1 outline-transparent disabled:opacity-50 disabled:cursor-not-allowed'
+										>
 											<AccessibleIcon.Root label='Show layouts options'>
 												<GearIcon />
 											</AccessibleIcon.Root>
@@ -1638,6 +1706,13 @@ const Edit = ({ project }: { project: Project }) => {
 													p-1
 												'
 											>
+												<DropdownMenu.Item
+													key='autoformat'
+													className='capitalize rounded-md px-3 py-1.5 cursor-pointer hover:bg-neutral-200 outline-1 outline-transparent'
+													onSelect={onAutoFormat}
+												>
+													Apply auto layout
+												</DropdownMenu.Item>
 												{
 													breakpoints.filter(v => v !== breakpoint).map(screen =>
 														<DropdownMenu.Item

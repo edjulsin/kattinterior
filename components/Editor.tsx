@@ -148,7 +148,7 @@ const Editable = ({
     setAsThumbnail,
     setImageAlt
 }: EditableProps) => {
-    const [alt, setAlt] = useState('')
+    const [alt, setAlt] = useState(image.alt)
     const [cropMode, setCropMode] = useState(false)
     const [dialog, setDialog] = useState(false)
     const [error, setError] = useState(false)

@@ -2,7 +2,7 @@
 
 'use client'
 
-import { MoveIcon, ResetIcon, CrossCircledIcon, CheckCircledIcon, TrashIcon, Share2Icon, PlayIcon, UploadIcon, CaretDownIcon, DesktopIcon, MobileIcon, BoxIcon, ViewVerticalIcon, InfoCircledIcon, ImageIcon, ChevronLeftIcon, GearIcon } from '@radix-ui/react-icons'
+import { MoveIcon, ResetIcon, CrossCircledIcon, CheckCircledIcon, TrashIcon, Share2Icon, PlayIcon, UploadIcon, CaretDownIcon, DesktopIcon, MobileIcon, BoxIcon, ViewVerticalIcon, InfoCircledIcon, ImageIcon, ChevronLeftIcon, GearIcon, LightningBoltIcon } from '@radix-ui/react-icons'
 import { AlertDialog, Toast, DropdownMenu, Tooltip, AccessibleIcon, Switch, RadioGroup } from 'radix-ui'
 import React, { MouseEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
@@ -1677,6 +1677,17 @@ const Edit = ({ project }: { project: Project }) => {
 									</button>
 								</li>
 								<li>
+									<button
+										className='disabled:opacity-50 disabled:cursor-not-allowed'
+										disabled={layout.items.length === 0}
+										onClick={onAutoFormat}
+									>
+										<AccessibleIcon.Root label='Auto format'>
+											<LightningBoltIcon />
+										</AccessibleIcon.Root>
+									</button>
+								</li>
+								<li>
 									<DropdownMenu.Root>
 										<DropdownMenu.Trigger
 											disabled={layout.items.length === 0}
@@ -1706,13 +1717,6 @@ const Edit = ({ project }: { project: Project }) => {
 													p-1
 												'
 											>
-												<DropdownMenu.Item
-													key='autoformat'
-													className='capitalize rounded-md px-3 py-1.5 cursor-pointer hover:bg-neutral-200 outline-1 outline-transparent'
-													onSelect={onAutoFormat}
-												>
-													Apply auto layout
-												</DropdownMenu.Item>
 												{
 													breakpoints.filter(v => v !== breakpoint).map(screen =>
 														<DropdownMenu.Item

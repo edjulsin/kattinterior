@@ -96,7 +96,6 @@ const effects = [
 ]
 
 type EditableProps = {
-    onCenter: ItemCallback,
     onContextMenu: ItemCallback,
     active: boolean,
     interactive: boolean,
@@ -125,7 +124,6 @@ type EditableProps = {
 const Editable = ({
     sizeExtent: [[wMin, wMax], [hMin, hMax]],
     translateExtent: [[xMin, xMax], [yMin, yMax]],
-    onCenter,
     onDuplicate,
     onEffect,
     active,
@@ -207,271 +205,242 @@ const Editable = ({
 
     useEffect(() => () => setCropMode(false), [active])
 
+    const resize = (tx: (dx: number) => number, ty: (dy: number) => number, dx: number, dy: number, item: Item) => {
+        const m = Math.max(dx, dy)
+        const rx = m === dx ? 1 : item.w / item.h
+        const ry = m === dy ? 1 : item.h / item.w
+        const d = clamp(
+            Math.max((wMin - item.w) / rx, (hMin - item.h) / ry),
+            Math.min((wMax - item.w) / rx, (hMax - item.h) / ry),
+            m
+        )
+        const mx = d * rx
+        const my = d * ry
+        return applyBoxConstrain(
+            { x: xMin, y: yMin, w: xMax, h: yMax },
+            {
+                ...item,
+                x: item.x + tx(mx),
+                y: item.y + ty(my),
+                w: item.w + mx,
+                h: item.h + my
+            }
+        )
+    }
+
     const resizers = [
         {
             style: 'top-0 left-[4px] right-[4px] h-[8px] -translate-y-[50%] opacity-0 cursor-n-resize', // top-center
-            callback: ({ dy, item }: Result): Item => {
-                const ratio = item.w / item.h
-                const delta = clamp(
-                    Math.min(wMin - item.w, hMin - item.h),
-                    Math.min(
-                        (wMax - item.w) / ratio,
-                        (hMax - item.h) * ratio
-                    ),
-                    -dy
+            callback: ({ dy, item }: Result): Item =>
+                resize(
+                    x => x * .5 * -1,
+                    y => y * -1,
+                    -Infinity,
+                    -dy,
+                    item
                 )
-
-                return applyBoxConstrain({ x: xMin, y: yMin, w: xMax, h: yMax }, {
-                    ...item,
-                    x: item.x - delta * ratio * .5,
-                    y: item.y - delta,
-                    w: item.w + delta * ratio,
-                    h: item.h + delta
-                }) as Item
-            }
         },
         {
             style: 'bottom-0 left-[4px] right-[4px] h-[8px] translate-y-[50%] opacity-0 cursor-s-resize', // bottom-center
-            callback: ({ dy, item }: Result): Item => {
-                const ratio = item.w / item.h
-                const delta = clamp(
-                    Math.min(wMin - item.w, hMin - item.h),
-                    Math.min(
-                        (wMax - item.w) / ratio,
-                        (hMax - item.h) * ratio
-                    ),
-                    dy
+            callback: ({ dy, item }: Result): Item =>
+                resize(
+                    x => x * .5 * -1,
+                    y => 0,
+                    -Infinity,
+                    dy,
+                    item
                 )
-                return applyBoxConstrain({ x: xMin, y: yMin, w: xMax, h: yMax }, {
-                    ...item,
-                    x: item.x + delta * ratio * -.5,
-                    w: item.w + delta * ratio,
-                    h: item.h + delta
-                }) as Item
-            }
         },
         {
             style: 'left-0 top-[4px] bottom-[4px] w-[8px] -translate-x-[50%] opacity-0 cursor-w-resize', // left-center
-            callback: ({ dx, item }: Result): Item => {
-                const ratio = item.h / item.w
-                const delta = clamp(
-                    Math.min(wMin - item.w, hMin - item.h),
-                    Math.min(wMax - item.w, hMax - item.h),
-                    -dx
+            callback: ({ dx, item }: Result): Item =>
+                resize(
+                    x => x * -1,
+                    y => y * .5 * -1,
+                    -dx,
+                    -Infinity,
+                    item
                 )
-                return applyBoxConstrain({ x: xMin, y: yMin, w: xMax, h: yMax }, {
-                    ...item,
-                    x: item.x + delta * -1,
-                    y: item.y + delta * ratio * -.5,
-                    w: item.w + delta,
-                    h: item.h + delta * ratio
-                }) as Item
-            }
         },
         {
             style: 'right-0 top-[4px] bottom-[4px] w-[8px] translate-x-[50%] opacity-0 cursor-e-resize', // right-center
-            callback: ({ dx, item }: Result): Item => {
-                const ratio = item.h / item.w
-                const delta = clamp(
-                    Math.min(wMin - item.w, hMin - item.h),
-                    Math.min(wMax - item.w, hMax - item.h),
-                    dx
+            callback: ({ dx, item }: Result): Item =>
+                resize(
+                    x => 0,
+                    y => y * .5 * -1,
+                    dx,
+                    -Infinity,
+                    item
                 )
-                return applyBoxConstrain({ x: xMin, y: yMin, w: xMax, h: yMax }, {
-                    ...item,
-                    x: item.x,
-                    y: item.y + delta * ratio * -.5,
-                    w: item.w + delta,
-                    h: item.h + delta * ratio
-                }) as Item
-            }
         },
         {
             style: 'left-0 top-0 cursor-nwse-resize size-2 -translate-x-[50%] -translate-y-[50%] outline-1 outline-blue-500 bg-white', // top-left
-            callback: ({ dx, dy, item }: Result): Item => {
-                const ratio = item.w / item.h
-                const delta = clamp(
-                    Math.min(wMin - item.w, hMin - item.h),
-                    Math.min(
-                        (wMax - item.w) / ratio,
-                        (hMax - item.h) * ratio
-                    ),
-                    Math.max(dx * -1, dy * -1)
+            callback: ({ dx, dy, item }: Result): Item =>
+                resize(
+                    x => x * -1,
+                    y => y * -1,
+                    -dx,
+                    -dy,
+                    item
                 )
-                return applyBoxConstrain({ x: xMin, y: yMin, w: xMax, h: yMax }, {
-                    ...item,
-                    x: item.x + delta * ratio * -1,
-                    y: item.y + delta * -1,
-                    w: item.w + delta * ratio,
-                    h: item.h + delta
-                }) as Item
-            }
         },
         {
             style: 'top-0 right-0 cursor-nesw-resize size-2 translate-x-[50%] -translate-y-[50%] outline-1 outline-blue-500 bg-white', // top-right
-            callback: ({ dx, dy, item }: Result): Item => {
-                const ratio = item.w / item.h
-                const delta = clamp(
-                    Math.min(wMin - item.w, hMin - item.h),
-                    Math.min(
-                        (wMax - item.w) / ratio,
-                        (hMax - item.h) * ratio
-                    ),
-                    Math.max(dx, dy * -1)
+            callback: ({ dx, dy, item }: Result): Item =>
+                resize(
+                    x => 0,
+                    y => y * -1,
+                    dx,
+                    -dy,
+                    item
                 )
-                return applyBoxConstrain({ x: xMin, y: yMin, w: xMax, h: yMax }, {
-                    ...item,
-                    x: item.x,
-                    y: item.y + delta * -1,
-                    w: item.w + delta * ratio,
-                    h: item.h + delta
-                }) as Item
-            }
         },
         {
             style: 'right-0 bottom-0 cursor-nwse-resize size-2 translate-x-[50%] translate-y-[50%] outline-1 outline-blue-500 bg-white', // bottom-right
-            callback: ({ dx, dy, item }: Result): Item => {
-                const ratio = item.w / item.h
-                const delta = clamp(
-                    Math.min(wMin - item.w, hMin - item.h),
-                    Math.min(
-                        (wMax - item.w) / ratio,
-                        (hMax - item.h) * ratio
-                    ),
-                    Math.max(dx, dy)
+            callback: ({ dx, dy, item }: Result): Item =>
+                resize(
+                    x => 0,
+                    y => 0,
+                    dx,
+                    dy,
+                    item
                 )
-                return applyBoxConstrain({ x: xMin, y: yMin, w: xMax, h: yMax }, {
-                    ...item,
-                    x: item.x,
-                    y: item.y,
-                    w: item.w + delta * ratio,
-                    h: item.h + delta
-                }) as Item
-            }
         },
         {
             style: 'bottom-0 left-0 cursor-nesw-resize size-2 -translate-x-[50%] translate-y-[50%] outline-1 outline-blue-500 bg-white', // bottom-left
-            callback: ({ dx, dy, item }: Result): Item => {
-                const ratio = item.w / item.h
-                const delta = clamp(
-                    Math.min(wMin - item.w, hMin - item.h),
-                    Math.min(
-                        (wMax - item.w) / ratio,
-                        (hMax - item.h) * ratio
-                    ),
-                    Math.max(dx * -1, dy)
+            callback: ({ dx, dy, item }: Result): Item =>
+                resize(
+                    x => x * -1,
+                    y => 0,
+                    -dx,
+                    dy,
+                    item
                 )
-                return applyBoxConstrain({ x: xMin, y: yMin, w: xMax, h: yMax }, {
-                    ...item,
-                    x: item.x + delta * ratio * -1,
-                    y: item.y,
-                    w: item.w + delta * ratio,
-                    h: item.h + delta
-                }) as Item
-            }
         }
     ]
+
+    const crop = (tx: (dx: number) => number, ty: (dy: number) => number, dx: number, dy: number, image: Box, item: Item) => {
+        const l = Math.max(image.x, xMin)
+        const r = Math.min(image.x + image.w, xMax)
+        const t = Math.max(image.y, yMin)
+        const b = Math.min(image.y + image.h, yMax)
+
+        const mx = Math.max(wMin - item.w, dx)
+        const my = Math.max(hMin - item.h, dy)
+
+        const cx = Math.min(mx, item.x - l)
+        const cy = Math.min(my, item.y - t)
+
+        const nx = tx(cx)
+        const ny = ty(cy)
+
+        const x = item.x + nx
+        const y = item.y + ny
+        const w = item.w + (nx === 0 ? Math.min(r - (item.x + item.w), mx) : cx)
+        const h = item.h + (ny === 0 ? Math.min(b - (item.y + item.h), my) : cy)
+        const sx = (x - image.x) / image.w
+        const sy = (y - image.y) / image.h
+        const sw = w / image.w
+        const sh = h / image.h
+        return { ...item, x, y, w, h, sx, sy, sw, sh }
+    }
 
     const croppers = [
         {
             style: 'top-0 left-[4px] right-[4px] h-[8px] -translate-y-[50%] opacity-0 cursor-n-resize', // top-center
-            callback: ({ dy, item, image }: Result): Item => {
-                const delta = clamp(
-                    hMin - item.h,
-                    Math.min(item.y - image.y, item.y - yMin),
-                    -dy
+            callback: ({ dy, item, image }: Result): Item =>
+                crop(
+                    x => 0,
+                    y => y * -1,
+                    0,
+                    -dy,
+                    image,
+                    item
                 )
-                const y = item.y - delta
-                const h = item.h + delta
-                const sy = (y - image.y) / image.h
-                const sh = h / image.h
-                return { ...item, y, h, sy, sh }
-            }
         },
         {
             style: 'bottom-0 left-[4px] right-[4px] h-[8px] translate-y-[50%] opacity-0 cursor-s-resize', // bottom-center
-            callback: ({ dy, item, image }: Result): Item => {
-                const delta = clamp(hMin - item.h, (image.y + image.h) - (item.y + item.h), dy)
-                const h = item.h + delta
-                const sh = h / image.h
-                return { ...item, h, sh }
-            }
+            callback: ({ dy, item, image }: Result): Item =>
+                crop(
+                    x => 0,
+                    y => 0,
+                    0,
+                    dy,
+                    image,
+                    item
+                )
         },
         {
             style: 'left-0 top-[4px] bottom-[4px] w-[8px] -translate-x-[50%] opacity-0 cursor-w-resize', // left-center
-            callback: ({ dx, item, image }: Result): Item => {
-                const delta = clamp(wMin - item.w, Math.min(item.x - image.x, item.x - xMin), -dx)
-                const x = item.x - delta
-                const w = item.w + delta
-                const sx = (x - image.x) / image.w
-                const sw = w / image.w
-                return { ...item, x, w, sx, sw }
-            }
+            callback: ({ dx, item, image }: Result): Item =>
+                crop(
+                    x => x * -1,
+                    y => 0,
+                    -dx,
+                    0,
+                    image,
+                    item
+                )
         },
         {
             style: 'right-0 top-[4px] bottom-[4px] w-[8px] translate-x-[50%] opacity-0 cursor-e-resize', // right-center
-            callback: ({ dx, item, image }: Result): Item => {
-                const delta = clamp(wMin - item.w, Math.min((image.x + image.w) - (item.x + item.w), (xMin + xMax) - (item.x + item.w)), dx)
-                const w = item.w + delta
-                const sw = w / image.w
-                return { ...item, w, sw }
-            }
+            callback: ({ dx, item, image }: Result): Item =>
+                crop(
+                    x => 0,
+                    y => 0,
+                    dx,
+                    0,
+                    image,
+                    item
+                )
         },
         {
             style: 'left-0 top-0 cursor-nwse-resize size-2 -translate-x-[50%] -translate-y-[50%] outline-1 outline-red-500 bg-white', // top-left
-            callback: ({ dx, dy, item, image }: Result): Item => {
-                const dh = clamp(wMin - item.w, Math.min(item.x - image.x, item.x - xMin), -dx)
-                const dv = clamp(hMin - item.h, Math.min(item.y - image.y, item.y - yMin), -dy)
-                const x = item.x - dh
-                const w = item.w + dh
-                const y = item.y - dv
-                const h = item.h + dv
-                const sx = (x - image.x) / image.w
-                const sw = w / image.w
-                const sy = (y - image.y) / image.h
-                const sh = h / image.h
-                return { ...item, x, w, y, h, sx, sw, sy, sh }
-            }
+            callback: ({ dx, dy, item, image }: Result): Item =>
+                crop(
+                    x => x * -1,
+                    y => y * -1,
+                    -dx,
+                    -dy,
+                    image,
+                    item
+                )
         },
         {
             style: 'top-0 right-0 cursor-nesw-resize size-2 translate-x-[50%] -translate-y-[50%] outline-1 outline-red-500 bg-white', // top-right
-            callback: ({ dx, dy, item, image }: Result): Item => {
-                const dh = clamp(wMin - item.w, Math.min((image.x + image.w) - (item.x + item.w), (xMin + xMax) - (item.x + item.w)), dx)
-                const dv = clamp(hMin - item.h, Math.min(item.y - image.y, item.y - xMin), -dy)
-                const y = item.y - dv
-                const w = item.w + dh
-                const h = item.h + dv
-                const sy = (y - image.y) / image.h
-                const sw = w / image.w
-                const sh = h / image.h
-                return { ...item, y, w, h, sw, sy, sh }
-            }
+            callback: ({ dx, dy, item, image }: Result): Item =>
+                crop(
+                    x => 0,
+                    y => y * -1,
+                    dx,
+                    -dy,
+                    image,
+                    item
+                )
         },
         {
             style: 'right-0 bottom-0 cursor-nwse-resize size-2 translate-x-[50%] translate-y-[50%] outline-1 outline-red-500 bg-white', // bottom-right
-            callback: ({ dx, dy, item, image }: Result): Item => {
-                const dh = clamp(wMin - item.w, Math.min((image.x + image.w) - (item.x + item.w), (xMin + xMax) - (item.x + item.w)), dx)
-                const dv = clamp(hMin - item.h, (image.y + image.h) - (item.y + item.h), dy)
-                const w = item.w + dh
-                const h = item.h + dv
-                const sw = w / image.w
-                const sh = h / image.h
-                return { ...item, w, h, sw, sh }
-            }
+            callback: ({ dx, dy, item, image }: Result): Item =>
+                crop(
+                    x => 0,
+                    y => 0,
+                    dx,
+                    dy,
+                    image,
+                    item
+                )
         },
         {
             style: 'bottom-0 left-0 cursor-nesw-resize size-2 -translate-x-[50%] translate-y-[50%] outline-1 outline-red-500 bg-white', // bottom-left
-            callback: ({ dx, dy, item, image }: Result): Item => {
-                const dh = clamp(wMin - item.w, Math.min(item.x - image.x, item.x - xMin), -dx)
-                const dv = clamp(hMin - item.h, (image.y + image.h) - (item.y + item.h), dy)
-                const x = item.x - dh
-                const w = item.w + dh
-                const h = item.h + dv
-                const sx = (x - image.x) / image.w
-                const sw = w / image.w
-                const sh = h / image.h
-                return { ...item, x, w, h, sx, sw, sh }
-            }
+            callback: ({ dx, dy, item, image }: Result): Item =>
+                crop(
+                    x => x * -1,
+                    y => 0,
+                    -dx,
+                    dy,
+                    image,
+                    item
+                )
         }
     ]
 
@@ -598,9 +567,6 @@ const Editable = ({
                     >
                         <ContextMenu.Item className='px-3 py-1.5' onSelect={() => setCropMode(true)}>
                             Crop Image
-                        </ContextMenu.Item>
-                        <ContextMenu.Item className='px-3 py-1.5' onSelect={() => onCenter(value)}>
-                            Center Horizontally
                         </ContextMenu.Item>
                         <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
                         <ContextMenu.Item className='px-3 py-1.5' onSelect={() => setAsThumbnail({ ...image, thumbnail: true })}>
@@ -827,9 +793,8 @@ const removeDuplicateLines = (lines: number[][][], acc: number[][][]) => {
 
 type GroupEvent = { x: number, y: number, dx: number, dy: number, subject: { x: number, y: number } }
 
-const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, x0, y0, x1, y1 }: {
+const Group = ({ onEffect, container, onDragStart, onDrag, onDragEnd, x0, y0, x1, y1 }: {
     container: React.RefObject<HTMLElement | null>,
-    onCenter: () => void,
     onEffect: (effect: string) => void,
     x0: number,
     y0: number,
@@ -895,13 +860,10 @@ const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, 
                         *:select-none
                         *:outline-transparent
                         *:data-[highlighted]:bg-neutral-200
+                        min-w-35
                     '
                     onContextMenu={e => e.stopPropagation()}
                 >
-                    <ContextMenu.Item className='px-3 py-1.5' onSelect={onCenter}>
-                        Center Horizontally
-                    </ContextMenu.Item>
-                    <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
                     <ContextMenu.Sub>
                         <ContextMenu.SubTrigger className='flex justify-between items-center px-3 py-1.5'>
                             <span>Effects</span>
@@ -912,6 +874,7 @@ const Group = ({ onCenter, onEffect, container, onDragStart, onDrag, onDragEnd, 
                         <ContextMenu.Portal>
                             <ContextMenu.SubContent
                                 onContextMenu={e => e.stopPropagation()}
+                                alignOffset={-4}
                                 sideOffset={5}
                                 asChild
                             >
@@ -1429,26 +1392,6 @@ const Edit = ({
         }
     }
 
-    const onGroupCenter = (group: Items) => () => {
-        setLayout((layout: Layout) => {
-            const [min, max] = extent(v => ([v.x, v.x + v.w]), group)
-            const delta = (layout.width / 2) - ((min + max) / 2)
-            const table: Record<string, number> = layout.items.reduce((a, b, i) => ({ ...a, [b.id]: i }), {})
-            const indexes = group.map(v => table[v.id])
-            const items = indexes.reduce((a, b) =>
-                a.with(
-                    b,
-                    applyBoxConstrain(
-                        { x: 0, y: 0, w: layout.width, h: Infinity },
-                        { ...a[b], x: a[b].x + delta }
-                    )
-                ),
-                layout.items
-            )
-            return { ...layout, items }
-        })
-    }
-
     const onGroupEffect = curry((group: Items, effect: string) => {
         setLayout((layout: Layout) => {
             const table: Record<string, number> = layout.items.reduce((a, b, i) => ({ ...a, [b.id]: i }), {})
@@ -1594,20 +1537,6 @@ const Edit = ({
 
     const onEffect = applyChange
 
-    const onCenter = curry((index: number, item: Item) => {
-        const c = containerRef.current!.getBoundingClientRect()
-        const delta = (layout.width / 2) - ((item.x + item.x + item.w) / 2)
-        const moved = applyBoxConstrain(
-            { x: 0, y: 0, w: c.width, h: Infinity },
-            { ...item, x: item.x + delta }
-        )
-        setLayout((layout: Layout) => {
-            const items = layout.items.with(index, moved)
-            return { ...layout, items }
-        })
-        drawActiveLines(moved)
-    })
-
     const setAsThumbnail = (image: Photo) => setAsset(asset =>
         Object.entries(asset).reduce((a, [k, v]) => ({
             ...a,
@@ -1665,7 +1594,6 @@ const Edit = ({
                             onResize={onResize(i)}
                             onResizeEnd={onResizeEnd(i)}
                             onDuplicate={onDuplicate(i)}
-                            onCenter={onCenter(i)}
                             onEffect={onEffect(i)}
                         />
                     )
@@ -1684,7 +1612,6 @@ const Edit = ({
                         onDragStart={onGroupDragStart}
                         onDrag={onGroupDrag}
                         onDragEnd={onGroupDragEnd}
-                        onCenter={onGroupCenter(group)}
                         onEffect={onGroupEffect(group)}
                         {...calculateGroup(group)}
                     />

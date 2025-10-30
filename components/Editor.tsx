@@ -7,7 +7,7 @@ import { drag, select } from 'd3'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Item, Photo, Layout, Asset, Items } from '@/type/editor'
 import { ContextMenu, Dialog } from 'radix-ui'
-import { applyBoxConstrain, capitalize, clamp, compose, curry, extent, o, alt as alternative } from '@/utility/fn'
+import { applyBoxConstrain, capitalize, clamp, compose, curry, o, alt as alternative, half, boxConstrain } from '@/utility/fn'
 import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent } from '@/hook/useDrag'
 import { v7 as UUIDv7 } from 'uuid'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
@@ -205,27 +205,26 @@ const Editable = ({
 
     useEffect(() => () => setCropMode(false), [active])
 
-    const resize = (tx: (dx: number) => number, ty: (dy: number) => number, dx: number, dy: number, item: Item) => {
+    const resize = (ox: number, oy: number, dx: number, dy: number, item: Item) => {
         const m = Math.max(dx, dy)
-        const rx = m === dx ? 1 : item.w / item.h
-        const ry = m === dy ? 1 : item.h / item.w
-        const d = clamp(
-            Math.max((wMin - item.w) / rx, (hMin - item.h) / ry),
-            Math.min((wMax - item.w) / rx, (hMax - item.h) / ry),
-            m
+        const s = 1 + m * (m === dx ? 1 / item.w : 1 / item.h)
+        const c = clamp(
+            Math.max(wMin / item.w, hMin / item.h),
+            Math.min(wMax / item.w, hMax / item.h),
+            s
         )
-        const mx = d * rx
-        const my = d * ry
-        return applyBoxConstrain(
+        const result = applyBoxConstrain(
             { x: xMin, y: yMin, w: xMax, h: yMax },
             {
                 ...item,
-                x: item.x + tx(mx),
-                y: item.y + ty(my),
-                w: item.w + mx,
-                h: item.h + my
+                x: ox - (ox - item.x) * c,
+                y: oy - (oy - item.y) * c,
+                w: item.w * c,
+                h: item.h * c
             }
         )
+
+        return result
     }
 
     const resizers = [
@@ -233,8 +232,8 @@ const Editable = ({
             style: 'top-0 left-[4px] right-[4px] h-[8px] -translate-y-[50%] opacity-0 cursor-n-resize', // top-center
             callback: ({ dy, item }: Result): Item =>
                 resize(
-                    x => x * .5 * -1,
-                    y => y * -1,
+                    item.x + half(item.w),
+                    item.y + item.h,
                     -Infinity,
                     -dy,
                     item
@@ -244,8 +243,8 @@ const Editable = ({
             style: 'bottom-0 left-[4px] right-[4px] h-[8px] translate-y-[50%] opacity-0 cursor-s-resize', // bottom-center
             callback: ({ dy, item }: Result): Item =>
                 resize(
-                    x => x * .5 * -1,
-                    y => 0,
+                    item.x + half(item.w),
+                    item.y,
                     -Infinity,
                     dy,
                     item
@@ -255,8 +254,8 @@ const Editable = ({
             style: 'left-0 top-[4px] bottom-[4px] w-[8px] -translate-x-[50%] opacity-0 cursor-w-resize', // left-center
             callback: ({ dx, item }: Result): Item =>
                 resize(
-                    x => x * -1,
-                    y => y * .5 * -1,
+                    item.x + item.w,
+                    item.y + half(item.h),
                     -dx,
                     -Infinity,
                     item
@@ -266,8 +265,8 @@ const Editable = ({
             style: 'right-0 top-[4px] bottom-[4px] w-[8px] translate-x-[50%] opacity-0 cursor-e-resize', // right-center
             callback: ({ dx, item }: Result): Item =>
                 resize(
-                    x => 0,
-                    y => y * .5 * -1,
+                    item.x,
+                    item.y + half(item.h),
                     dx,
                     -Infinity,
                     item
@@ -277,8 +276,8 @@ const Editable = ({
             style: 'left-0 top-0 cursor-nwse-resize size-2 -translate-x-[50%] -translate-y-[50%] outline-1 outline-blue-500 bg-white', // top-left
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    x => x * -1,
-                    y => y * -1,
+                    item.x + item.w,
+                    item.y + item.h,
                     -dx,
                     -dy,
                     item
@@ -288,8 +287,8 @@ const Editable = ({
             style: 'top-0 right-0 cursor-nesw-resize size-2 translate-x-[50%] -translate-y-[50%] outline-1 outline-blue-500 bg-white', // top-right
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    x => 0,
-                    y => y * -1,
+                    item.x,
+                    item.y + item.h,
                     dx,
                     -dy,
                     item
@@ -299,8 +298,8 @@ const Editable = ({
             style: 'right-0 bottom-0 cursor-nwse-resize size-2 translate-x-[50%] translate-y-[50%] outline-1 outline-blue-500 bg-white', // bottom-right
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    x => 0,
-                    y => 0,
+                    item.x,
+                    item.y,
                     dx,
                     dy,
                     item
@@ -310,8 +309,8 @@ const Editable = ({
             style: 'bottom-0 left-0 cursor-nesw-resize size-2 -translate-x-[50%] translate-y-[50%] outline-1 outline-blue-500 bg-white', // bottom-left
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    x => x * -1,
-                    y => 0,
+                    item.x + item.w,
+                    item.y,
                     -dx,
                     dy,
                     item
@@ -319,25 +318,13 @@ const Editable = ({
         }
     ]
 
-    const crop = (tx: (dx: number) => number, ty: (dy: number) => number, dx: number, dy: number, image: Box, item: Item) => {
-        const l = Math.max(image.x, xMin)
-        const r = Math.min(image.x + image.w, xMax)
-        const t = Math.max(image.y, yMin)
-        const b = Math.min(image.y + image.h, yMax)
-
-        const mx = Math.max(wMin - item.w, dx)
-        const my = Math.max(hMin - item.h, dy)
-
-        const cx = Math.min(mx, item.x - l)
-        const cy = Math.min(my, item.y - t)
-
-        const nx = tx(cx)
-        const ny = ty(cy)
-
-        const x = item.x + nx
-        const y = item.y + ny
-        const w = item.w + (nx === 0 ? Math.min(r - (item.x + item.w), mx) : cx)
-        const h = item.h + (ny === 0 ? Math.min(b - (item.y + item.h), my) : cy)
+    const crop = (ox: number, oy: number, dx: number, dy: number, image: Box, item: Item) => {
+        const xx = 1 + dx / item.w
+        const yy = 1 + dy / item.h
+        const x = ox - (ox - item.x) * xx
+        const y = oy - (oy - item.y) * yy
+        const w = item.w * xx
+        const h = item.h * yy
         const sx = (x - image.x) / image.w
         const sy = (y - image.y) / image.h
         const sw = w / image.w
@@ -350,10 +337,14 @@ const Editable = ({
             style: 'top-0 left-[4px] right-[4px] h-[8px] -translate-y-[50%] opacity-0 cursor-n-resize', // top-center
             callback: ({ dy, item, image }: Result): Item =>
                 crop(
-                    x => 0,
-                    y => y * -1,
+                    item.x + half(item.w),
+                    item.y + item.h,
                     0,
-                    -dy,
+                    clamp(
+                        hMin - item.h,
+                        item.y - Math.max(image.y, yMin),
+                        -dy
+                    ),
                     image,
                     item
                 )
@@ -362,10 +353,14 @@ const Editable = ({
             style: 'bottom-0 left-[4px] right-[4px] h-[8px] translate-y-[50%] opacity-0 cursor-s-resize', // bottom-center
             callback: ({ dy, item, image }: Result): Item =>
                 crop(
-                    x => 0,
-                    y => 0,
+                    item.x + half(item.w),
+                    item.y,
                     0,
-                    dy,
+                    clamp(
+                        hMin - item.h,
+                        Math.min(image.y + image.h, yMax) - (item.y + item.h),
+                        dy
+                    ),
                     image,
                     item
                 )
@@ -374,10 +369,14 @@ const Editable = ({
             style: 'left-0 top-[4px] bottom-[4px] w-[8px] -translate-x-[50%] opacity-0 cursor-w-resize', // left-center
             callback: ({ dx, item, image }: Result): Item =>
                 crop(
-                    x => x * -1,
-                    y => 0,
-                    -dx,
-                    0,
+                    item.x + item.w,
+                    item.y + half(item.h),
+                    clamp(
+                        wMin - item.w,
+                        item.x - Math.max(xMin, image.x),
+                        -dx
+                    ),
+                    1,
                     image,
                     item
                 )
@@ -386,10 +385,14 @@ const Editable = ({
             style: 'right-0 top-[4px] bottom-[4px] w-[8px] translate-x-[50%] opacity-0 cursor-e-resize', // right-center
             callback: ({ dx, item, image }: Result): Item =>
                 crop(
-                    x => 0,
-                    y => 0,
-                    dx,
-                    0,
+                    item.x,
+                    item.y + half(item.h),
+                    clamp(
+                        wMin - item.w,
+                        Math.min(image.x + image.w, xMax) - (item.x + item.w),
+                        dx
+                    ),
+                    1,
                     image,
                     item
                 )
@@ -398,10 +401,18 @@ const Editable = ({
             style: 'left-0 top-0 cursor-nwse-resize size-2 -translate-x-[50%] -translate-y-[50%] outline-1 outline-red-500 bg-white', // top-left
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    x => x * -1,
-                    y => y * -1,
-                    -dx,
-                    -dy,
+                    item.x + item.w,
+                    item.y + item.h,
+                    clamp(
+                        wMin - item.w,
+                        item.x - Math.max(xMin, image.x),
+                        -dx
+                    ),
+                    clamp(
+                        hMin - item.h,
+                        item.y - Math.max(yMin, image.y),
+                        -dy
+                    ),
                     image,
                     item
                 )
@@ -410,10 +421,10 @@ const Editable = ({
             style: 'top-0 right-0 cursor-nesw-resize size-2 translate-x-[50%] -translate-y-[50%] outline-1 outline-red-500 bg-white', // top-right
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    x => 0,
-                    y => y * -1,
-                    dx,
-                    -dy,
+                    item.x,
+                    item.y + item.h,
+                    clamp(wMin - item.w, Math.min(image.x + image.w, xMax) - (item.x + item.w), dx),
+                    clamp(hMin - item.h, item.y - Math.max(yMin, image.y), -dy),
                     image,
                     item
                 )
@@ -422,10 +433,10 @@ const Editable = ({
             style: 'right-0 bottom-0 cursor-nwse-resize size-2 translate-x-[50%] translate-y-[50%] outline-1 outline-red-500 bg-white', // bottom-right
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    x => 0,
-                    y => 0,
-                    dx,
-                    dy,
+                    item.x,
+                    item.y,
+                    clamp(wMin - item.w, Math.min(image.x + image.w, xMax) - (item.x + item.w), dx),
+                    clamp(hMin - item.h, Math.min(image.y + image.h, yMax) - (item.y + item.h), dy),
                     image,
                     item
                 )
@@ -434,10 +445,10 @@ const Editable = ({
             style: 'bottom-0 left-0 cursor-nesw-resize size-2 -translate-x-[50%] translate-y-[50%] outline-1 outline-red-500 bg-white', // bottom-left
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    x => x * -1,
-                    y => 0,
-                    -dx,
-                    dy,
+                    item.x + item.w,
+                    item.y,
+                    clamp(wMin - item.w, item.x - Math.max(image.x, xMin), -dx),
+                    clamp(hMin - item.h, Math.min(image.y + image.h, yMax) - (item.y + item.h), dy),
                     image,
                     item
                 )

@@ -368,3 +368,5 @@ export const capitalize = (string: string) => {
     })
     return capitalized.join(' ')
 }
+
+export const half = (v: number) => v * .5

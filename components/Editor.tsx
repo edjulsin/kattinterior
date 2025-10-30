@@ -121,6 +121,15 @@ type EditableProps = {
     translateExtent: number[][],
 }
 
+const bottomCenter = (item: Item): [number, number] => ([item.x + half(item.w), item.y + item.h])
+const topCenter = (item: Item): [number, number] => ([item.x + half(item.w), item.y])
+const rightCenter = (item: Item): [number, number] => ([item.x + item.w, item.y + half(item.h)])
+const leftCenter = (item: Item): [number, number] => ([item.x, item.y + half(item.h)])
+const bottomRight = (item: Item): [number, number] => ([item.x + item.w, item.y + item.h])
+const bottomLeft = (item: Item): [number, number] => ([item.x, item.y + item.h])
+const topLeft = (item: Item): [number, number] => ([item.x, item.y])
+const topRight = (item: Item): [number, number] => ([item.x + item.w, item.y])
+
 const Editable = ({
     sizeExtent: [[wMin, wMax], [hMin, hMax]],
     translateExtent: [[xMin, xMax], [yMin, yMax]],
@@ -205,7 +214,8 @@ const Editable = ({
 
     useEffect(() => () => setCropMode(false), [active])
 
-    const resize = (ox: number, oy: number, dx: number, dy: number, item: Item) => {
+    const resize = (origin: (item: Item) => ([number, number]), dx: number, dy: number, item: Item) => {
+        const [ox, oy] = origin(item)
         const m = Math.max(dx, dy)
         const s = 1 + m * (m === dx ? 1 / item.w : 1 / item.h)
         const c = clamp(
@@ -232,8 +242,7 @@ const Editable = ({
             style: 'top-0 left-[4px] right-[4px] h-[8px] -translate-y-[50%] opacity-0 cursor-n-resize', // top-center
             callback: ({ dy, item }: Result): Item =>
                 resize(
-                    item.x + half(item.w),
-                    item.y + item.h,
+                    bottomCenter,
                     -Infinity,
                     -dy,
                     item
@@ -243,8 +252,7 @@ const Editable = ({
             style: 'bottom-0 left-[4px] right-[4px] h-[8px] translate-y-[50%] opacity-0 cursor-s-resize', // bottom-center
             callback: ({ dy, item }: Result): Item =>
                 resize(
-                    item.x + half(item.w),
-                    item.y,
+                    topCenter,
                     -Infinity,
                     dy,
                     item
@@ -254,8 +262,7 @@ const Editable = ({
             style: 'left-0 top-[4px] bottom-[4px] w-[8px] -translate-x-[50%] opacity-0 cursor-w-resize', // left-center
             callback: ({ dx, item }: Result): Item =>
                 resize(
-                    item.x + item.w,
-                    item.y + half(item.h),
+                    rightCenter,
                     -dx,
                     -Infinity,
                     item
@@ -265,8 +272,7 @@ const Editable = ({
             style: 'right-0 top-[4px] bottom-[4px] w-[8px] translate-x-[50%] opacity-0 cursor-e-resize', // right-center
             callback: ({ dx, item }: Result): Item =>
                 resize(
-                    item.x,
-                    item.y + half(item.h),
+                    leftCenter,
                     dx,
                     -Infinity,
                     item
@@ -276,8 +282,7 @@ const Editable = ({
             style: 'left-0 top-0 cursor-nwse-resize size-2 -translate-x-[50%] -translate-y-[50%] outline-1 outline-blue-500 bg-white', // top-left
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    item.x + item.w,
-                    item.y + item.h,
+                    bottomRight,
                     -dx,
                     -dy,
                     item
@@ -287,8 +292,7 @@ const Editable = ({
             style: 'top-0 right-0 cursor-nesw-resize size-2 translate-x-[50%] -translate-y-[50%] outline-1 outline-blue-500 bg-white', // top-right
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    item.x,
-                    item.y + item.h,
+                    bottomLeft,
                     dx,
                     -dy,
                     item
@@ -298,8 +302,7 @@ const Editable = ({
             style: 'right-0 bottom-0 cursor-nwse-resize size-2 translate-x-[50%] translate-y-[50%] outline-1 outline-blue-500 bg-white', // bottom-right
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    item.x,
-                    item.y,
+                    topLeft,
                     dx,
                     dy,
                     item
@@ -309,8 +312,7 @@ const Editable = ({
             style: 'bottom-0 left-0 cursor-nesw-resize size-2 -translate-x-[50%] translate-y-[50%] outline-1 outline-blue-500 bg-white', // bottom-left
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    item.x + item.w,
-                    item.y,
+                    topRight,
                     -dx,
                     dy,
                     item
@@ -318,7 +320,8 @@ const Editable = ({
         }
     ]
 
-    const crop = (ox: number, oy: number, dx: number, dy: number, image: Box, item: Item) => {
+    const crop = (origin: (item: Item) => ([number, number]), dx: number, dy: number, image: Box, item: Item) => {
+        const [ox, oy] = origin(item)
         const xx = 1 + dx / item.w
         const yy = 1 + dy / item.h
         const x = ox - (ox - item.x) * xx
@@ -337,8 +340,7 @@ const Editable = ({
             style: 'top-0 left-[4px] right-[4px] h-[8px] -translate-y-[50%] opacity-0 cursor-n-resize', // top-center
             callback: ({ dy, item, image }: Result): Item =>
                 crop(
-                    item.x + half(item.w),
-                    item.y + item.h,
+                    bottomCenter,
                     0,
                     clamp(
                         hMin - item.h,
@@ -353,8 +355,7 @@ const Editable = ({
             style: 'bottom-0 left-[4px] right-[4px] h-[8px] translate-y-[50%] opacity-0 cursor-s-resize', // bottom-center
             callback: ({ dy, item, image }: Result): Item =>
                 crop(
-                    item.x + half(item.w),
-                    item.y,
+                    topCenter,
                     0,
                     clamp(
                         hMin - item.h,
@@ -369,8 +370,7 @@ const Editable = ({
             style: 'left-0 top-[4px] bottom-[4px] w-[8px] -translate-x-[50%] opacity-0 cursor-w-resize', // left-center
             callback: ({ dx, item, image }: Result): Item =>
                 crop(
-                    item.x + item.w,
-                    item.y + half(item.h),
+                    rightCenter,
                     clamp(
                         wMin - item.w,
                         item.x - Math.max(xMin, image.x),
@@ -385,8 +385,7 @@ const Editable = ({
             style: 'right-0 top-[4px] bottom-[4px] w-[8px] translate-x-[50%] opacity-0 cursor-e-resize', // right-center
             callback: ({ dx, item, image }: Result): Item =>
                 crop(
-                    item.x,
-                    item.y + half(item.h),
+                    leftCenter,
                     clamp(
                         wMin - item.w,
                         Math.min(image.x + image.w, xMax) - (item.x + item.w),
@@ -401,8 +400,7 @@ const Editable = ({
             style: 'left-0 top-0 cursor-nwse-resize size-2 -translate-x-[50%] -translate-y-[50%] outline-1 outline-red-500 bg-white', // top-left
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    item.x + item.w,
-                    item.y + item.h,
+                    bottomRight,
                     clamp(
                         wMin - item.w,
                         item.x - Math.max(xMin, image.x),
@@ -421,8 +419,7 @@ const Editable = ({
             style: 'top-0 right-0 cursor-nesw-resize size-2 translate-x-[50%] -translate-y-[50%] outline-1 outline-red-500 bg-white', // top-right
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    item.x,
-                    item.y + item.h,
+                    bottomLeft,
                     clamp(wMin - item.w, Math.min(image.x + image.w, xMax) - (item.x + item.w), dx),
                     clamp(hMin - item.h, item.y - Math.max(yMin, image.y), -dy),
                     image,
@@ -433,8 +430,7 @@ const Editable = ({
             style: 'right-0 bottom-0 cursor-nwse-resize size-2 translate-x-[50%] translate-y-[50%] outline-1 outline-red-500 bg-white', // bottom-right
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    item.x,
-                    item.y,
+                    topLeft,
                     clamp(wMin - item.w, Math.min(image.x + image.w, xMax) - (item.x + item.w), dx),
                     clamp(hMin - item.h, Math.min(image.y + image.h, yMax) - (item.y + item.h), dy),
                     image,
@@ -445,8 +441,7 @@ const Editable = ({
             style: 'bottom-0 left-0 cursor-nesw-resize size-2 -translate-x-[50%] translate-y-[50%] outline-1 outline-red-500 bg-white', // bottom-left
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    item.x + item.w,
-                    item.y,
+                    topRight,
                     clamp(wMin - item.w, item.x - Math.max(image.x, xMin), -dx),
                     clamp(hMin - item.h, Math.min(image.y + image.h, yMax) - (item.y + item.h), dy),
                     image,
@@ -1497,16 +1492,99 @@ const Edit = ({
         drawActiveLines(item)
     })
 
-    const onResizeStart = curry((_index: number, _item: Item) => {
-        setInteractive(false)
-    })
-
-    const onResize = curry((index: number, item: Item) => {
-        applyChange(index, item)
+    const onResizeStart = curry((_index: number, item: Item) => {
+        setInteractive(true)
         drawActiveLines(item)
     })
 
-    const onResizeEnd = curry((_index: number, _item: Item) => {
+    const onResize = curry((index: number, item: Item) => {
+        const [[wMin, wMax], [hMin, hMax]] = sizeExtent
+        const c = containerRef.current!.getBoundingClientRect()
+        const container = {
+            x: 0,
+            y: 0,
+            w: c.width,
+            h: c.height
+        }
+        const constrain = { ...container, h: Infinity }
+        const items = [...containerRef.current!.children].reduce<Box[]>((a, b) => {
+            const next = b as HTMLDivElement
+            const r = next.getBoundingClientRect()
+            const box = {
+                x: r.x - c.x,
+                y: r.y - c.y,
+                w: r.width,
+                h: r.height
+            }
+            return a.concat([box])
+        }, [])
+
+        const [dx, dy] = snap(5, item, [constrain, ...items])
+
+        const prev = items[index]
+
+        const xs = toPoints(prev)
+        const ys = toPoints(item)
+
+        const [[i]] = ys.map(([a, b], i) => {
+            const [c, d] = xs[i]
+            return [i, Math.hypot(a - c, b - d)]
+        }, []).toSorted(([a, b], [c, d]) => b - d)
+
+        const [ox, oy] = ys[i]
+
+        const sign = Math.sign((item.w * item.h) - (prev.w * prev.h))
+        const m = Math.max(dx, dy)
+        const s = 1 + Math.abs(m) * sign * (m === dx ? 1 / item.w : 1 / item.h)
+
+        const d = clamp(
+            Math.max(wMin / item.w, hMin / item.h),
+            Math.min(wMax / item.w, hMax / item.h),
+            s
+        )
+        const result = applyBoxConstrain(
+            constrain,
+            {
+                ...item,
+                x: ox - (ox - item.x) * d,
+                y: oy - (oy - item.y) * d,
+                w: item.w * d,
+                h: item.h * d
+            }
+        )
+
+        const points = toPoints(result)
+
+        const canvas = centers(container)
+
+        const lines = removeDuplicateLines(
+            items.toSpliced(index, 1).reduce(
+                (acc, curr) => {
+                    const lines = toPoints(curr)
+                    const result = points.flatMap(point =>
+                        intersections(point, lines)
+                    )
+                    return [...acc, ...result]
+                },
+                points.flatMap(point =>
+                    intersections(point, canvas)
+                )
+            ),
+            []
+        )
+
+        setInteractive(false)
+        applyChange(index, item)
+
+        if(lines.length > 0) {
+            drawOrangeLines(lines)
+        } else {
+            clearCanvas()
+        }
+    })
+
+    const onResizeEnd = curry((_index: number, item: Item) => {
+        drawActiveLines(item)
         setInteractive(true)
     })
 

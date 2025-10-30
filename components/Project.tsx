@@ -4,8 +4,7 @@ import Image from 'next/image';
 import React from 'react';
 import Style from './Style';
 
-const development = process.env.NODE_ENV === 'development'
-const domain = development ? 'localhost:3000' : process.env.NEXT_PUBLIC_DOMAIN
+const brand = process.env.NEXT_PUBLIC_SITE_NAME
 
 const Project = ({ name, location, story, tagline, assets, template }: ProjectType) => {
     const atBreakpoint = (breakpoint: number, style: string): string => {
@@ -187,7 +186,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
 
     const lcp = largest ?? ({ id: '' })
 
-    const formatAlt = (v: string) => `${v} Designed By ${domain}`
+    const formatAlt = (v: string) => `${v} Designed By ${brand}`
 
     return (
         <article className='flex flex-col items-center justify-center gap-y-30 py-5 w-full'>

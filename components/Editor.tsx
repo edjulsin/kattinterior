@@ -14,7 +14,7 @@ import { ChevronRightIcon } from '@radix-ui/react-icons'
 import Fallback from '@/assets/fallback.svg'
 import Image from 'next/image'
 
-const siteName = process.env.NEXT_PUBLIC_SITE_NAME
+const brand = process.env.NEXT_PUBLIC_SITE_NAME
 
 type Box = { x: number, y: number, w: number, h: number }
 
@@ -510,7 +510,7 @@ const Editable = ({
                                         src={image.src}
                                         width={image.width}
                                         height={image.height}
-                                        alt={`${alternative(image.alt)} Designed By ${siteName}`}
+                                        alt={`${alternative(image.alt)} Designed By ${brand}`}
                                         onError={() => setError(true)}
                                         style={{
                                             transformOrigin: 'top left',

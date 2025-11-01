@@ -237,45 +237,51 @@ export const getLayout = (template: Template) => {
     const reduceLayout = (a: Items[], b: Items[]) => {
         const tableA = rowTable(a)
         const tableB = rowTable(b)
-        const update = (row: number, items: Items, acc: Items[]) => {
-            if(row in acc) {
-                return acc.with(row, [...acc[row], ...items])
-            } else {
-                return [...acc, items]
-            }
-        }
+        const update = (row: number, items: Items, rows: Items[]) =>
+            rows.with(row, [...rows[row], ...items])
 
-        const [withSiblings, withoutSiblings] = b.reduce<[Items[], Items[]]>(([a, b], c) => {
-            if(c.some(v => !(v.id in tableA))) {
+        const insert = (row: number, items: Items, rows: Items[]) =>
+            rows.toSpliced(row, 0, items)
+
+        const [withSiblings, withoutSiblings] = b.reduce<[Items[], Items[]]>(([a, b], c) => { // get row with unique items
+            if(c.every(v => v.id in tableA)) {
+                return [a, b]
+            } else {
                 if(c.some(v => v.id in tableA)) {
                     return [[...a, c], b]
                 } else {
                     return [a, [...b, c]]
                 }
-            } else {
-                return [a, b]
             }
         }, [[], []])
 
         return withoutSiblings.reduce(
             (e, f) => {
-                const [item] = f
-                const prev = tableB[item.id] - 1
-                if(prev in b) {
-                    const [exist] = b[prev]
-                    const row = tableA[exist.id]
-                    return update(row, f, e)
+                const ref = rowTable(e)
+                const [unique] = f
+                const i = tableB[unique.id]
+                const before = ((i - 1) in b ? b.slice(0, i).flat() : ([])).filter(v => v.id in ref).map(v => ref[v.id])
+                const after = ((i + 1) in b ? b.slice(i + 1).flat() : ([])).filter(v => v.id in ref).map(v => ref[v.id])
+                const joined = before.filter(x =>
+                    after.some(y => x === y)
+                )
+                if(joined.length > 0) {
+                    const [j] = joined
+                    return update(j, f, e)
                 } else {
-                    const row = 0
-                    return update(row, f, e)
+                    const j = before.length > 0 ? Math.max(...before) + 1 : 0
+                    return insert(j, f, e)
                 }
             },
             withSiblings.reduce((c, d) => {
-                const exist = d.find(v => v.id in tableA)!
+                const [[exist], uniques] = d.reduce<[Items, Items]>(([a, b], c) => {
+                    if(c.id in tableA) {
+                        return [[...a, c], b]
+                    } else {
+                        return [a, [...b, c]]
+                    }
+                }, [[], []])
                 const row = tableA[exist.id]
-                const uniques = d.filter(v =>
-                    !(v.id in tableA)
-                )
                 return update(row, uniques, c)
             }, a)
         )

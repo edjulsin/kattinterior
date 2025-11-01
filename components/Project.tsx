@@ -70,14 +70,40 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
     const desktopExcludes = [...template.tablet.items, ...template.mobile.items]
         .filter(v => !(v.id in desktop))
         .reduce<Items>((a, b) => a.some(v => b.id === v.id) ? a : a.concat([b]), [])
-
     const tabletExcludes = [...template.desktop.items, ...template.mobile.items]
         .filter(v => !(v.id in tablet))
         .reduce<Items>((a, b) => a.some(v => b.id === v.id) ? a : a.concat([b]), [])
-
     const mobileExcludes = [...template.desktop.items, ...template.tablet.items]
         .filter(v => !(v.id in mobile))
         .reduce<Items>((a, b) => a.some(v => b.id === v.id) ? a : a.concat([b]), [])
+
+    const desktopIgnores = desktops.reduce<number[]>((a, b, i) => b.length > 0 ? a : ([...a, i]), [])
+    const tabletIgnores = tablets.reduce<number[]>((a, b, i) => b.length > 0 ? a : ([...a, i]), [])
+    const mobileIgnores = mobiles.reduce<number[]>((a, b, i) => b.length > 0 ? a : ([...a, i]), [])
+
+    const desktopIncludes = desktops.reduce<[number, Items][]>((a, b, i) => {
+        if(b.length > 0) {
+            return [...a, [i, b]]
+        } else {
+            return a
+        }
+    }, [])
+
+    const tabletIncludes = tablets.reduce<[number, Items][]>((a, b, i) => {
+        if(b.length > 0) {
+            return [...a, [i, b]]
+        } else {
+            return a
+        }
+    }, [])
+
+    const mobileIncludes = mobiles.reduce<[number, Items][]>((a, b, i) => {
+        if(b.length > 0) {
+            return [...a, [i, b]]
+        } else {
+            return a
+        }
+    }, [])
 
     const asset = Object.fromEntries(
         assets.map(v => {
@@ -85,8 +111,10 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         })
     )
 
-    const responsiveStyles = (w: number, h: number, rows: Items[]) => {
-        const gaps = getGaps(rows)
+    const responsiveStyles = (w: number, h: number, layout: [number, Items][]) => {
+        const gaps = getGaps(
+            layout.map(([_, row]) => row)
+        )
         const container = `
             .layout {
                 aspect-ratio: ${w} / ${h};
@@ -94,12 +122,13 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         `
         return [
             container,
-            ...rows.flatMap((row, i) => {
+            ...layout.flatMap(([i, row], j) => {
                 const [sy, ey] = extent(ys, row)
-                const gap = gaps[i]
+                const gap = gaps[j]
                 const height = Math.max(0, (ey - sy) + gap)
                 const section = `
                     .section-${i} {
+                        display: block;
                         position: relative;
                         height: ${(height / h) * 100}cqh;
                     }
@@ -146,7 +175,10 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
             ...responsiveStyles(
                 template.mobile.width,
                 template.mobile.height,
-                mobiles
+                mobileIncludes
+            ),
+            ...mobileIgnores.map(v =>
+                `.section-${v} { display: none; height: 0px; }`
             ),
             ...mobileExcludes.map(v =>
                 `.item-${v.id} { display: none; }`
@@ -158,7 +190,10 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                 ...responsiveStyles(
                     template.tablet.width,
                     template.tablet.height,
-                    tablets
+                    tabletIncludes
+                ),
+                ...tabletIgnores.map(v =>
+                    `.section-${v} { display: none; height: 0px; }`
                 ),
                 ...tabletExcludes.map(v =>
                     `.item-${v.id} { display: none; }`
@@ -171,7 +206,10 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                 ...responsiveStyles(
                     template.desktop.width,
                     template.desktop.height,
-                    desktops
+                    desktopIncludes
+                ),
+                ...desktopIgnores.map(v =>
+                    `.section-${v} { display: none; height: 0px; }`
                 ),
                 ...desktopExcludes.map(v =>
                     `.item-${v.id} { display: none; }`

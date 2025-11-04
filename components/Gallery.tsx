@@ -5,7 +5,7 @@ const Gallery = ({ heading, children }: { heading: string, children: React.React
         {
             React.createElement(
                 heading,
-                { className: 'text-center font-serif text-lg full-slide-from-bottom anim-delay-[100ms]' },
+                { className: 'text-center font-sans text-3xl font-medium full-slide-from-bottom anim-delay-[100ms] text-gold-900' },
                 'Design Stories'
             )
         }

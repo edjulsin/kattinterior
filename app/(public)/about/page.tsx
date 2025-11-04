@@ -43,10 +43,11 @@ const AboutPage = () =>
             />
             <div className='flex flex-col justify-center gap-y-5'>
                 <h1 className='text-lg/relaxed md:text-xl/relaxed xl:text-2xl/relaxed font-serif max-w-3xl full-slide-from-bottom anim-delay-[300ms]'>
-                    Luxury Interiors Rooted in Culture, Blending Tradition with Contemporary Style.
+                    Timeless design rooted in culture, crafted for modern living.
                 </h1>
-                <p className='font-sans text-base md:text-lg font-semibold max-w-lg full-slide-from-bottom'>
-                    We specialize in crafting luxury residential and commercial interiors, tailored for private clients and developers seeking timeless elegance and exceptional design.
+                <p className='font-sans text-base md:text-lg font-medium max-w-lg full-slide-from-bottom'>
+                    We craft soulful interiors that honor local culture while embracing modern living.
+                    Each project — from private residences to boutique commercial spaces — is tailored for clients and developers seeking timeless elegance, natural warmth, and meaningful design.
                 </p>
             </div>
             <span className='block font-sans text-6xl text-center xl:text-left xl:self-end'>&darr;</span>
@@ -61,13 +62,35 @@ const AboutPage = () =>
             />
             <div className='flex flex-col justify-center gap-y-5'>
                 <h2 className='text-xl/relaxed md:text-2xl/relaxed xl:text-3xl/relaxed font-serif slide-from-bottom max-w-xl'>
-                    Grounded by the earth, awakened by the fire within
+                    Guided by your story, ignited by our fire within.
                 </h2>
-                <div className='max-w-sm flex flex-col gap-y-5 justify-center font-sans text-base font-semibold md:text-lg slide-from-bottom anim-delay-[100ms]'>
-                    <p>Founded in 2018 by interior designer Chaterina Melissa, Katt Interior Studio is a Bali-based design atelier specializing in creating timeless and sophisticated spaces. </p>
-                    <p>With years of experience designing high-end residential and commercial projects across Bali, Chaterina brings a deep understanding of aesthetics, functionality, and local craftsmanship.</p>
-                    <p>At Katt interior studio, we believe every space tells a story. Our design philosophy blends modern elegance with Bali’s rich cultural heritage, crafting interiors that are not only visually stunning but also deeply connected to their surroundings. </p>
-                    <p>Whether its a luxurious villa, a boutique resort, or a stylish café, we curate each project with passion, precision, and an unwavering commitment to excellence.</p>
+                <div className='max-w-sm flex flex-col gap-y-5 justify-center font-sans text-base font-medium md:text-lg slide-from-bottom anim-delay-[100ms]'>
+                    <p>
+                        Founded in 2018 by interior designer Chaterina Melissa, KATTINTERIOR is a Bali-
+                        based design atelier dedicated to creating timeless and soulful spaces —
+                        shaped around the people who live in them.
+                    </p>
+                    <p>
+                        With years of experience designing residential and commercial projects across
+                        Bali, Chaterina brings a deep understanding of aesthetics, functionality, and
+                        local craftsmanship.
+                    </p>
+                    <p>
+                        At KATTINTERIOR, we believe every home should tell your story — not ours.
+                        We don’t impose a fixed signature style, because this isn’t our home; it’s yours.
+                        Our role is to listen, interpret, and translate your lifestyle and personality into
+                        design — creating spaces that feel genuinely personal, comfortable, and true to
+                        who you are.
+                    </p>
+                    <p>
+                        Blending modern refinement with Bali’s cultural richness, we craft interiors that
+                        balance calm beauty with purpose.
+                    </p>
+                    <p>
+                        Whether it’s a luxurious villa, a boutique resort, or a small private retreat, every
+                        project is approached with passion, precision, and an unwavering respect for
+                        individuality.
+                    </p>
                 </div>
             </div>
         </section>

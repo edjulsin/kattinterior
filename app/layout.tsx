@@ -3,26 +3,15 @@ import "./globals.css";
 import type { Metadata } from 'next';
 
 const serif = localFont({
+	display: 'swap',
 	src: '../assets/fonts/tanpearl/TanPearl.otf',
-	style: 'normal',
 	weight: '400',
 	variable: '--font-serif'
 })
 
 const sans = localFont({
-	src: [
-		{ path: '../assets/fonts/garamond/EBGaramond-ExtraBold.ttf', weight: '800', style: 'normal' },
-		{ path: '../assets/fonts/garamond/EBGaramond-ExtraBold.ttf', weight: '800', style: 'italic' },
-		{ path: '../assets/fonts/garamond/EBGaramond-Bold.ttf', weight: '700', style: 'normal' },
-		{ path: '../assets/fonts/garamond/EBGaramond-BoldItalic.ttf', weight: '700', style: 'italic' },
-		{ path: '../assets/fonts/garamond/EBGaramond-Medium.ttf', weight: '500', style: 'normal' },
-		{ path: '../assets/fonts/garamond/EBGaramond-MediumItalic.ttf', weight: '500', style: 'italic' },
-		{ path: '../assets/fonts/garamond/EBGaramond-Italic.ttf', weight: '400', style: 'italic' },
-		{ path: '../assets/fonts/garamond/EBGaramond-Regular.ttf', weight: '400', style: 'normal' },
-		{ path: '../assets/fonts/garamond/EBGaramond-SemiBold.ttf', weight: '600', style: 'normal' },
-		{ path: '../assets/fonts/garamond/EBGaramond-SemiBoldItalic.ttf', weight: '600', style: 'italic' },
-		{ path: '../assets/fonts/garamond/EBGaramond.otf', weight: '300', style: 'normal' }
-	],
+	display: 'swap',
+	src: '../assets/fonts/cabinet/Cabinet.woff2',
 	variable: '--font-sans'
 })
 

@@ -26,7 +26,7 @@ const Guide = (
                     description.map(paragraph =>
                         <React.Fragment key={paragraph}>
                             <br />
-                            <p className='text-base sm:text-lg font-semibold font-sans slide-from-bottom'>{paragraph}</p>
+                            <p className='text-base sm:text-lg font-medium font-sans slide-from-bottom'>{paragraph}</p>
                         </React.Fragment>
                     )
                 }
@@ -45,7 +45,7 @@ const Guide = (
                         <span className='text-2xl sm:text-3xl'>00</span>
                         <span>{headTitle}</span>
                     </h3>
-                    <p className='text-base sm:text-lg font-semibold font-sans'>{headDescription}</p>
+                    <p className='text-base sm:text-lg font-medium font-sans'>{headDescription}</p>
                 </li>
                 {
                     contents.map(([title, description], i) =>
@@ -54,7 +54,7 @@ const Guide = (
                                 <span className='text-2xl sm:text-3xl'>{(i + 1 < 10 ? '0' : '') + (i + 1)}</span>
                                 <span>{title}</span>
                             </h3>
-                            <p className='text-base sm:text-lg font-semibold font-sans'>{description}</p>
+                            <p className='text-base sm:text-lg font-medium font-sans'>{description}</p>
                         </li>
                     )
                 }

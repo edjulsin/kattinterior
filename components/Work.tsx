@@ -29,7 +29,7 @@ const Work = () => getFeaturedProject().then(
 
             return (
                 <section key={v.id} className='flex flex-col gap-y-10 md:gap-y-15 xl:gap-y-20 justify-center items-center'>
-                    <h3 className='font-serif text-gold-900 text-center text-xl/relaxed md:text-2xl/relaxed'>FEATURED WORK</h3>
+                    <h3 className='font-sans font-semibold text-gold-900 text-center text-2xl/relaxed md:text-3xl/relaxed uppercase'>Featured work</h3>
                     <ul
                         className='
                             grid
@@ -60,7 +60,7 @@ const Work = () => getFeaturedProject().then(
                     </ul>
                     <div className='flex flex-col justify-center align-center text-center'>
                         <h4 className='text-xl/relaxed md:text-2xl/relaxed xl:text-3xl/relaxed font-serif capitalize'>{v.name}</h4>
-                        <small className='text-gold-900 font-sans font-semibold capitalize text-base/relaxed md:text-lg/relaxed'>{v.location}</small>
+                        <small className='text-gold-900 font-sans font-medium capitalize text-base/relaxed md:text-lg/relaxed'>{v.location}</small>
                     </div>
                 </section>
             )

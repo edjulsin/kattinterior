@@ -22,7 +22,10 @@ const Article = ({ className, heading, project, index }: { heading: string, clas
 
     const title = React.createElement(
         heading,
-        { className: 'font-serif text-center text-lg capitalize' },
+        {
+            className: 'font-serif text-center text-lg capitalize overflow-clip text-ellipsis whitespace-nowrap',
+            style: { maxWidth: 'calc(100% - 48px - 8px - 12px)' }
+        },
         project.name || 'Untitled'
     )
     return (
@@ -31,16 +34,18 @@ const Article = ({ className, heading, project, index }: { heading: string, clas
             className={className}
             href={`/projects/${project.slug}`}
         >
-            <article className='flex flex-col gap-y-5 lg:gap-y-15 xl:gap-y-20' >
+            <article className='flex flex-col justify-center items-center gap-y-5 md:gap-y-15 xl:gap-y-20'>
                 <Image
-                    className='w-65 h-90 lg:scale-115 xl:scale-130 object-cover object-center'
+                    className='w-65 h-90 md:scale-115 xl:scale-130 object-cover object-center'
                     src={thumbnail.src}
                     alt={alt(thumbnail.alt)}
                     width={thumbnail.width}
                     height={thumbnail.height}
                 />
-                <div className='flex justify-center items-center gap-x-5'>
-                    <span className='text-center font-serif text-xs size-12 p-2 flex justify-center items-center flex-col rounded-full outline-1'>{(index + 1 < 10 ? '0' : '') + (index + 1)}</span>
+                <div className='flex justify-center items-center gap-x-3 w-full'>
+                    <span className='text-center font-serif text-xs size-12 p-2 flex justify-center items-center flex-col rounded-full outline-1 outline-gold-900 text-gold-700'>
+                        {(index + 1 < 10 ? '0' : '') + (index + 1)}
+                    </span>
                     {title}
                 </div>
             </article>

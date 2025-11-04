@@ -1,7 +1,6 @@
 import { Items, Project as ProjectType, Item } from '@/type/editor';
 import { ab, extent, getLayout, ys } from '@/utility/fn';
 import Image from 'next/image';
-import React from 'react';
 import Style from './Style';
 
 const brand = process.env.NEXT_PUBLIC_SITE_NAME
@@ -233,7 +232,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                     <h1 className='font-serif text-2xl/relaxed md:text-3xl/relaxed max-w-2xs md:max-w-md capitalize'>{name}</h1>
                     <h2 className='font-serif text-sm/relaxed md:text-base/relaxed max-w-2xs md:max-w-sm capitalize'>{location}</h2>
                 </div>
-                <p className='font-sans font-semibold text-base md:text-lg slide-from-bottom max-w-2xs md:max-w-md xl:max-w-lg'>
+                <p className='font-sans font-medium text-base md:text-lg slide-from-bottom max-w-2xs md:max-w-md xl:max-w-lg'>
                     {story}
                 </p>
                 <h3 className='font-serif text-sm/loose md:text-base/loose xl:text-lg/loose slide-from-bottom max-w-2xs md:max-w-lg xl:max-w-2xl'>

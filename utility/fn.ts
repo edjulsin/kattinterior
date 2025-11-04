@@ -9,6 +9,8 @@ export const curry = (fn: Function) => (...xs: any[]) =>
 export const o = (a: Function, b: Function) => (c: any) => a(
     b(c)
 )
+export const first = ([v]: any[]) => v
+export const last = (v: any[]) => v[v.length - 1]
 
 export const compose = (...fns: Function[]) => (...args: any[]) =>
     fns.slice(0, -1).reduceRight(

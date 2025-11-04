@@ -1,5 +1,5 @@
 import { Items, Project as ProjectType, Item } from '@/type/editor';
-import { ab, extent, getLayout, ys } from '@/utility/fn';
+import { ab, extent, getLayout, last, ys } from '@/utility/fn';
 import Image from 'next/image';
 import Style from './Style';
 
@@ -112,13 +112,9 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
 
     const responsiveStyles = (w: number, h: number, layout: [number, Items][]) => {
         const gaps = getGaps(
-            layout.map(([_, row]) => row)
+            layout.map(last)
         )
-        const container = `
-            .layout {
-                aspect-ratio: ${w} / ${h};
-            }
-        `
+        const container = `.layout { aspect-ratio: ${w} / ${h};}`
         return [
             container,
             ...layout.flatMap(([i, row], j) => {

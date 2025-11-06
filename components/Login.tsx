@@ -29,7 +29,7 @@ const Login = () => {
                 <form action={action} className='flex flex-col justify-center gap-y-4 min-w-3xs'>
                     <label htmlFor='email' className='sr-only'>Email</label>
                     <input
-                        className='font-semibold px-3 py-1.5 rounded-lg outline-1 focus:outline-orange-500 disabled:opacity-50 disabled:cursor-not-allowed'
+                        className='font-semibold px-3 py-1.5 rounded-lg outline-1 outline-neutral-200 focus:outline-orange-500 disabled:opacity-50 disabled:cursor-not-allowed'
                         type='email'
                         name='email'
                         id='email'

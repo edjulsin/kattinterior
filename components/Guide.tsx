@@ -42,7 +42,7 @@ const Guide = (
             <ol className='*:max-w-sm grid justify-center items-center auto-rows-fr gap-y-10 sm:gap-y-15 md:gap-y-20 lg:gap-y-25 gap-x-30 lg:grid-cols-2 lg:*:row-span-3 lg:*:odd:justify-self-start lg:*:even:justify-self-end'>
                 <li key={'first'} className='flex flex-col justify-center gap-y-4 lg:col-start-2 slide-from-bottom anim-delay-[100ms]'>
                     <h3 className='text-xl/loose sm:text-2xl/loose font-serif flex flex-col'>
-                        <span className='text-2xl sm:text-3xl'>00</span>
+                        <span className='text-2xl sm:text-3xl opacity-50'>00</span>
                         <span>{headTitle}</span>
                     </h3>
                     <p className='text-base sm:text-lg font-medium font-sans'>{headDescription}</p>
@@ -51,7 +51,7 @@ const Guide = (
                     contents.map(([title, description], i) =>
                         <li key={title} className='flex flex-col justify-center gap-y-4 slide-from-bottom anim-delay-[100ms]'>
                             <h3 className='text-xl/loose sm:text-2xl/loose font-serif flex flex-col'>
-                                <span className='text-2xl sm:text-3xl'>{(i + 1 < 10 ? '0' : '') + (i + 1)}</span>
+                                <span className='text-2xl sm:text-3xl opacity-50'>{(i + 1 < 10 ? '0' : '') + (i + 1)}</span>
                                 <span>{title}</span>
                             </h3>
                             <p className='text-base sm:text-lg font-medium font-sans'>{description}</p>

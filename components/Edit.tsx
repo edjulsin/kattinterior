@@ -201,13 +201,13 @@ const MainEditorBody = ({
 const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMenu }: { onPreview: () => void, published: boolean, onUnpublish: () => void, onPublish: () => void, menu: boolean, setMenu: (value: boolean) => void }) =>
 	<div className='flex size-full justify-between items-center min-h-20 *:w-auto'>
 		<div className='flex flex-row justify-center items-center rounded-md *:h-full'>
-			<button onClick={() => onPreview()} className='rounded-md hover:bg-neutral-200 p-2'>
+			<button onClick={() => onPreview()} className='rounded-md transition-opacity hover:opacity-50 p-2 cursor-pointer'>
 				<AccessibleIcon.Root label='Preview'>
 					<PlayIcon />
 				</AccessibleIcon.Root>
 			</button>
 			<DropdownMenu.Root>
-				<DropdownMenu.Trigger className='rounded-md hover:bg-neutral-200 px-0.5 py-2'>
+				<DropdownMenu.Trigger className='rounded-md transition-opacity hover:opacity-50 px-0.5 py-2 cursor-pointer'>
 					<AccessibleIcon.Root label='Show action menu'>
 						<CaretDownIcon />
 					</AccessibleIcon.Root>
@@ -226,6 +226,7 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 							text-sm 
 							z-50 
 							bg-light 
+							dark:bg-dark
 							ring-1
 							ring-neutral-200 
 							rounded-md 
@@ -233,7 +234,7 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 						'
 					>
 						<DropdownMenu.Item
-							className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer hover:bg-neutral-200'
+							className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer transition-opacity hover:opacity-50'
 							onSelect={() => onPreview()}
 						>
 							<span>
@@ -247,7 +248,7 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 						{
 							published
 								? <DropdownMenu.Item
-									className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer hover:bg-neutral-200'
+									className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer transition-opacity hover:opacity-50'
 									onSelect={() => onUnpublish()}
 								>
 									<span>
@@ -260,7 +261,7 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 								: null
 						}
 						<DropdownMenu.Item
-							className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer hover:bg-neutral-200'
+							className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer transition-opacity hover:opacity-50'
 							onSelect={() => onPublish()}
 						>
 							<span>
@@ -274,7 +275,7 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 				</DropdownMenu.Portal>
 			</DropdownMenu.Root>
 		</div>
-		<button onClick={() => setMenu(!menu)} className='flex p-2 justify-center items-center rounded-md hover:bg-neutral-200'>
+		<button onClick={() => setMenu(!menu)} className='flex p-2 justify-center items-center rounded-md transition-opacity hover:opacity-50 cursor-pointer'>
 			<AccessibleIcon.Root label='Toggle menu'>
 				<ViewVerticalIcon />
 			</AccessibleIcon.Root>
@@ -308,15 +309,15 @@ const RightMain = ({
 }) =>
 	<div className='flex flex-col justify-center items-stretch h-max w-full gap-y-10'>
 		<div className='flex items-center gap-x-4'>
-			<small className='text-base font-semibold text-neutral-500'>Category:</small>
+			<small className='text-base font-semibold opacity-50'>Category:</small>
 			<RadioGroup.Root value={category} onValueChange={v => setCategory(v as Project['category'])} className='flex gap-x-4'>
 				{
 					['residential', 'commercial'].map(v =>
 						<div key={v} className='flex gap-x-2 items-center justify-center'>
-							<RadioGroup.Item value={v} id={v} className='size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-400'>
-								<RadioGroup.Indicator className='rounded-full size-2 bg-neutral-600' />
+							<RadioGroup.Item value={v} id={v} className='peer size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-400 cursor-pointer'>
+								<RadioGroup.Indicator className='rounded-full size-2 bg-gold-900' />
 							</RadioGroup.Item>
-							<label className='text-base font-medium' htmlFor={v}>{capitalize(v)}</label>
+							<label className='text-base font-medium cursor-pointer opacity-50 peer-data-[state=checked]:opacity-100 transition-opacity' htmlFor={v}>{capitalize(v)}</label>
 						</div>
 					)
 				}
@@ -330,11 +331,11 @@ const RightMain = ({
 				onChange={e => setSlug(e.target.value)}
 				onBlur={e => setSlug(e.target.value.toLowerCase().trim().split(' ').join('-'))}
 				value={slug}
-				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl bg-neutral-200 focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('slug') })}
+				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl outline-1 outline-neutral-200 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('slug') })}
 				placeholder='Slug'
 				type='url'
 			/>
-			<small className='text-base font-medium text-neutral-500'>{`${domain}/projects/${slug}`}</small>
+			<small className='text-base font-medium opacity-50'>{`${domain}/projects/${slug}`}</small>
 		</div>
 		<div>
 			<label htmlFor='title' className='text-base font-medium sr-only'>Title</label>
@@ -343,11 +344,11 @@ const RightMain = ({
 				required={true}
 				onChange={e => setTitle(e.target.value)}
 				value={title}
-				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl bg-neutral-200 focus:outline-1 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('title') })}
+				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl outline-1 outline-neutral-200 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('title') })}
 				placeholder='Title'
 				type='text'
 			/>
-			<small className='text-base font-medium text-neutral-500'>{`Recommended: 60 characters. You’ve used ${title.length}`}</small>
+			<small className='text-base font-medium opacity-50'>{`Recommended: 60 characters. You’ve used ${title.length}`}</small>
 		</div>
 		<div>
 			<label htmlFor='description' className='text-base font-medium sr-only'>Description</label>
@@ -356,15 +357,15 @@ const RightMain = ({
 				required={true}
 				onChange={e => setDescription(e.target.value)}
 				value={description}
-				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl bg-neutral-200 focus:outline-1 focus:outline-amber-600 min-h-30', { 'outline-1 outline-red-500': errors.includes('title') })}
+				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl outline-1 outline-neutral-200 focus:outline-amber-600 min-h-30', { 'outline-1 outline-red-500': errors.includes('title') })}
 				placeholder='Description'
 			/>
-			<small className='text-base font-medium text-neutral-500'>{`Recommended: 145 characters. You’ve used ${description.length}`}</small>
+			<small className='text-base font-medium opacity-50'>{`Recommended: 145 characters. You’ve used ${description.length}`}</small>
 		</div>
 		<div className='flex items-center gap-x-2 rounded-full'>
 			<Switch.Root
 				id='featured'
-				className={clsx('w-8 h-4 rounded-full outline-transparent', featured ? 'bg-neutral-600' : 'bg-neutral-200')}
+				className={clsx('peer w-8 h-4 rounded-full outline-transparent', featured ? 'bg-gold-900' : 'bg-neutral-200')}
 				onCheckedChange={v => setFeatured(v)}
 				checked={featured}
 			>
@@ -381,8 +382,8 @@ const RightMain = ({
 
 
 const RightFooter = ({ onDelete }: { onDelete: () => void }) =>
-	<button onClick={() => onDelete()} className='flex gap-x-1 justify-center items-center p-2 rounded-lg hover:bg-neutral-200 cursor-pointer'>
-		<span><TrashIcon className='text-neutral-500' /></span>
+	<button onClick={() => onDelete()} className='flex gap-x-1 justify-center items-center p-2 rounded-lg transition-opacity hover:opacity-50 cursor-pointer'>
+		<span><TrashIcon className='text-gold-900' /></span>
 		<span className='font-semibold text-base leading-none'>Delete</span>
 	</button>
 
@@ -393,7 +394,7 @@ const WithTooltip = ({ children, tooltip, side }: { children: React.ReactNode, t
 				{children}
 			</Tooltip.Trigger>
 			<Tooltip.Portal>
-				<Tooltip.Content side={side} sideOffset={10} className='px-2 py-1 capitalize font-sans font-semibold text-sm text-center rounded-sm bg-light outline-1 outline-neutral-200 z-50'>
+				<Tooltip.Content side={side} sideOffset={10} className='px-2 py-1 capitalize font-sans font-semibold text-sm text-center rounded-sm dark:bg-dark outline-1 outline-neutral-200 z-50'>
 					{tooltip}
 				</Tooltip.Content>
 			</Tooltip.Portal>
@@ -423,7 +424,7 @@ const Breakpoint = ({
 	}) =>
 		<WithTooltip side='bottom' tooltip={label + ' view'}>
 			<button
-				className={clsx('relative flex items-center justify-center rounded-sm cursor-pointer hover:bg-neutral-200 size-full p-2', { 'bg-neutral-200': active })}
+				className={clsx('relative flex items-center justify-center rounded-sm cursor-pointer transition-opacity hover:opacity-100 opacity-50 size-full p-2', { 'opacity-100': active })}
 				onClick={() => onClick()}
 			>
 				<AccessibleIcon.Root label={label}>
@@ -433,7 +434,7 @@ const Breakpoint = ({
 		</WithTooltip>
 
 	return (
-		<ul className={clsx(className, 'bg-light flex justify-center items-center gap-x-5 outline-1 p-1 outline-neutral-200 rounded-md')}>
+		<ul className={clsx(className, 'bg-light dark:bg-dark flex justify-center items-center gap-x-5 outline-1 p-1 outline-neutral-200 rounded-md')}>
 			<li className='size-full' key={'desktop'}>
 				<Item
 					label={'desktop'}
@@ -472,8 +473,8 @@ const MainHeader = (
 		setBreakpoint: (breakpoint: Device) => void
 	}
 ) => (
-	<header className='z-50 sticky top-0 left-0 right-0 size-full grid grid-cols-3 items-center min-h-20 *:w-auto pointer-events-none'>
-		<button onClick={() => onBack()} className='justify-self-start cursor-pointer flex justify-center items-center hover:bg-neutral-200 rounded-md p-2 text-center pointer-events-auto'>
+	<header className='z-50 sticky top-0 left-0 right-0 size-full grid grid-cols-3 items-center min-h-20 *:w-auto pointer-events-none *:transition-opacity'>
+		<button onClick={() => onBack()} className='justify-self-start cursor-pointer flex justify-center items-center opacity-100 transition-opacity hover:opacity-50 rounded-md p-2 text-center pointer-events-auto'>
 			<AccessibleIcon.Root label='Back'>
 				<ChevronLeftIcon />
 			</AccessibleIcon.Root>
@@ -486,7 +487,7 @@ const MainHeader = (
 						breakpoint={breakpoint}
 						setBreakpoint={setBreakpoint}
 					/>
-					<button onClick={e => { e.stopPropagation(); setMenu(!menu) }} className='pointer-events-auto p-2 justify-self-end cursor-pointer flex gap-x-2 justify-center items-center hover:bg-neutral-200 rounded-md' >
+					<button onClick={e => { e.stopPropagation(); setMenu(!menu) }} className='pointer-events-auto p-2 justify-self-end cursor-pointer flex gap-x-2 justify-center items-center transition-opacity opacity-100 hover:opacity-50 rounded-md' >
 						<AccessibleIcon.Root label='Toggle SEO settings'>
 							<ViewVerticalIcon />
 						</AccessibleIcon.Root>
@@ -822,7 +823,7 @@ const Left = ({ onDelete, asset, onDrag, onDrop }: {
 			{
 				items.length === 0
 					? <div className='size-full p-4 flex flex-col justify-center items-center'>
-						<p className='font-sans text-neutral-500 uppercase text-base font-medium'>No images</p>
+						<p className='font-sans opacity-50 uppercase text-base font-medium'>No images</p>
 					</div>
 					: null
 			}
@@ -1658,10 +1659,10 @@ const Edit = ({ project }: { project: Project }) => {
 				{
 					assets.length > 0
 						? <div className='sticky bottom-0 left-0 right-0 size-full flex justify-center items-center min-h-20 pointer-events-none z-50'>
-							<ul className='flex justify-center items-center rounded-md p-1 bg-light outline-1 outline-neutral-200 *:size-full gap-x-5 *:*:flex *:*:justify-center *:*:items-center *:*:p-2 *:*:rounded-md *:*:hover:not-disabled:bg-neutral-200 *:*:pointer-events-auto *:*:cursor-pointer'>
+							<ul className='flex justify-center items-center rounded-md p-1 bg-light dark:bg-dark outline-1 outline-neutral-200 *:size-full gap-x-5 *:*:flex *:*:justify-center *:*:items-center *:*:p-2 *:*:rounded-md *:*:hover:not-disabled:text-gold-900 *:*:transition-colors *:*:pointer-events-auto *:*:cursor-pointer'>
 								<li>
 									<button
-										className={clsx('relative', { 'bg-neutral-200': bucket })}
+										className={clsx('relative', { 'text-gold-900': bucket })}
 										onClick={e => { e.stopPropagation(); setBucket(!bucket) }}
 									>
 										<AccessibleIcon.Root label='Show images'>
@@ -1691,7 +1692,7 @@ const Edit = ({ project }: { project: Project }) => {
 									<DropdownMenu.Root>
 										<DropdownMenu.Trigger
 											disabled={layout.items.length === 0}
-											className='data-[state=open]:bg-neutral-200 outline-1 outline-transparent disabled:opacity-50 disabled:cursor-not-allowed'
+											className='data-[state=open]:text-gold-900 outline-1 outline-transparent disabled:opacity-50 disabled:cursor-not-allowed'
 										>
 											<AccessibleIcon.Root label='Show layouts options'>
 												<GearIcon />
@@ -1711,6 +1712,7 @@ const Edit = ({ project }: { project: Project }) => {
 													text-sm 
 													z-50 
 													bg-light 
+													dark:bg-dark
 													ring-1
 													ring-neutral-200 
 													rounded-md 
@@ -1721,7 +1723,7 @@ const Edit = ({ project }: { project: Project }) => {
 													breakpoints.filter(v => v !== breakpoint).map(screen =>
 														<DropdownMenu.Item
 															key={screen}
-															className='capitalize rounded-md px-3 py-1.5 cursor-pointer hover:bg-neutral-200 outline-1 outline-transparent'
+															className='capitalize rounded-md px-3 py-1.5 cursor-pointer hover:opacity-100 opacity-50 outline-1 outline-transparent transition-opacity'
 															onSelect={() =>
 																updateLayout(layout => {
 																	const base = template[screen as keyof Template]
@@ -1760,7 +1762,7 @@ const Edit = ({ project }: { project: Project }) => {
 			</section>
 			{
 				bucket
-					? <section className='z-50 fixed top-0 left-0 w-xs h-dvh outline-1 outline-neutral-200 shadow-lg bg-light'>
+					? <section className='z-50 fixed top-0 left-0 w-xs h-dvh outline-1 outline-neutral-200 shadow-lg bg-light dark:bg-dark'>
 						<Left
 							key={layout.width + remainingAsset.length}
 							asset={unused}
@@ -1773,7 +1775,7 @@ const Edit = ({ project }: { project: Project }) => {
 			}
 			{
 				menu
-					? <section className='z-50 fixed right-0 top-0 bottom-0 px-10 w-md grid grid-rows-[auto_max-content_1fr] gap-y-5 place-items-center outline-1 outline-neutral-200 shadow-lg bg-light'>
+					? <section className='z-50 fixed right-0 top-0 bottom-0 px-10 w-md grid grid-rows-[auto_max-content_1fr] gap-y-5 place-items-center outline-1 outline-neutral-200 shadow-lg bg-light dark:bg-dark'>
 						<RightHeader
 							published={published}
 							onPublish={onPublish}
@@ -1802,7 +1804,7 @@ const Edit = ({ project }: { project: Project }) => {
 			{overlay.items.length > 0 ? <Overlay {...overlay} /> : null}
 			<Toast.Provider>
 				<Toast.Root
-					className='bg-light rounded-lg px-3 py-1 font-sans text-base font-semibold outline-1 outline-neutral-200'
+					className='bg-light dark:bg-dark rounded-lg px-3 py-1 font-sans text-base font-semibold outline-1 outline-neutral-200'
 					open={toast.open}
 					onOpenChange={open => setToast({ ...toast, open })}
 				>
@@ -1835,14 +1837,15 @@ const Edit = ({ project }: { project: Project }) => {
 							px-5
 							py-2.5
 							bg-light
+							dark:bg-dark
 							z-50
 						'
 					>
 						<AlertDialog.Title className='font-semibold text-lg'>{alert.title}</AlertDialog.Title>
-						<AlertDialog.Description className='font-semibold text-base text-neutral-500'>
+						<AlertDialog.Description className='font-semibold text-base opacity-50'>
 							{alert.description}
 						</AlertDialog.Description>
-						<div className='font-bold text-base flex items-center justify-end gap-x-3 *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:hover:bg-neutral-200'>
+						<div className='font-bold text-base flex items-center justify-end gap-x-3 *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:hover:opacity-50 *:transition-opacity'>
 							<AlertDialog.Cancel onClick={alert.cancel.callback} className={alert.cancel.color}>{alert.cancel.text}</AlertDialog.Cancel>
 							<AlertDialog.Action onClick={alert.action.callback} className={alert.action.color}>{alert.action.text}</AlertDialog.Action>
 						</div>
@@ -1873,6 +1876,7 @@ const Edit = ({ project }: { project: Project }) => {
 							ring-1
 							ring-neutral-200
 							bg-light
+							dark:bg-dark
 							z-50
 							focus:outline-1
 							focus:outline-neutral-200
@@ -1892,7 +1896,7 @@ const Edit = ({ project }: { project: Project }) => {
 						}
 						<div className='flex flex-col items-center justify-center gap-1 text-center'>
 							<AlertDialog.Title className='font-bold text-lg'>Set Image Description</AlertDialog.Title>
-							<AlertDialog.Description className='font-semibold text-base text-neutral-500'>
+							<AlertDialog.Description className='font-semibold text-base opacity-50'>
 								Write short description about this image.
 							</AlertDialog.Description>
 						</div>
@@ -1902,19 +1906,19 @@ const Edit = ({ project }: { project: Project }) => {
 								ref={focusRef}
 								id='asset'
 								autoFocus={true}
-								className='px-2 py-1 rounded-md bg-neutral-200 outline-1 outline-neutral-200 focus:outline-amber-600 w-full font-semibold text-base'
+								className='px-2 py-1 rounded-md  outline-1 outline-neutral-200 focus:outline-amber-600 w-full font-semibold text-base'
 								placeholder='e.g., Scandinavian chair'
 								type='text'
 								value={assetDialog.input}
 								onChange={e => setAssetDialog({ ...assetDialog, input: e.target.value })}
 							/>
 						</fieldset>
-						<div className='font-bold text-base flex items-center *:focus:outline-1 *:outline-neutral-200 justify-between w-full *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:hover:bg-neutral-200'>
-							<AlertDialog.Cancel className='text-neutral-500' onClick={onSkip}>Skip All</AlertDialog.Cancel>
+						<div className='font-bold text-base flex items-center *:focus:outline-1 *:outline-neutral-200 justify-between w-full *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:transition-opacity'>
+							<AlertDialog.Cancel className='transition-opacity opacity-50 hover:opacity-100' onClick={onSkip}>Skip All</AlertDialog.Cancel>
 							{
 								assetDialog.assets.length > 1
-									? <button onClick={() => { onNext(); focusRef.current!.focus() }}>Next</button>
-									: <AlertDialog.Action onClick={onNext}>Done</AlertDialog.Action>
+									? <button className='transition-opacity hover:opacity-50' onClick={() => { onNext(); focusRef.current!.focus() }}>Next</button>
+									: <AlertDialog.Action className='transition-opacity hover:opacity-50' onClick={onNext}>Done</AlertDialog.Action>
 							}
 						</div>
 					</AlertDialog.Content>

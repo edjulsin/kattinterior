@@ -46,11 +46,11 @@ const defaultThumbnail = {
 
 const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter: string) => void, filter: string, className?: string }) =>
     <DropdownMenu.Root>
-        <DropdownMenu.Trigger className={clsx('flex justify-between items-center gap-x-1 group font-sans font-semibold rounded-lg cursor-pointer bg-neutral-200 outline-transparent', className)}>
+        <DropdownMenu.Trigger className={clsx('flex justify-between items-center gap-x-1 group font-sans font-semibold rounded-lg cursor-pointer', className)}>
             <span>{filter}</span>
             <span>
                 <AccessibleIcon.Root label='Filter posts'>
-                    <CaretDownIcon className='text-neutral-500 transition-transform duration-200 group-data-[state=open]:rotate-180 group-hover:text-amber-600' />
+                    <CaretDownIcon className='text-gold-900 transition-transform duration-200 group-data-[state=open]:rotate-180' />
                 </AccessibleIcon.Root>
             </span>
         </DropdownMenu.Trigger>
@@ -75,6 +75,7 @@ const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter
                         text-sm 
                         z-50 
                         bg-light 
+                        dark:bg-dark
                         ring-1
                         ring-neutral-200 
                         rounded-sm
@@ -83,7 +84,6 @@ const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter
                         *:size-full
                         *:select-none
                         *:outline-transparent
-                        *:data-[highlighted]:bg-neutral-200
                     '
                 >
                     {
@@ -92,8 +92,8 @@ const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter
                                 key={name}
                                 className={
                                     clsx(
-                                        'px-3 py-1.5 flex w-full justify center items-center cursor-pointer hover:bg-neutral-200 outline-transparent outline-1',
-                                        { 'bg-neutral-200': filter === name }
+                                        'transition-opacity px-3 py-1.5 flex w-full justify center items-center cursor-pointer outline-transparent outline-1 opacity-50 hover:opacity-100',
+                                        { 'opacity-100': filter === name }
                                     )
                                 }
                                 value={name}
@@ -279,17 +279,17 @@ const Projects = ({ fetchCount, projects }: { fetchCount: number, projects: Proj
         <section className='w-full flex flex-col justify-center items-center text-base'>
             <div className='z-50 sticky top-0 py-10 rounded-lg grid grid-cols-2 md:grid-cols-3 font-semibold size-full items-center justify-between text-sm md:text-base *:px-3 *:py-1.5'>
                 <button
-                    className='bg-neutral-200 flex justify-center items-center gap-x-1 cursor-pointer rounded-lg justify-self-start group'
+                    className='flex bg-light dark:bg-dark outline-neutral-200 outline-1 justify-center items-center gap-x-1 cursor-pointer rounded-lg justify-self-start group'
                     onClick={action}
                 >
                     <span>New Project</span>
-                    <span><PlusIcon className='text-neutral-500 group-hover:text-amber-600' /></span>
+                    <span><PlusIcon className='text-gold-900' /></span>
                 </button>
-                <div className='flex justify-center items-center bg-neutral-200 rounded-xl justify-self-end md:justify-self-center focus-within:outline-1 focus-within:outline-amber-600'>
-                    <MagnifyingGlassIcon className='text-neutral-500' />
+                <div className='flex justify-center items-center bg-light dark:bg-dark rounded-xl justify-self-end md:justify-self-center outline-1 outline-neutral-200 focus-within:outline-amber-600'>
+                    <MagnifyingGlassIcon className='text-gold-900' />
                     <input value={search} onChange={e => onSearch(e.target.value)} className='max-h-6 max-w-30 size-full p-2 outline-1 outline-transparent' placeholder='Find projects...' />
                 </div>
-                <Filter filter={filter} onFilterChange={onFilterChange} className='hidden md:flex bg-light justify-self-end outline-2 outline-neutral-200' />
+                <Filter filter={filter} onFilterChange={onFilterChange} className='hidden md:flex bg-light dark:bg-dark justify-self-end outline-1 outline-neutral-200' />
             </div>
             <section className='py-15 flex flex-col justify-center items-center gap-y-5'>
                 <List projects={filtered} />

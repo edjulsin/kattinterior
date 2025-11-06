@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 const Dashboard = () => {
-    const [ error, setError ] = useState(false)
+    const [error, setError] = useState(false)
     const router = useRouter()
     const action = () => createProject().then(
         id => { setError(false); router.push('/dashboard/editor/' + id) },
@@ -18,9 +18,9 @@ const Dashboard = () => {
         ? <Error title='Database Error' />
         : (
             <section className='flex flex-col gap-y-5 justify-center items-center size-full h-[50dvh]'>
-                <h1 className='text-2xl font-medium text-neutral-500'>Start creating content</h1>
-                <button onClick={ action } className='rounded-lg px-2 py-1 outline-1 outline-neutral-200 text-lg gap-x-2 font-semibold flex justify-center items-center cursor-pointer' role='button'>
-                    <span><Pencil2Icon className='text-neutral-500' /></span>
+                <h1 className='text-2xl font-medium opacity-50'>Start creating content</h1>
+                <button onClick={action} className='rounded-lg px-2 py-1 outline-1 outline-neutral-200 text-lg gap-x-2 font-semibold flex justify-center items-center cursor-pointer' role='button'>
+                    <span><Pencil2Icon className='text-gold-900' /></span>
                     <span>New Project</span>
                 </button>
             </section>

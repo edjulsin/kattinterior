@@ -10,7 +10,7 @@ export default ({ title, description, path }: { title: string, path: string, des
     "@type": "WebSite",
     "url": url,
     "name": name,
-    "description": 'Discover professional interior design solutions in Bali with ${name}. Residential, commercial, and custom projects.',
+    "description": `Discover professional interior design solutions in Bali with ${name}. Residential, commercial, and custom projects.`,
     "mainEntityOfPage": {
         "@type": "WebPage",
         "@id": url + path,

@@ -89,7 +89,7 @@ const ServicesPage = async () =>
                     Through thoughtful design and natural materials, we create interiors that feel alive, timeless, and truly personal.
                 </p>
             </div>
-            <span className='font-serif text-4xl text-center'>&darr;</span>
+            <span className='font-serif text-4xl text-center text-amber-600'>&darr;</span>
         </section>
         <section className='max-w-2xs md:max-w-md xl:max-w-lg text-center flex flex-col justify-center items-center gap-y-5'>
             <h2 className='text-2xl md:text-3xl font-serif slide-from-bottom'>What we do</h2>

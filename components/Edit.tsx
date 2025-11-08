@@ -201,13 +201,13 @@ const MainEditorBody = ({
 const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMenu }: { onPreview: () => void, published: boolean, onUnpublish: () => void, onPublish: () => void, menu: boolean, setMenu: (value: boolean) => void }) =>
 	<div className='flex size-full justify-between items-center min-h-20 *:w-auto'>
 		<div className='flex flex-row justify-center items-center rounded-md *:h-full'>
-			<button onClick={() => onPreview()} className='rounded-md transition-opacity hover:opacity-50 p-2 cursor-pointer'>
+			<button onClick={() => onPreview()} className='rounded-md transition-colors hover:bg-amber-600 hover:text-light p-2 cursor-pointer'>
 				<AccessibleIcon.Root label='Preview'>
 					<PlayIcon />
 				</AccessibleIcon.Root>
 			</button>
 			<DropdownMenu.Root>
-				<DropdownMenu.Trigger className='rounded-md transition-opacity hover:opacity-50 px-0.5 py-2 cursor-pointer'>
+				<DropdownMenu.Trigger className='rounded-md transition-colors hover:bg-amber-600 hover:text-light px-0.5 py-2 cursor-pointer'>
 					<AccessibleIcon.Root label='Show action menu'>
 						<CaretDownIcon />
 					</AccessibleIcon.Root>
@@ -231,10 +231,12 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 							ring-neutral-200 
 							rounded-md 
 							p-1
+							*:data-highlighted:bg-amber-600
+							*:data-highlighted:text-light
 						'
 					>
 						<DropdownMenu.Item
-							className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer transition-opacity hover:opacity-50'
+							className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer'
 							onSelect={() => onPreview()}
 						>
 							<span>
@@ -248,7 +250,7 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 						{
 							published
 								? <DropdownMenu.Item
-									className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer transition-opacity hover:opacity-50'
+									className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer'
 									onSelect={() => onUnpublish()}
 								>
 									<span>
@@ -261,7 +263,7 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 								: null
 						}
 						<DropdownMenu.Item
-							className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer transition-opacity hover:opacity-50'
+							className='flex gap-x-1 w-full items-center rounded-md px-4 py-1.5 cursor-pointer'
 							onSelect={() => onPublish()}
 						>
 							<span>
@@ -275,7 +277,7 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 				</DropdownMenu.Portal>
 			</DropdownMenu.Root>
 		</div>
-		<button onClick={() => setMenu(!menu)} className='flex p-2 justify-center items-center rounded-md transition-opacity hover:opacity-50 cursor-pointer'>
+		<button onClick={() => setMenu(!menu)} className='flex p-2 justify-center items-center rounded-md transition-colors hover:bg-amber-600 hover:text-light cursor-pointer'>
 			<AccessibleIcon.Root label='Toggle menu'>
 				<ViewVerticalIcon />
 			</AccessibleIcon.Root>
@@ -315,9 +317,9 @@ const RightMain = ({
 					['residential', 'commercial'].map(v =>
 						<div key={v} className='flex gap-x-2 items-center justify-center'>
 							<RadioGroup.Item value={v} id={v} className='peer size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-400 cursor-pointer'>
-								<RadioGroup.Indicator className='rounded-full size-2 bg-gold-900' />
+								<RadioGroup.Indicator className='rounded-full size-2 bg-amber-600' />
 							</RadioGroup.Item>
-							<label className='text-base font-medium cursor-pointer opacity-50 peer-data-[state=checked]:opacity-100 transition-opacity' htmlFor={v}>{capitalize(v)}</label>
+							<label className='text-base font-medium cursor-pointer' htmlFor={v}>{capitalize(v)}</label>
 						</div>
 					)
 				}
@@ -331,9 +333,9 @@ const RightMain = ({
 				onChange={e => setSlug(e.target.value)}
 				onBlur={e => setSlug(e.target.value.toLowerCase().trim().split(' ').join('-'))}
 				value={slug}
-				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl outline-1 outline-neutral-200 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('slug') })}
+				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl outline-1 transition-colors outline-neutral-200 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('slug') })}
 				placeholder='Slug'
-				type='url'
+				type='text'
 			/>
 			<small className='text-base font-medium opacity-50'>{`${domain}/projects/${slug}`}</small>
 		</div>
@@ -344,7 +346,7 @@ const RightMain = ({
 				required={true}
 				onChange={e => setTitle(e.target.value)}
 				value={title}
-				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl outline-1 outline-neutral-200 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('title') })}
+				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl outline-1 transition-colors outline-neutral-200 focus:outline-amber-600', { 'outline-1 outline-red-500': errors.includes('title') })}
 				placeholder='Title'
 				type='text'
 			/>
@@ -357,15 +359,16 @@ const RightMain = ({
 				required={true}
 				onChange={e => setDescription(e.target.value)}
 				value={description}
-				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl outline-1 outline-neutral-200 focus:outline-amber-600 min-h-30', { 'outline-1 outline-red-500': errors.includes('title') })}
+				className={clsx('text-lg font-medium w-full px-3 py-1.5 rounded-xl outline-1 transition-colors outline-neutral-200 focus:outline-amber-600 min-h-30', { 'outline-1 outline-red-500': errors.includes('title') })}
 				placeholder='Description'
 			/>
 			<small className='text-base font-medium opacity-50'>{`Recommended: 145 characters. You’ve used ${description.length}`}</small>
+			<style jsx>{`#description { scrollbar-width: thin;}`}</style>
 		</div>
 		<div className='flex items-center gap-x-2 rounded-full'>
 			<Switch.Root
 				id='featured'
-				className={clsx('peer w-8 h-4 rounded-full outline-transparent', featured ? 'bg-gold-900' : 'bg-neutral-200')}
+				className={clsx('peer w-8 h-4 rounded-full outline-transparent cursor-pointer', featured ? 'bg-amber-600' : 'bg-neutral-200')}
 				onCheckedChange={v => setFeatured(v)}
 				checked={featured}
 			>
@@ -376,14 +379,14 @@ const RightMain = ({
 					)}
 				/>
 			</Switch.Root>
-			<label className='text-base font-semibold' htmlFor='featured'>Feature in Homepage</label>
+			<label className='text-base font-semibold cursor-pointer' htmlFor='featured'>Feature in Homepage</label>
 		</div>
 	</div>
 
 
 const RightFooter = ({ onDelete }: { onDelete: () => void }) =>
-	<button onClick={() => onDelete()} className='flex gap-x-1 justify-center items-center p-2 rounded-lg transition-opacity hover:opacity-50 cursor-pointer'>
-		<span><TrashIcon className='text-gold-900' /></span>
+	<button onClick={() => onDelete()} className='flex gap-x-1 justify-center items-center p-2 rounded-lg transition-colors cursor-pointer hover:bg-amber-600 hover:text-light'>
+		<span><TrashIcon /></span>
 		<span className='font-semibold text-base leading-none'>Delete</span>
 	</button>
 
@@ -394,7 +397,7 @@ const WithTooltip = ({ children, tooltip, side }: { children: React.ReactNode, t
 				{children}
 			</Tooltip.Trigger>
 			<Tooltip.Portal>
-				<Tooltip.Content side={side} sideOffset={10} className='px-2 py-1 capitalize font-sans font-semibold text-sm text-center rounded-sm dark:bg-dark outline-1 outline-neutral-200 z-50'>
+				<Tooltip.Content side={side} sideOffset={10} className='px-2 py-1 capitalize font-sans font-semibold text-sm text-center rounded-sm bg-light dark:bg-dark outline-1 outline-neutral-200 z-50'>
 					{tooltip}
 				</Tooltip.Content>
 			</Tooltip.Portal>
@@ -424,7 +427,7 @@ const Breakpoint = ({
 	}) =>
 		<WithTooltip side='bottom' tooltip={label + ' view'}>
 			<button
-				className={clsx('relative flex items-center justify-center rounded-sm cursor-pointer transition-opacity hover:opacity-100 opacity-50 size-full p-2', { 'opacity-100': active })}
+				className={clsx('relative flex items-center justify-center rounded-sm cursor-pointer transition-colors hover:text-amber-600 size-full p-2', { 'text-amber-600': active })}
 				onClick={() => onClick()}
 			>
 				<AccessibleIcon.Root label={label}>
@@ -473,8 +476,8 @@ const MainHeader = (
 		setBreakpoint: (breakpoint: Device) => void
 	}
 ) => (
-	<header className='z-50 sticky top-0 left-0 right-0 size-full grid grid-cols-3 items-center min-h-20 *:w-auto pointer-events-none *:transition-opacity'>
-		<button onClick={() => onBack()} className='justify-self-start cursor-pointer flex justify-center items-center opacity-100 transition-opacity hover:opacity-50 rounded-md p-2 text-center pointer-events-auto'>
+	<header className='z-50 sticky top-0 left-0 right-0 size-full grid grid-cols-3 items-center min-h-20 *:w-auto pointer-events-none'>
+		<button onClick={() => onBack()} className='justify-self-start cursor-pointer flex justify-center items-center transition-colors hover:bg-amber-600 hover:text-light rounded-md p-2 text-center pointer-events-auto'>
 			<AccessibleIcon.Root label='Back'>
 				<ChevronLeftIcon />
 			</AccessibleIcon.Root>
@@ -487,7 +490,7 @@ const MainHeader = (
 						breakpoint={breakpoint}
 						setBreakpoint={setBreakpoint}
 					/>
-					<button onClick={e => { e.stopPropagation(); setMenu(!menu) }} className='pointer-events-auto p-2 justify-self-end cursor-pointer flex gap-x-2 justify-center items-center transition-opacity opacity-100 hover:opacity-50 rounded-md' >
+					<button onClick={e => { e.stopPropagation(); setMenu(!menu) }} className='pointer-events-auto p-2 justify-self-end cursor-pointer flex gap-x-2 justify-center items-center rounded-md transition-colors hover:bg-amber-600 hover:text-light' >
 						<AccessibleIcon.Root label='Toggle SEO settings'>
 							<ViewVerticalIcon />
 						</AccessibleIcon.Root>
@@ -1658,11 +1661,11 @@ const Edit = ({ project }: { project: Project }) => {
 				}
 				{
 					assets.length > 0
-						? <div className='sticky bottom-0 left-0 right-0 size-full flex justify-center items-center min-h-20 pointer-events-none z-50'>
-							<ul className='flex justify-center items-center rounded-md p-1 bg-light dark:bg-dark outline-1 outline-neutral-200 *:size-full gap-x-5 *:*:flex *:*:justify-center *:*:items-center *:*:p-2 *:*:rounded-md *:*:hover:not-disabled:text-gold-900 *:*:transition-colors *:*:pointer-events-auto *:*:cursor-pointer'>
+						? <div className='sticky bottom-0 left-0 right-0 size-full flex justify-center items-center min-h-20 z-50 pointer-events-none'>
+							<ul className='pointer-events-none flex justify-center items-center rounded-md p-1 bg-light dark:bg-dark outline-1 outline-neutral-200 *:size-full gap-x-5 *:*:flex *:*:justify-center *:*:items-center *:*:p-2 *:*:rounded-md *:*:hover:not-disabled:text-amber-600 *:*:transition-colors *:*:pointer-events-auto *:*:cursor-pointer'>
 								<li>
 									<button
-										className={clsx('relative', { 'text-gold-900': bucket })}
+										className={clsx('relative', { 'text-amber-600': bucket })}
 										onClick={e => { e.stopPropagation(); setBucket(!bucket) }}
 									>
 										<AccessibleIcon.Root label='Show images'>
@@ -1692,7 +1695,7 @@ const Edit = ({ project }: { project: Project }) => {
 									<DropdownMenu.Root>
 										<DropdownMenu.Trigger
 											disabled={layout.items.length === 0}
-											className='data-[state=open]:text-gold-900 outline-1 outline-transparent disabled:opacity-50 disabled:cursor-not-allowed'
+											className='data-[state=open]:text-amber-600 outline-1 outline-transparent disabled:opacity-50 disabled:cursor-not-allowed'
 										>
 											<AccessibleIcon.Root label='Show layouts options'>
 												<GearIcon />
@@ -1717,13 +1720,15 @@ const Edit = ({ project }: { project: Project }) => {
 													ring-neutral-200 
 													rounded-md 
 													p-1
+													*:data-highlighted:bg-amber-600 
+													*:data-highlighted:text-light
 												'
 											>
 												{
 													breakpoints.filter(v => v !== breakpoint).map(screen =>
 														<DropdownMenu.Item
 															key={screen}
-															className='capitalize rounded-md px-3 py-1.5 cursor-pointer hover:opacity-100 opacity-50 outline-1 outline-transparent transition-opacity'
+															className='capitalize rounded-md px-3 py-1.5 cursor-pointer  outline-1 outline-transparent'
 															onSelect={() =>
 																updateLayout(layout => {
 																	const base = template[screen as keyof Template]
@@ -1913,12 +1918,12 @@ const Edit = ({ project }: { project: Project }) => {
 								onChange={e => setAssetDialog({ ...assetDialog, input: e.target.value })}
 							/>
 						</fieldset>
-						<div className='font-bold text-base flex items-center *:focus:outline-1 *:outline-neutral-200 justify-between w-full *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:transition-opacity'>
-							<AlertDialog.Cancel className='transition-opacity opacity-50 hover:opacity-100' onClick={onSkip}>Skip All</AlertDialog.Cancel>
+						<div className='font-bold text-base flex items-center *:focus:outline-1 *:outline-neutral-200 justify-between w-full *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:transition-colors *:hover:bg-amber-600 *:hover:text-light'>
+							<AlertDialog.Cancel className='opacity-50 hover:opacity-100 transition-opacity' onClick={onSkip}>Skip All</AlertDialog.Cancel>
 							{
 								assetDialog.assets.length > 1
-									? <button className='transition-opacity hover:opacity-50' onClick={() => { onNext(); focusRef.current!.focus() }}>Next</button>
-									: <AlertDialog.Action className='transition-opacity hover:opacity-50' onClick={onNext}>Done</AlertDialog.Action>
+									? <button onClick={() => { onNext(); focusRef.current!.focus() }}>Next</button>
+									: <AlertDialog.Action onClick={onNext}>Done</AlertDialog.Action>
 							}
 						</div>
 					</AlertDialog.Content>

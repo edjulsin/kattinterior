@@ -43,7 +43,7 @@ const Article = ({ className, heading, project, index }: { heading: string, clas
                     height={thumbnail.height}
                 />
                 <div className='flex justify-center items-center gap-x-3 w-full'>
-                    <span className='text-center font-serif text-xs size-12 p-2 flex justify-center items-center flex-col rounded-full outline-1 outline-gold-900 text-gold-700'>
+                    <span className='text-center font-serif text-xs size-12 p-2 flex justify-center items-center flex-col rounded-full outline-1 outline-gold-900 text-gold-900'>
                         {(index + 1 < 10 ? '0' : '') + (index + 1)}
                     </span>
                     {title}

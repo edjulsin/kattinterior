@@ -53,7 +53,7 @@ const Menu = () => {
                                             <li key={page} className={clsx('col-span-2 transition-opacity duration-350 ease-in-out overflow-clip', { 'col-start-2': i % 2 === 1 })} >
                                                 <Dialog.Close asChild>
                                                     <Link className='capitalize flex items-center gap-x-5' href={`/${page}`}>
-                                                        <span className='text-xs opacity-50'>{'0' + (i + 1)}</span>
+                                                        <span className='text-xs text-gold-900'>{'0' + (i + 1)}</span>
                                                         <span
                                                             data-play={state}
                                                             className='

@@ -113,7 +113,7 @@ const Contacts = ({ fetchCount, contacts }: { fetchCount: number, contacts: Cont
     return (
         <section className='flex flex-col justify-center items-center gap-y-5'>
             <header>
-                <div className='flex justify-center items-center bg-light dark:bg-dark px-2 py-1 rounded-xl outline-1 outline-neutral-200 focus-within:outline-amber-600'>
+                <div className='flex justify-center items-center bg-light dark:bg-dark px-2 py-1 rounded-xl outline-1 outline-neutral-200 focus-within:outline-amber-600 transition-colors'>
                     <MagnifyingGlassIcon className='text-gold-900' />
                     <input
                         className='max-h-6 max-w-30 size-full p-2 font-semibold outline-transparent outline-1'

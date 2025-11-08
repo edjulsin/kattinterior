@@ -50,7 +50,7 @@ const AboutPage = () =>
                     Each project — from private residences to boutique commercial spaces — is tailored for clients and developers seeking timeless elegance, natural warmth, and meaningful design.
                 </p>
             </div>
-            <span className='block font-sans text-6xl text-center xl:text-left xl:self-end'>&darr;</span>
+            <span className='block font-sans text-6xl text-center xl:text-left xl:self-end text-amber-600'>&darr;</span>
         </section>
         <section className='flex flex-col xl:flex-row-reverse xl:items-start gap-y-10 justify-center items-center max-w-2xs md:max-w-sm xl:max-w-full'>
             <Image

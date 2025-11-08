@@ -33,7 +33,7 @@ const Contact = () => {
             <div className='flex flex-col gap-y-1 size-full'>
                 <label className='font-bold text-md sr-only' htmlFor='name'>Name <span>*</span></label>
                 <input
-                    className='border-b-1 border-b-gold-200 py-1 px-2 focus:outline-1 focus:outline-transparent focus:border-b-amber-500'
+                    className='border-b-1 border-b-gold-200 py-1 px-2 outline-1 outline-transparent transition-colors focus:border-b-amber-500'
                     placeholder='Name'
                     id='name'
                     type='text'
@@ -47,7 +47,7 @@ const Contact = () => {
             <div className='flex flex-col gap-y-1 size-full'>
                 <label className='font-bold text-md sr-only' htmlFor='email'>Email <span>*</span></label>
                 <input
-                    className='border-b-1 border-b-gold-200 py-1 px-2 focus:outline-1 focus:outline-transparent focus:border-b-amber-500'
+                    className='border-b-1 border-b-gold-200 py-1 px-2 outline-1 outline-transparent transition-colors focus:border-b-amber-500'
                     placeholder='Email'
                     id='email'
                     type='email'
@@ -59,7 +59,7 @@ const Contact = () => {
             <div className='flex flex-col gap-y-1 size-full'>
                 <label className='font-bold text-md sr-only' htmlFor='message'>Message <span>*</span></label>
                 <textarea
-                    className='border-b-1 border-b-gold-200 py-1 px-2 min-h-36 focus:outline-1 focus:outline-transparent focus:border-b-amber-500'
+                    className='border-b-1 border-b-gold-200 py-1 px-2 min-h-36 outline-1 outline-transparent transition-colors focus:border-b-amber-500'
                     placeholder='Message'
                     id='message'
                     name='message'
@@ -75,7 +75,7 @@ const Contact = () => {
                 {state.error && state.message ? <Error error={state.message} /> : null}
             </div>
             <button
-                className='font-semibold rounded-lg cursor-pointer py-2 px-3 outline-1 outline-gold-200 disabled:opacity-50 disabled:cursor-not-allowed'
+                className='hover:bg-amber-600 hover:text-light transition-colors font-semibold rounded-lg cursor-pointer py-2 px-3 outline-1 outline-gold-200 disabled:opacity-50 disabled:cursor-not-allowed'
                 disabled={pending || state.success}
             >
                 Submit &rarr;

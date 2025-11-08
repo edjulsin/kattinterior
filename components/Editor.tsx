@@ -557,17 +557,22 @@ const Editable = ({
                             z-50
                             p-1
                             bg-light 
+                            dark:bg-dark
                             rounded-sm
                             font-sans 
                             text-sm 
                             font-semibold
                             ring-1
                             ring-neutral-200
+                            shadow-xs
                             *:rounded-sm
                             *:size-full
                             *:select-none
                             *:outline-transparent
-                            *:data-[highlighted]:bg-neutral-200
+                            *:data-highlighted:bg-amber-600
+                            *:data-highlighted:text-light
+                            *:data-[state=open]:bg-amber-600
+                            *:data-[state=open]:text-light
                         '
                         onContextMenu={e => e.stopPropagation()}
                     >
@@ -600,6 +605,7 @@ const Editable = ({
                                 <ContextMenu.SubContent
                                     onContextMenu={e => e.stopPropagation()}
                                     sideOffset={5}
+                                    alignOffset={-4}
                                     asChild
                                 >
                                     <ContextMenu.RadioGroup
@@ -612,6 +618,7 @@ const Editable = ({
                                             z-50
                                             p-1
                                             bg-light 
+                                            dark:bg-dark
                                             rounded-sm
                                             font-sans 
                                             text-sm 
@@ -622,14 +629,17 @@ const Editable = ({
                                             *:size-full
                                             *:select-none
                                             *:outline-transparent
-                                            *:data-[highlighted]:bg-neutral-200
+                                            *:data-highlighted:bg-amber-600
+                                            *:data-highlighted:text-light
+                                            *:data-[state=open]:bg-amber-600
+                                            *:data-[state=open]:text-light
                                         '
                                     >
                                         {
                                             effects.map(effect =>
                                                 <ContextMenu.RadioItem
                                                     key={effect}
-                                                    className={clsx('px-3 py-1.5', { 'bg-neutral-200': value.effect === effect })}
+                                                    className={clsx('px-3 py-1.5', { 'bg-amber-600 text-light': value.effect === effect })}
                                                     value={effect}
                                                 >
                                                     {
@@ -673,11 +683,12 @@ const Editable = ({
                             px-5
                             py-3
                             bg-light
+                            dark:bg-dark
                             z-50
                         '
                     >
                         <Dialog.Title className='font-bold text-lg'>Edit description</Dialog.Title>
-                        <Dialog.Description className='font-semibold text-base text-neutral-500'>
+                        <Dialog.Description className='font-semibold text-base opacity-50'>
                             Short description about the image.
                         </Dialog.Description>
                         <fieldset className='py-3'>
@@ -685,7 +696,7 @@ const Editable = ({
                             <input
                                 id='alt'
                                 autoFocus={true}
-                                className='px-2 py-1 rounded-md bg-neutral-200 outline-1 outline-neutral-200 focus:outline-amber-600 w-full font-semibold text-base'
+                                className='px-2 py-1 rounded-md outline-1 outline-neutral-200 transition-colors focus:outline-amber-600 w-full font-semibold text-base'
                                 value={alt}
                                 onChange={v => setAlt(v.target.value)}
                                 type='text'
@@ -693,7 +704,7 @@ const Editable = ({
                             />
                         </fieldset>
                         <Dialog.Close
-                            className='text-center font-bold text-base rounded-md cursor-pointer px-2 py-1 hover:bg-neutral-200 hover:outline-1 hover:outline-neutral-200 w-full'
+                            className='text-center font-bold text-base rounded-md cursor-pointer px-2 py-1 transition-colors hover:bg-amber-600 hover:text-light w-full'
                             onClick={() => setImageAlt({ ...image, alt: alternative(alt) })}
                         >
                             Save changes
@@ -854,6 +865,7 @@ const Group = ({ onEffect, container, onDragStart, onDrag, onDragEnd, x0, y0, x1
                         z-50
                         p-1
                         bg-light 
+                        dark:bg-dark
                         rounded-sm
                         font-sans 
                         text-sm 
@@ -865,7 +877,11 @@ const Group = ({ onEffect, container, onDragStart, onDrag, onDragEnd, x0, y0, x1
                         *:size-full
                         *:select-none
                         *:outline-transparent
-                        *:data-[highlighted]:bg-neutral-200
+                        *:data-highlighted:bg-amber-600
+                        *:data-highlighted:text-light
+                        *:data-[state=open]:bg-amber-600
+                        *:data-[state=open]:text-light
+                        *:transition-colors
                         min-w-35
                     '
                     onContextMenu={e => e.stopPropagation()}
@@ -897,6 +913,7 @@ const Group = ({ onEffect, container, onDragStart, onDrag, onDragEnd, x0, y0, x1
                                         z-50
                                         p-1
                                         bg-light 
+                                        dark:bg-dark
                                         rounded-sm
                                         font-sans 
                                         text-sm 
@@ -907,14 +924,18 @@ const Group = ({ onEffect, container, onDragStart, onDrag, onDragEnd, x0, y0, x1
                                         *:size-full
                                         *:select-none
                                         *:outline-transparent
-                                        *:data-[highlighted]:bg-neutral-200
+                                        *:transition-colors
+                                        *:data-highlighted:bg-amber-600
+                                        *:data-highlighted:text-light
+                                        *:data-[state=open]:bg-amber-600
+                                        *:data-[state=open]:text-light
                                     '
                                 >
                                     {
                                         effects.map(value =>
                                             <ContextMenu.RadioItem
                                                 key={value}
-                                                className={clsx('px-3 py-1.5', { 'bg-neutral-200': effect === value })}
+                                                className={clsx('px-3 py-1.5', { 'bg-amber-600 text-light': effect === value })}
                                                 value={value}
                                             >
                                                 {
@@ -1533,7 +1554,9 @@ const Edit = ({
 
         const [ox, oy] = ys[i]
 
-        const sign = Math.sign((item.w * item.h) - (prev.w * prev.h))
+        const sign = Math.sign(
+            (item.w * item.h) - (prev.w * prev.h)
+        )
         const m = Math.max(dx, dy)
         const s = 1 + Math.abs(m) * sign * (m === dx ? 1 / item.w : 1 / item.h)
 

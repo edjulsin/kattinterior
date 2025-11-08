@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import Project from './Project'
 
 const Preview = ({ project }: { project: ProjectType }) => {
-    const [ data, setData ] = useState<ProjectType>(project)
+    const [data, setData] = useState<ProjectType>(project)
 
     useEffect(() => {
         const broadcast = new BroadcastChannel(project.id)
@@ -13,13 +13,15 @@ const Preview = ({ project }: { project: ProjectType }) => {
 
         broadcast.addEventListener('message', callback)
 
+        broadcast.postMessage(project.id)
+
         return () => {
             broadcast.removeEventListener('message', callback)
             broadcast.close()
         }
-    }, [ project.id ])
+    }, [project.id])
 
-    return <Project { ...data } />
+    return <Project {...data} />
 }
 
 export default Preview

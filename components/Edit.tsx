@@ -1331,36 +1331,26 @@ const Edit = ({ project }: { project: Project }) => {
 
 		setBroadcast(broadcaster)
 
-		const openPreview = () => new Promise<void>((resolve, reject) => {
-			const tab = window.open('/preview/' + project.id, project.id)
-			if(tab) {
-				const timeout = setTimeout(() => {
-					broadcaster.postMessage(current)
-					resolve()
-					clearTimeout(timeout)
-				}, 5000)
+		const attachListener = () => {
+			broadcaster.addEventListener('message', () => {
 				broadcaster.postMessage(current)
-			} else {
-				reject()
-			}
-		})
+			}, { once: true })
+		}
 
 		task.then(
 			() => {
-				openPreview().catch(() => {
-					const onClick = () => {
-						const timeout = setTimeout(() => {
-							broadcaster.postMessage(current)
-							clearTimeout(timeout)
-						}, 5000)
-					}
+				const tab = window.open('/preview/' + project.id, project.id)
+				if(tab) {
+					attachListener()
+				} else {
+					attachListener()
 					showInfoToast({
 						title: 'Preview error',
 						description: (
-							<>Unable to open preview. <a onClick={onClick} href={'/preview/' + project.id} target='_blank'>Click here</a> to open preview manually.</>
+							<>Unable to open preview. <a href={'/preview/' + project.id} target='_blank'>Click here</a> to open preview manually.</>
 						)
 					})
-				})
+				}
 			},
 			() => showErrorToast({
 				title: 'Database error',

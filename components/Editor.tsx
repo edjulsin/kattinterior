@@ -472,7 +472,7 @@ const Editable = ({
     return (
         <div
             ref={itemRef}
-            className='absolute bg-neutral-200'
+            className='absolute bg-light'
             onContextMenu={() => onContextMenu(value)}
             data-id={value.id}
             data-z={value.z}
@@ -498,7 +498,7 @@ const Editable = ({
                                 error
                                     ? <img
                                         ref={imageRef}
-                                        className='size-full object-cover object-center bg-neutral-200'
+                                        className='size-full object-cover object-center bg-light'
                                         width={1000}
                                         height={1000}
                                         alt='Image not found. Please delete and reupload.'

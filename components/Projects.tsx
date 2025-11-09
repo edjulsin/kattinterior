@@ -128,7 +128,7 @@ const List = ({ projects }: { projects: Project[] }) => {
                                 <figure className='flex flex-col justify-center items-center gap-y-3'>
                                     <div className='relative bg-neutral-200'>
                                         <Image
-                                            className='w-70 h-90 object-cover object-center'
+                                            className='w-70 h-90 object-cover object-center bg-light'
                                             src={thumbnail.src}
                                             width={thumbnail.width}
                                             height={thumbnail.height}

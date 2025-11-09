@@ -194,11 +194,11 @@ const MainEditorBody = ({
 			<div style={{ width: layout.width + 'px', height: '100%' }} className='size-full min-h-100 outline-1 outline-neutral-200 flex flex-col items-center justify-center gap-y-5 px-10'>
 				<div className='flex justify-center items-center gap-x-2'>
 					<AccessibleIcon.Root label='Drop here'>
-						<MoveIcon className='text-neutral-500' />
+						<MoveIcon />
 					</AccessibleIcon.Root>
 					<p className='text-3xl font-medium'>Drop here</p>
 				</div>
-				<small className='text-neutral-500 text-base font-medium'>Drag and drop images from the sidebar here to start editing.</small>
+				<small className='opacity-50 text-base font-medium'>Drag and drop images from the sidebar here to start editing.</small>
 			</div>
 		</section>
 
@@ -1735,7 +1735,7 @@ const Edit = ({ project }: { project: Project }) => {
 				}
 			</section>
 			{
-				bucket
+				bucket && assets.length > 0
 					? <section className='z-50 fixed top-0 left-0 w-xs h-dvh outline-1 outline-neutral-200 shadow-lg bg-light dark:bg-dark'>
 						<Left
 							key={layout.width + remainingAsset.length}
@@ -1748,7 +1748,7 @@ const Edit = ({ project }: { project: Project }) => {
 					: null
 			}
 			{
-				menu
+				menu && assets.length > 0
 					? <section className='z-50 fixed right-0 top-0 bottom-0 px-10 w-md grid grid-rows-[auto_max-content_1fr] gap-y-5 place-items-center outline-1 outline-neutral-200 shadow-lg bg-light dark:bg-dark'>
 						<RightHeader
 							published={published}
@@ -1819,7 +1819,7 @@ const Edit = ({ project }: { project: Project }) => {
 						<AlertDialog.Description className='font-semibold text-base opacity-50'>
 							{alert.description}
 						</AlertDialog.Description>
-						<div className='font-bold text-base flex items-center justify-end gap-x-3 *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:hover:opacity-50 *:transition-opacity'>
+						<div className='font-bold text-base flex items-center justify-end gap-x-3 *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:hover:bg-amber-600 *:hover:text-light *:transition-colors'>
 							<AlertDialog.Cancel onClick={alert.cancel.callback} className={alert.cancel.color}>{alert.cancel.text}</AlertDialog.Cancel>
 							<AlertDialog.Action onClick={alert.action.callback} className={alert.action.color}>{alert.action.text}</AlertDialog.Action>
 						</div>

@@ -1,6 +1,6 @@
 'use client'
 
-import type { Project } from '@/type/editor'
+import type { Project, Photos } from '@/type/editor'
 import Link from 'next/link'
 import Image from 'next/image'
 import { MagnifyingGlassIcon, CaretDownIcon, PlusIcon } from '@radix-ui/react-icons'
@@ -116,9 +116,12 @@ const List = ({ projects }: { projects: Project[] }) => {
         <ol className='grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 place-items-center gap-15'>
             {
                 projects.map(project => {
-                    const thumbnail = project.assets.length > 0
-                        ? project.assets.find(v => v.thumbnail) ?? project.assets[0]
-                        : defaultThumbnail
+                    const [thumbnail] = [
+                        ...project.assets.toSorted((a, b) =>
+                            Number(!a.thumbnail) - Number(!b.thumbnail)
+                        ),
+                        defaultThumbnail
+                    ]
 
                     const time = formatISODate(now, project.created_at)
 

@@ -6,11 +6,11 @@ import clsx from 'clsx'
 import { drag, select } from 'd3'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Item, Photo, Layout, Asset, Items } from '@/type/editor'
-import { ContextMenu, Dialog } from 'radix-ui'
+import { AccessibleIcon, ContextMenu, Dialog } from 'radix-ui'
 import { applyBoxConstrain, capitalize, clamp, compose, curry, o, alt as alternative, half, boxConstrain } from '@/utility/fn'
 import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent } from '@/hook/useDrag'
 import { v7 as UUIDv7 } from 'uuid'
-import { ChevronRightIcon } from '@radix-ui/react-icons'
+import { ChevronRightIcon, HeartFilledIcon } from '@radix-ui/react-icons'
 import Fallback from '@/assets/fallback.svg'
 import Image from 'next/image'
 
@@ -573,6 +573,7 @@ const Editable = ({
                             *:data-highlighted:text-light
                             *:data-[state=open]:bg-amber-600
                             *:data-[state=open]:text-light
+                            *:data-disabled:opacity-50
                         '
                         onContextMenu={e => e.stopPropagation()}
                     >
@@ -580,7 +581,11 @@ const Editable = ({
                             Crop Image
                         </ContextMenu.Item>
                         <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
-                        <ContextMenu.Item className='px-3 py-1.5' onSelect={() => setAsThumbnail({ ...image, thumbnail: true })}>
+                        <ContextMenu.Item
+                            disabled={image.thumbnail}
+                            className='px-3 py-1.5'
+                            onSelect={() => setAsThumbnail({ ...image, thumbnail: true })}
+                        >
                             Set as Thumbnail
                         </ContextMenu.Item>
                         <ContextMenu.Item className='px-3 py-1.5' onSelect={() => setDialog(true)}>

@@ -1,5 +1,5 @@
 import { getFeaturedProject } from '@/action/admin';
-import { Project } from '@/type/editor';
+import { Photos, Project } from '@/type/editor';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { v7 as UUIDv7 } from 'uuid'
@@ -19,13 +19,12 @@ const defaultImages = [thumbnail(), thumbnail()]
 const Work = () => getFeaturedProject().then(
     (projects: Project[]) =>
         projects.map(v => {
-            const asset = Object.fromEntries(
-                v.assets.map(v => {
-                    return [v.id, v]
-                })
-            )
-
-            const images = [...v.template.desktop.items.slice(0, 2).map(v => asset[v.src]), ...defaultImages].slice(0, 2)
+            const images = [
+                ...v.assets.toSorted((a, b) =>
+                    Number(!a.thumbnail) - Number(!b.thumbnail)
+                ),
+                ...defaultImages
+            ]
 
             return (
                 <section key={v.id} className='flex flex-col gap-y-10 md:gap-y-15 xl:gap-y-20 justify-center items-center'>
@@ -45,7 +44,7 @@ const Work = () => getFeaturedProject().then(
                         '
                     >
                         {
-                            images.map((img, i) =>
+                            images.slice(0, 2).map((img, i) =>
                                 <li key={img.id} className={clsx({ 'hidden sm:block': i === 1 })}>
                                     <Image // use sizes
                                         className='w-70 h-100 object-center object-cover sm:w-80 sm:h-110 lg:w-90 lg:h-120'

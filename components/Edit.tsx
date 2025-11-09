@@ -112,14 +112,14 @@ const MainUpload = ({ uploadAssets }: { uploadAssets: (files: File[]) => Promise
 			<Droppable onDrop={uploadAssets} noDragsEventBubbling={true}>
 				<button className='cursor-pointer flex justify-center items-center gap-x-2 p-4'>
 					<AccessibleIcon.Root label='Upload images'>
-						<UploadIcon className='text-neutral-500' />
+						<UploadIcon />
 					</AccessibleIcon.Root>
 					<p className='text-3xl font-medium'>Upload images</p>
 				</button>
 			</Droppable>
-			<div className='flex flex-col justify-center items-center gap-y-2'>
-				<small className='text-base font-medium text-neutral-500'>Supported: PNG, JPG, WEBP, AVIF.</small>
-				<small className='text-base font-medium text-neutral-500'>Maximum resolution: 4000 x 4000.</small>
+			<div className='flex flex-col justify-center items-center gap-y-2 opacity-50 *:text-base *:font-medium'>
+				<small>Supported: PNG, JPG, WEBP, AVIF.</small>
+				<small>Maximum resolution: 4000 x 4000.</small>
 			</div>
 		</section>
 	</Droppable>
@@ -320,7 +320,7 @@ const RightMain = ({
 				{
 					['residential', 'commercial'].map(v =>
 						<div key={v} className='flex gap-x-2 items-center justify-center'>
-							<RadioGroup.Item value={v} id={v} className='peer size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-400 cursor-pointer'>
+							<RadioGroup.Item value={v} id={v} className='peer size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-200 cursor-pointer'>
 								<RadioGroup.Indicator className='rounded-full size-2 bg-amber-600' />
 							</RadioGroup.Item>
 							<label className='text-base font-medium cursor-pointer' htmlFor={v}>{capitalize(v)}</label>

@@ -1,5 +1,5 @@
 import { v7 as UUIDv7 } from 'uuid'
-import type { Project } from '@/type/editor'
+import type { Project, Photos } from '@/type/editor'
 import Link from 'next/link'
 import Image from 'next/image'
 import { alt } from '@/utility/fn'
@@ -14,11 +14,13 @@ const defaultThumbnail = {
     height: 29,
     thumbnail: false
 }
-
 const Article = ({ className, heading, project, index }: { heading: string, className?: string, project: Project, index: number }) => {
-    const thumbnail = project.assets.length > 0
-        ? project.assets.find(v => v.thumbnail) ?? project.assets[0]
-        : defaultThumbnail
+    const [thumbnail] = [
+        ...project.assets.toSorted((a, b) =>
+            Number(!a.thumbnail) - Number(!b.thumbnail)
+        ),
+        defaultThumbnail
+    ]
 
     const title = React.createElement(
         heading,

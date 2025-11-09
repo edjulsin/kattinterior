@@ -248,7 +248,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                                             className={`anim-delay-[125ms] item-${item.id}` + (item.effect ? ` ${item.effect}` : '')}
                                         >
                                             <Image
-                                                className={`anim-delay-[125ms] size-80 image-${img.id} bg-light`}
+                                                className={`anim-delay-[125ms] size-80 image-${img.id}`}
                                                 src={img.src}
                                                 width={img.width}
                                                 height={img.height}

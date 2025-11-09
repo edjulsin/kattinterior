@@ -498,7 +498,7 @@ const Editable = ({
                                 error
                                     ? <img
                                         ref={imageRef}
-                                        className='size-full object-cover object-center bg-light'
+                                        className='size-full object-cover object-center'
                                         width={1000}
                                         height={1000}
                                         alt='Image not found. Please delete and reupload.'

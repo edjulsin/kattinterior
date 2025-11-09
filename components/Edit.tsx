@@ -683,7 +683,7 @@ const Left = ({ onDelete, asset, onDrag, onDrop }: {
 				data-thumbnail={item.thumbnail}
 			>
 				<img
-					className='object-cover object-center w-full h-40 select-none bg-light'
+					className='object-cover object-center w-full h-40 select-none'
 					width={item.width}
 					height={item.height}
 					alt={`${item.alt} Designed By ${siteName}`}
@@ -859,7 +859,7 @@ const Overlay = ({ x, y, items }: { x: number, y: number, items: Photos }) => {
 										className='absolute top-0 left-0 size-20'
 									>
 										<img
-											className='size-full object-cover object-center bg-light'
+											className='size-full object-cover object-center'
 											src={v.src}
 											alt={v.alt}
 											width={v.width}
@@ -1860,7 +1860,7 @@ const Edit = ({ project }: { project: Project }) => {
 							assetDialog.assets.slice(0, 1).map(v =>
 								<img
 									key={v.id}
-									className='object-cover object-center aspect-square rounded-md bg-light w-full h-auto'
+									className='object-cover object-center aspect-square rounded-md w-full h-auto'
 									width={v.width}
 									height={v.height}
 									src={v.src}

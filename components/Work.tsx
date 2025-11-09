@@ -48,7 +48,7 @@ const Work = () => getFeaturedProject().then(
                             images.map((img, i) =>
                                 <li key={img.id} className={clsx({ 'hidden sm:block': i === 1 })}>
                                     <Image // use sizes
-                                        className='w-70 h-100 object-center object-cover sm:w-80 sm:h-110 lg:w-90 lg:h-120 bg-light'
+                                        className='w-70 h-100 object-center object-cover sm:w-80 sm:h-110 lg:w-90 lg:h-120'
                                         alt={img.alt}
                                         src={img.src}
                                         width={img.width}

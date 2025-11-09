@@ -21,9 +21,9 @@ const Droppable = ({
         noClick: noClick
     })
     return (
-        <div { ...getRootProps({ className }) }>
-            <input { ...getInputProps() } />
-            { children }
+        <div {...getRootProps({ className })}>
+            <input {...getInputProps()} />
+            {children}
         </div>
     )
 }

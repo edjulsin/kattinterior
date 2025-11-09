@@ -1120,10 +1120,6 @@ const Edit = ({ project }: { project: Project }) => {
 			const exit = () => updateProject(update).then(
 				() => {
 					rebuildPath('/', 'layout')
-					// rebuildPath('/services')
-					// rebuildPath('/projects')
-					// rebuildPath('/projects/[slug]')
-					// rebuildPath(`/projects/${current.slug}`)
 					back()
 				},
 				back
@@ -1167,11 +1163,6 @@ const Edit = ({ project }: { project: Project }) => {
 					return { ...v, ...change }
 				})
 				rebuildPath('/', 'layout')
-				// rebuildPath('/services')
-				// rebuildPath('/projects')
-				// rebuildPath('/projects/[slug]')
-				// rebuildPath(`/projects/${current.slug}`)
-
 			})
 			: Promise.resolve()
 
@@ -1249,10 +1240,6 @@ const Edit = ({ project }: { project: Project }) => {
 						return { ...prev, ...change }
 					})
 					rebuildPath('/', 'layout')
-					// rebuildPath('/services')
-					// rebuildPath('/projects')
-					// rebuildPath('/projects/[slug]')
-					// rebuildPath(`/projects/${current.slug}`)
 				})
 				: Promise.resolve()
 
@@ -1296,10 +1283,6 @@ const Edit = ({ project }: { project: Project }) => {
 						URL.revokeObjectURL(v.src)
 					)
 					rebuildPath('/', 'layout')
-					// rebuildPath('/services')
-					// rebuildPath('/projects')
-					// rebuildPath('/projects/[slug]')
-					// rebuildPath(`/projects/${current.slug}`)
 					router.push('/dashboard/projects')
 				},
 				() => showErrorToast({
@@ -1320,10 +1303,6 @@ const Edit = ({ project }: { project: Project }) => {
 					return { ...prev, ...change }
 				})
 				rebuildPath('/', 'layout')
-				// rebuildPath('/services')
-				// rebuildPath('/projects')
-				// rebuildPath('/projects/[slug]')
-				// rebuildPath(`/projects/${current.slug}`)
 			})
 			: Promise.resolve()
 
@@ -1391,10 +1370,6 @@ const Edit = ({ project }: { project: Project }) => {
 								return { ...prev, ...change }
 							})
 							rebuildPath('/', 'layout')
-							// rebuildPath('/services')
-							// rebuildPath('/projects')
-							// rebuildPath('/projects/[slug]')
-							// rebuildPath(`/projects/${current.slug}`)
 						},
 						() => showErrorToast({
 							title: 'Database error',
@@ -1847,7 +1822,7 @@ const Edit = ({ project }: { project: Project }) => {
 					</AlertDialog.Content>
 				</AlertDialog.Portal>
 			</AlertDialog.Root>
-			<AlertDialog.Root open={assetDialog.open} onOpenChange={open => setAssetDialog({ ...assetDialog, open })}>
+			<AlertDialog.Root open={assetDialog.open && assetDialog.assets.length > 0} onOpenChange={open => setAssetDialog({ ...assetDialog, open })}>
 				<AlertDialog.Portal>
 					<AlertDialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
 					<AlertDialog.Content
@@ -1878,16 +1853,16 @@ const Edit = ({ project }: { project: Project }) => {
 						'
 					>
 						{
-							assetDialog.open
-								? <img
+							assetDialog.assets.slice(0, 1).map(v =>
+								<img
+									key={v.id}
 									className='object-cover object-center aspect-square rounded-md'
-									width={assetDialog.assets[0].width}
-									height={assetDialog.assets[0].height}
-									src={assetDialog.assets[0].src}
-									alt={assetDialog.assets[0].alt}
+									width={v.width}
+									height={v.height}
+									src={v.src}
+									alt={v.alt}
 								/>
-								: null
-
+							)
 						}
 						<div className='flex flex-col items-center justify-center gap-1 text-center'>
 							<AlertDialog.Title className='font-bold text-lg'>Set Image Description</AlertDialog.Title>

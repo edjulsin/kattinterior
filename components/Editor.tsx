@@ -574,7 +574,6 @@ const Editable = ({
                             *:data-[state=open]:bg-amber-600
                             *:data-[state=open]:text-light
                             *:data-disabled:opacity-50
-                            *:data-disabled:cursor-not-allowed
                         '
                         onContextMenu={e => e.stopPropagation()}
                     >

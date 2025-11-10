@@ -1,5 +1,5 @@
 import { getFeaturedProject } from '@/action/admin';
-import { Photos, Project } from '@/type/editor';
+import { Project } from '@/type/editor';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { v7 as UUIDv7 } from 'uuid'

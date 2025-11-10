@@ -1864,6 +1864,7 @@ const Edit = ({ project }: { project: Project }) => {
 								{
 									[
 										<Bucket
+											key={'bucket'}
 											active={bucket}
 											count={unusedAssets.length}
 											onClick={e => {
@@ -1872,10 +1873,12 @@ const Edit = ({ project }: { project: Project }) => {
 											}}
 										/>,
 										<AutoFormat
+											key={'autoformat'}
 											disabled={emptyLayout}
 											onClick={onAutoFormat}
 										/>,
 										<Reset
+											key={'reset'}
 											disabled={emptyLayout}
 											options={
 												breakpoints.map(screen => {

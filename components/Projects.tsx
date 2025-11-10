@@ -1,6 +1,6 @@
 'use client'
 
-import type { Project, Photos } from '@/type/editor'
+import type { Project } from '@/type/editor'
 import Link from 'next/link'
 import Image from 'next/image'
 import { MagnifyingGlassIcon, CaretDownIcon, PlusIcon } from '@radix-ui/react-icons'

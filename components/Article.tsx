@@ -1,5 +1,5 @@
 import { v7 as UUIDv7 } from 'uuid'
-import type { Project, Photos } from '@/type/editor'
+import type { Project } from '@/type/editor'
 import Link from 'next/link'
 import Image from 'next/image'
 import { alt } from '@/utility/fn'

@@ -113,7 +113,11 @@ export const updateProject = async (project: Partial<Project>) => {
     }
 
     const init = () => client().from('projects')
-    const update = () => init().update(changes).eq('id', project.id)
+    const update = () => init().update(changes).eq('id', project.id).then(v =>
+        v.error === null
+            ? Promise.resolve()
+            : Promise.reject()
+    )
     if('featured' in changes && changes.featured) {
         return init()
             .update({ featured: false, updated_at: changes.updated_at })

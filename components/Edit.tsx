@@ -4,7 +4,7 @@
 
 import { MoveIcon, ResetIcon, CrossCircledIcon, CheckCircledIcon, TrashIcon, Share2Icon, PlayIcon, UploadIcon, CaretDownIcon, DesktopIcon, MobileIcon, BoxIcon, ViewVerticalIcon, InfoCircledIcon, ImageIcon, ChevronLeftIcon, GearIcon, LightningBoltIcon } from '@radix-ui/react-icons'
 import { AlertDialog, Toast, DropdownMenu, Tooltip, AccessibleIcon, Switch, RadioGroup } from 'radix-ui'
-import React, { MouseEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { MouseEvent, PointerEventHandler, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 
 import { Photo, Project, Template, Layout, Photos, Device, Asset, Items } from '@/type/editor'
@@ -106,6 +106,103 @@ const breakpoint = {
 
 const breakpoints = Object.keys(breakpoint)
 
+const Bucket = ({ active, onClick, count }: { active: boolean, onClick: PointerEventHandler<HTMLButtonElement>, count: number }) =>
+	<button
+		className={clsx('relative', { 'text-amber-600': active })}
+		onClick={onClick}
+	>
+		<AccessibleIcon.Root label='Show images'>
+			<ImageIcon />
+		</AccessibleIcon.Root>
+		<small className={clsx({ 'hidden': count === 0 }, 'absolute flex flex-col justify-center items-center top-0 left-full -translate-1/2 rounded-full bg-orange-500 text-center size-5 text-light text-tiny font-bold align-middle')}>
+			{count > 100 ? '...' : count}
+		</small>
+	</button>
+
+const AutoFormat = ({ disabled, onClick }: { disabled: boolean, onClick: PointerEventHandler<HTMLButtonElement> }) =>
+	<button
+		className='disabled:opacity-50 disabled:cursor-not-allowed'
+		disabled={disabled}
+		onClick={onClick}
+	>
+		<AccessibleIcon.Root label='Auto format'>
+			<LightningBoltIcon />
+		</AccessibleIcon.Root>
+	</button>
+
+const Reset = ({ disabled, options }: { disabled: boolean, options: [boolean, string, () => void][] }) =>
+	<DropdownMenu.Root>
+		<DropdownMenu.Trigger
+			disabled={disabled}
+			className='data-[state=open]:text-amber-600 outline-1 outline-transparent disabled:opacity-50 disabled:cursor-not-allowed'
+		>
+			<AccessibleIcon.Root label='Show layouts options'>
+				<GearIcon />
+			</AccessibleIcon.Root>
+		</DropdownMenu.Trigger>
+		<DropdownMenu.Portal>
+			<DropdownMenu.Content
+				sideOffset={13}
+				side='top'
+				className='
+					flex 
+					flex-col 
+					justify-center 
+					gap-y-0.5
+					font-sans 
+					font-semibold 
+					text-sm 
+					z-50 
+					bg-light 
+					dark:bg-dark
+					ring-1
+					ring-neutral-200 
+					rounded-md 
+					p-1
+					*:data-highlighted:bg-amber-600 
+					*:data-highlighted:text-light
+					*:cursor-pointer
+					*:data-disabled:opacity-50
+					*:data-disabled:cursor-not-allowed
+				'
+			>
+				{
+					options.map(([disabled, screen, callback]) =>
+						<DropdownMenu.Item
+							key={screen}
+							disabled={disabled}
+							className={clsx('capitalize rounded-md px-3 py-1.5 outline-1 outline-transparent')}
+							onSelect={callback}
+						>
+							{`Apply ${screen} layout`}
+						</DropdownMenu.Item>
+					)
+				}
+			</DropdownMenu.Content>
+		</DropdownMenu.Portal>
+	</DropdownMenu.Root>
+
+type Status = {
+	open: boolean,
+	title: string,
+	description: React.ReactNode | string
+}
+
+const Status = ({ status, setStatus }: { status: Status, setStatus: (status: Status) => void }) =>
+	<Toast.Provider>
+		<Toast.Root
+			className='bg-light dark:bg-dark rounded-lg px-3 py-1 font-sans text-base font-medium outline-1 outline-neutral-200'
+			open={status.open}
+			onOpenChange={open => setStatus({ ...status, open })}
+		>
+			<Toast.Title className='sr-only'>{status.title}</Toast.Title>
+			<Toast.Description className='flex justify-center items-center gap-x-1'>
+				{status.description}
+			</Toast.Description>
+		</Toast.Root>
+		<Toast.Viewport className='fixed right-0 bottom-0 p-5 z-50' />
+	</Toast.Provider>
+
 const MainUpload = ({ uploadAssets }: { uploadAssets: (files: File[]) => Promise<void> }) =>
 	<Droppable className='size-full flex flex-col justify-center items-center' noClick={true} onDrop={uploadAssets}>
 		<section className='flex flex-col justify-center items-center gap-y-5 px-10'>
@@ -123,6 +220,152 @@ const MainUpload = ({ uploadAssets }: { uploadAssets: (files: File[]) => Promise
 			</div>
 		</section>
 	</Droppable>
+
+type Alert = {
+	open: boolean,
+	title: string,
+	description: string,
+	cancel: { text: string, color: string, callback: () => void },
+	action: { text: string, color: string, callback: () => void },
+}
+
+const Alert = ({ alert, setAlert }: { alert: Alert, setAlert: (alert: Alert) => void }) =>
+	<AlertDialog.Root open={alert.open} onOpenChange={open => setAlert({ ...alert, open })}>
+		<AlertDialog.Portal>
+			<AlertDialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
+			<AlertDialog.Content
+				className='
+					flex
+					flex-col
+					gap-y-3
+					justify-center
+					font-sans 
+					fixed 
+					top-[50%] 
+					left-[50%] 
+					-translate-x-[50%] 
+					-translate-y-[50%] 
+					min-w-2xs 
+					rounded-md 
+					ring-1
+					ring-neutral-200
+					px-5
+					py-2.5
+					bg-light
+					dark:bg-dark
+					z-50
+				'
+			>
+				<AlertDialog.Title className='font-semibold text-lg'>{alert.title}</AlertDialog.Title>
+				<AlertDialog.Description className='font-semibold text-base opacity-50'>
+					{alert.description}
+				</AlertDialog.Description>
+				<div className='font-bold text-base flex items-center justify-end gap-x-3 *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:hover:bg-amber-600 *:hover:text-light *:transition-colors'>
+					<AlertDialog.Cancel onClick={alert.cancel.callback} className={alert.cancel.color}>{alert.cancel.text}</AlertDialog.Cancel>
+					<AlertDialog.Action onClick={alert.action.callback} className={alert.action.color}>{alert.action.text}</AlertDialog.Action>
+				</div>
+			</AlertDialog.Content>
+		</AlertDialog.Portal>
+	</AlertDialog.Root>
+
+type Multisteps = {
+	open: boolean,
+	input: string,
+	images: Photos
+}
+
+const Multisteps = ({ onSkip, onNext, multisteps, setMultisteps }: { onSkip: () => void, onNext: () => void, multisteps: Multisteps, setMultisteps: (multisteps: Multisteps) => void }) => {
+	const focusRef = useRef<HTMLInputElement>(null)
+	const onEnter = (e: React.KeyboardEvent) => {
+		if(e.key === 'Enter') {
+			e.preventDefault()
+			onNext()
+		}
+	}
+	return (
+		<AlertDialog.Root open={multisteps.open && multisteps.images.length > 0} onOpenChange={open => setMultisteps({ ...multisteps, open })}>
+			<AlertDialog.Portal>
+				<AlertDialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
+				<AlertDialog.Content
+					onKeyDown={onEnter}
+					autoFocus={false}
+					className='
+					flex
+					flex-col
+					max-w-lg
+					w-full
+					items-center
+					p-4
+					gap-8
+					font-sans 
+					fixed 
+					top-[50%] 
+					left-[50%] 
+					-translate-x-[50%] 
+					-translate-y-[50%] 
+					rounded-md 
+					ring-1
+					ring-neutral-200
+					bg-light
+					dark:bg-dark
+					z-50
+					focus:outline-1
+					focus:outline-neutral-200
+				'
+				>
+					{
+						multisteps.images.slice(0, 1).map(v =>
+							<img
+								key={v.id}
+								className='object-cover object-center aspect-square rounded-md w-full h-auto'
+								width={v.width}
+								height={v.height}
+								src={v.src}
+								alt={v.alt}
+							/>
+						)
+					}
+					<div className='flex flex-col items-center justify-center gap-1 text-center'>
+						<AlertDialog.Title className='font-bold text-lg'>Set Image Description</AlertDialog.Title>
+						<AlertDialog.Description className='font-semibold text-base opacity-50'>
+							Write short description about this image.
+						</AlertDialog.Description>
+					</div>
+					<fieldset>
+						<label className='sr-only' htmlFor='asset'>Description</label>
+						<input
+							ref={focusRef}
+							id='asset'
+							autoFocus={true}
+							className='px-2 py-1 rounded-md  outline-1 outline-neutral-200 focus:outline-amber-600 w-full font-semibold text-base'
+							placeholder='e.g., Scandinavian chair'
+							type='text'
+							value={multisteps.input}
+							onChange={e => setMultisteps({ ...multisteps, input: e.target.value })}
+						/>
+					</fieldset>
+					<div className='font-bold text-base flex items-center *:focus:outline-1 *:outline-neutral-200 justify-between w-full *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:transition-colors *:hover:bg-amber-600 *:hover:text-light'>
+						<AlertDialog.Cancel className='opacity-50 hover:opacity-100 transition-opacity' onClick={onSkip}>Skip All</AlertDialog.Cancel>
+						{
+							multisteps.images.length > 1
+								? <button onClick={() => { onNext(); focusRef.current!.focus() }}>Next</button>
+								: <AlertDialog.Action onClick={onNext}>Done</AlertDialog.Action>
+						}
+					</div>
+				</AlertDialog.Content>
+			</AlertDialog.Portal>
+		</AlertDialog.Root>
+	)
+}
+
+const Sensor = ({ ref, style, active }: { ref: React.RefObject<HTMLDivElement>, style: React.CSSProperties, active: boolean }) =>
+	<div className='absolute top-0 left-0 size-full flex flex-col justify-center items-center pointer-events-none'>
+		<div
+			ref={ref}
+			style={style}
+			className={clsx({ 'outline-1 outline-blue-500': active })}
+		/>
+	</div>
 
 const MainEditorHeader = ({ errors, name, location, story, tagline, setName, setLocation, setStory, setTagline }: {
 	errors: string[],
@@ -481,7 +724,7 @@ const MainHeader = (
 	}
 ) => (
 	<header className='z-50 sticky top-0 left-0 right-0 size-full grid grid-cols-3 items-center min-h-20 *:w-auto pointer-events-none'>
-		<button onClick={() => onBack()} className='justify-self-start cursor-pointer flex justify-center items-center transition-colors hover:bg-amber-600 hover:text-light rounded-md p-2 text-center pointer-events-auto'>
+		<button onClick={onBack} className='justify-self-start cursor-pointer flex justify-center items-center transition-colors hover:bg-amber-600 hover:text-light rounded-md p-2 text-center pointer-events-auto'>
 			<AccessibleIcon.Root label='Back'>
 				<ChevronLeftIcon />
 			</AccessibleIcon.Root>
@@ -924,10 +1167,10 @@ const Edit = ({ project }: { project: Project }) => {
 	const [controllers, setControllers] = useState<AbortController[]>([])
 	const [broadcast, setBroadcast] = useState<BroadcastChannel | null>(null)
 
-	const [assetDialog, setAssetDialog] = useState<{ open: boolean, assets: Photos, input: string }>({
+	const [multisteps, setMultisteps] = useState<Multisteps>({
 		open: false,
 		input: '',
-		assets: [],
+		images: [],
 	})
 
 	const [alert, setAlert] = useState({
@@ -938,7 +1181,7 @@ const Edit = ({ project }: { project: Project }) => {
 		action: { text: '', color: '', callback: () => { } },
 	})
 
-	const [toast, setToast] = useState<{ open: boolean, description: React.ReactNode, title: string }>({
+	const [toast, setToast] = useState<Status>({
 		open: false,
 		title: '',
 		description: null
@@ -1017,9 +1260,9 @@ const Edit = ({ project }: { project: Project }) => {
 						v.concat([time])
 					)
 					setBucket(false)
-					setAssetDialog({
+					setMultisteps({
 						open: true,
-						assets: imgs,
+						images: imgs,
 						input: ''
 					})
 					uploadFiles(controller.signal, uploads).then(
@@ -1160,7 +1403,7 @@ const Edit = ({ project }: { project: Project }) => {
 	const onUnpublish = () => {
 		const change = changes(previous, { ...current, published: false })
 		const task = Object.keys(change).length > 0
-			? updateProject(
+			? () => updateProject(
 				formatChanges(project.id, change)
 			).then(() => {
 				setPrevious(v => {
@@ -1168,11 +1411,11 @@ const Edit = ({ project }: { project: Project }) => {
 				})
 				rebuildPath('/', 'layout')
 			})
-			: Promise.resolve()
+			: () => Promise.resolve()
 
 		setPublished(false)
 
-		task.then(
+		task().then(
 			() => showSuccessToast({
 				title: 'Success',
 				description: 'Project has been unpublished.'
@@ -1215,6 +1458,7 @@ const Edit = ({ project }: { project: Project }) => {
 				description: 'Fields cannot be empty.'
 			})
 		} else if(contents.some(contents => contents.length === 0)) {
+			setErrors([])
 			showErrorToast({
 				title: 'Insufficient number of images.',
 				description: 'In order to publish, project require at least one image on each viewport.'
@@ -1234,7 +1478,7 @@ const Edit = ({ project }: { project: Project }) => {
 			)
 
 			const task = Object.keys(change).length > 0
-				? updateProject(
+				? () => updateProject(
 					formatChanges(project.id, {
 						...change,
 						published_at: new Date().toISOString()
@@ -1245,11 +1489,12 @@ const Edit = ({ project }: { project: Project }) => {
 					})
 					rebuildPath('/', 'layout')
 				})
-				: Promise.resolve()
+				: () => Promise.resolve()
 
 			setPublished(true)
+			setErrors([])
 
-			task.then(
+			task().then(
 				() => showSuccessToast({
 					title: 'Success',
 					description: 'Project has been published.'
@@ -1377,7 +1622,7 @@ const Edit = ({ project }: { project: Project }) => {
 						},
 						() => showErrorToast({
 							title: 'Database error',
-							description: 'Error when saving project.'
+							description: 'Error when saving project. Make sure each project has unique slug.'
 						})
 					)
 				}, 3000),
@@ -1412,7 +1657,7 @@ const Edit = ({ project }: { project: Project }) => {
 
 	const layout = template[breakpoint]
 	const { used, unused } = splitAsset(layout.items, assets)
-	const remainingAsset = Object.values(unused)
+	const unusedAssets = Object.values(unused)
 
 	const onDrag = (e: { x: number, y: number, items: Photos }) => {
 		const dropable = sensorRef.current
@@ -1468,15 +1713,13 @@ const Edit = ({ project }: { project: Project }) => {
 		}
 	}
 
-	const focusRef = useRef<HTMLInputElement>(null)
-
 	const onSkip = () => {
 		setBucket(true)
-		setAssetDialog({ assets: [], open: false, input: '' })
+		setMultisteps({ images: [], open: false, input: '' })
 	}
 
 	const onNext = () => {
-		const [x, ...xs] = assetDialog.assets
+		const [x, ...xs] = multisteps.images
 
 		updateAsset(asset => {
 			return {
@@ -1484,24 +1727,17 @@ const Edit = ({ project }: { project: Project }) => {
 				[x.id]: {
 					...x,
 					alt: alternative(
-						assetDialog.input.trim()
+						multisteps.input.trim()
 					)
 				}
 			}
 		})
-		setAssetDialog({
+		setMultisteps({
 			open: xs.length > 0,
 			input: '',
-			assets: xs
+			images: xs
 		})
 		setBucket(xs.length === 0)
-	}
-
-	const onEnter = (e: React.KeyboardEvent) => {
-		if(e.key === 'Enter') {
-			e.preventDefault()
-			onNext()
-		}
 	}
 
 	const onClear = () => {
@@ -1512,23 +1748,22 @@ const Edit = ({ project }: { project: Project }) => {
 	const onAutoFormat = () =>
 		updateLayout(layout => {
 			if(layout.items.length > 0) {
-				const [r, ...rs] = groupByRow(layout.items).map(row => {
-					const [min, max] = extent(v => ([v.x, v.x + v.w]), row)
-					const delta = (layout.width / 2) - ((min + max) / 2)
-					return row.map(v =>
-						applyBoxConstrain(
-							{ x: 0, y: 0, w: layout.width, h: Infinity },
-							{ ...v, x: v.x + delta }
-						)
-					)
-				})
-				const delta = -1 * Math.min(
+				const [r, ...rs] = groupByRow(layout.items)
+				const dy = -1 * Math.min(
 					...r.map(v => v.y)
 				)
+				const [n, ...ns] = [r, ...rs].map(row => {
+					const [min, max] = extent(v => ([v.x, v.x + v.w]), row)
+					const dx = (layout.width / 2) - ((min + max) / 2)
+					return row.map(v => {
+						return { ...v, x: v.x + dx, y: Math.max(v.y + dy, 0) }
+					})
+				})
+
 				const m = .035
 				const gs = [1, 2, 3, 4, 5].map(v => v * m * layout.width)
 
-				const items = rs.reduce(
+				const items = ns.reduce(
 					(a, b) => {
 						const c = a[a.length - 1]
 						const min = Math.max(
@@ -1544,22 +1779,12 @@ const Edit = ({ project }: { project: Project }) => {
 						const d = b.map(v => {
 							return {
 								...v,
-								y: Math.max(
-									0,
-									v.y + (delta - diff)
-								)
+								y: Math.max(v.y + (delta - diff), 0)
 							}
 						})
 						return [...a, d]
 					},
-					[
-						r.map(v => {
-							return {
-								...v,
-								y: Math.max(0, v.y + delta)
-							}
-						})
-					]
+					[n]
 				).flat()
 
 				const height = items.length > 0
@@ -1574,6 +1799,9 @@ const Edit = ({ project }: { project: Project }) => {
 			}
 		})
 
+	const emptyLayout = layout.items.length === 0
+	const hasImages = assets.length > 0
+
 	return (
 		<>
 			<section
@@ -1583,14 +1811,14 @@ const Edit = ({ project }: { project: Project }) => {
 			>
 				<MainHeader
 					onBack={onBack}
-					content={assets.length > 0}
+					content={hasImages}
 					menu={menu}
 					setMenu={setMenu}
 					breakpoint={breakpoint}
 					setBreakpoint={setBreakpoint}
 				/>
 				{
-					assets.length > 0
+					hasImages
 						? <Droppable
 							className='size-full'
 							noClick={true}
@@ -1623,122 +1851,79 @@ const Edit = ({ project }: { project: Project }) => {
 											className={clsx({ 'outline-1 outline-blue-500': over })}
 										/>
 									</div>
+									<Sensor ref={sensorRef} active={over} style={{ width: layout.width + 'px', height: '100%' }} />
 								</div>
 							</article >
 						</Droppable>
 						: <MainUpload uploadAssets={uploadAssets} />
 				}
 				{
-					assets.length > 0
+					hasImages
 						? <div className='sticky bottom-0 left-0 right-0 size-full flex justify-center items-center min-h-20 z-50 pointer-events-none'>
-							<ul className='pointer-events-none flex justify-center items-center rounded-md p-1 bg-light dark:bg-dark outline-1 outline-neutral-200 *:size-full gap-x-5 *:*:flex *:*:justify-center *:*:items-center *:*:p-2 *:*:rounded-md *:*:hover:not-disabled:text-amber-600 *:*:transition-colors *:*:pointer-events-auto *:*:cursor-pointer'>
-								<li>
-									<button
-										className={clsx('relative', { 'text-amber-600': bucket })}
-										onClick={e => { e.stopPropagation(); setBucket(!bucket) }}
-									>
-										<AccessibleIcon.Root label='Show images'>
-											<ImageIcon />
-										</AccessibleIcon.Root>
-										{
-											remainingAsset.length > 0
-												? <small className='absolute flex flex-col justify-center items-center top-0 left-full -translate-1/2 rounded-full bg-orange-500 text-center size-5 text-light text-tiny font-bold align-middle'>
-													{remainingAsset.length > 100 ? '...' : remainingAsset.length}
-												</small>
-												: null
-										}
-									</button>
-								</li>
-								<li>
-									<button
-										className='disabled:opacity-50 disabled:cursor-not-allowed'
-										disabled={layout.items.length === 0}
-										onClick={onAutoFormat}
-									>
-										<AccessibleIcon.Root label='Auto format'>
-											<LightningBoltIcon />
-										</AccessibleIcon.Root>
-									</button>
-								</li>
-								<li>
-									<DropdownMenu.Root>
-										<DropdownMenu.Trigger
-											disabled={layout.items.length === 0}
-											className='data-[state=open]:text-amber-600 outline-1 outline-transparent disabled:opacity-50 disabled:cursor-not-allowed'
-										>
-											<AccessibleIcon.Root label='Show layouts options'>
-												<GearIcon />
-											</AccessibleIcon.Root>
-										</DropdownMenu.Trigger>
-										<DropdownMenu.Portal>
-											<DropdownMenu.Content
-												sideOffset={13}
-												side='top'
-												className='
-													flex 
-													flex-col 
-													justify-center 
-													gap-y-0.5
-													font-sans 
-													font-semibold 
-													text-sm 
-													z-50 
-													bg-light 
-													dark:bg-dark
-													ring-1
-													ring-neutral-200 
-													rounded-md 
-													p-1
-													*:data-highlighted:bg-amber-600 
-													*:data-highlighted:text-light
-												'
-											>
-												{
-													breakpoints.filter(v => v !== breakpoint).map(screen =>
-														<DropdownMenu.Item
-															key={screen}
-															className='capitalize rounded-md px-3 py-1.5 cursor-pointer  outline-1 outline-transparent'
-															onSelect={() =>
-																updateLayout(layout => {
-																	const base = template[screen as keyof Template]
-																	const ratio = layout.width / base.width
-																	const items = base.items.map(item => {
-																		const box = {
-																			x: item.x * ratio,
-																			y: item.y * ratio,
-																			w: item.w * ratio,
-																			h: item.h * ratio
-																		}
-																		return { ...item, ...box }
-																	})
-																	const height = items.length > 0
-																		? Math.max(
-																			...items.map(v => v.y + v.h)
-																		)
-																		: 0
+							<ul className='pointer-events-auto flex justify-center items-center rounded-md p-1 bg-light dark:bg-dark outline-1 outline-neutral-200 *:size-full gap-x-5 *:*:flex *:*:justify-center *:*:items-center *:*:p-2 *:*:rounded-md'>
+								{
+									[
+										<Bucket
+											active={bucket}
+											count={unusedAssets.length}
+											onClick={e => {
+												e.stopPropagation()
+												setBucket(!bucket)
+											}}
+										/>,
+										<AutoFormat
+											disabled={emptyLayout}
+											onClick={onAutoFormat}
+										/>,
+										<Reset
+											disabled={emptyLayout}
+											options={
+												breakpoints.map(screen => {
+													return [
+														screen === breakpoint,
+														screen,
+														() => updateLayout(layout => {
+															const base = template[screen as keyof Template]
+															const ratio = layout.width / base.width
+															const items = base.items.map(item => {
+																const box = {
+																	x: item.x * ratio,
+																	y: item.y * ratio,
+																	w: item.w * ratio,
+																	h: item.h * ratio
+																}
+																return { ...item, ...box }
+															})
+															const height = items.length > 0
+																? Math.max(
+																	...items.map(v => v.y + v.h)
+																)
+																: 0
 
-																	return { ...layout, items, height }
-																})
-															}
-														>
-															{`Apply ${screen} layout`}
-														</DropdownMenu.Item>
-													)
-												}
-											</DropdownMenu.Content>
-										</DropdownMenu.Portal>
-									</DropdownMenu.Root>
-								</li>
+															return { ...layout, items, height }
+														})
+													]
+												})
+											}
+										/>
+									].map((v, i) =>
+										<li
+											key={i}
+											className='*:cursor-pointer *:disabled:cursor-not-allowed *:hover:not-disabled:text-amber-600'>
+											{v}
+										</li>
+									)
+								}
 							</ul>
 						</div>
 						: null
 				}
 			</section>
 			{
-				bucket && assets.length > 0
+				bucket && hasImages
 					? <section className='z-50 fixed top-0 left-0 w-xs h-dvh outline-1 outline-neutral-200 shadow-lg bg-light dark:bg-dark'>
 						<Left
-							key={layout.width + remainingAsset.length}
+							key={layout.width + unusedAssets.length}
 							asset={unused}
 							onDrag={onDrag}
 							onDrop={onDrop}
@@ -1748,7 +1933,7 @@ const Edit = ({ project }: { project: Project }) => {
 					: null
 			}
 			{
-				menu && assets.length > 0
+				menu && hasImages
 					? <section className='z-50 fixed right-0 top-0 bottom-0 px-10 w-md grid grid-rows-[auto_max-content_1fr] gap-y-5 place-items-center outline-1 outline-neutral-200 shadow-lg bg-light dark:bg-dark'>
 						<RightHeader
 							published={published}
@@ -1776,128 +1961,20 @@ const Edit = ({ project }: { project: Project }) => {
 					: null
 			}
 			{overlay.items.length > 0 ? <Overlay {...overlay} /> : null}
-			<Toast.Provider>
-				<Toast.Root
-					className='bg-light dark:bg-dark rounded-lg px-3 py-1 font-sans text-base font-semibold outline-1 outline-neutral-200'
-					open={toast.open}
-					onOpenChange={open => setToast({ ...toast, open })}
-				>
-					<Toast.Title className='sr-only'>{toast.title}</Toast.Title>
-					<Toast.Description className='flex justify-center items-center gap-x-1'>
-						{toast.description}
-					</Toast.Description>
-				</Toast.Root>
-				<Toast.Viewport className='fixed right-0 bottom-0 p-5 z-50' />
-			</Toast.Provider>
-			<AlertDialog.Root open={alert.open} onOpenChange={open => setAlert({ ...alert, open })}>
-				<AlertDialog.Portal>
-					<AlertDialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
-					<AlertDialog.Content
-						className='
-							flex
-							flex-col
-							gap-y-3
-							justify-center
-							font-sans 
-							fixed 
-							top-[50%] 
-							left-[50%] 
-							-translate-x-[50%] 
-							-translate-y-[50%] 
-							min-w-2xs 
-							rounded-md 
-							ring-1
-							ring-neutral-200
-							px-5
-							py-2.5
-							bg-light
-							dark:bg-dark
-							z-50
-						'
-					>
-						<AlertDialog.Title className='font-semibold text-lg'>{alert.title}</AlertDialog.Title>
-						<AlertDialog.Description className='font-semibold text-base opacity-50'>
-							{alert.description}
-						</AlertDialog.Description>
-						<div className='font-bold text-base flex items-center justify-end gap-x-3 *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:hover:bg-amber-600 *:hover:text-light *:transition-colors'>
-							<AlertDialog.Cancel onClick={alert.cancel.callback} className={alert.cancel.color}>{alert.cancel.text}</AlertDialog.Cancel>
-							<AlertDialog.Action onClick={alert.action.callback} className={alert.action.color}>{alert.action.text}</AlertDialog.Action>
-						</div>
-					</AlertDialog.Content>
-				</AlertDialog.Portal>
-			</AlertDialog.Root>
-			<AlertDialog.Root open={assetDialog.open && assetDialog.assets.length > 0} onOpenChange={open => setAssetDialog({ ...assetDialog, open })}>
-				<AlertDialog.Portal>
-					<AlertDialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
-					<AlertDialog.Content
-						onKeyDown={onEnter}
-						autoFocus={false}
-						className='
-							flex
-							flex-col
-							max-w-lg
-							w-full
-							items-center
-							p-4
-							gap-8
-							font-sans 
-							fixed 
-							top-[50%] 
-							left-[50%] 
-							-translate-x-[50%] 
-							-translate-y-[50%] 
-							rounded-md 
-							ring-1
-							ring-neutral-200
-							bg-light
-							dark:bg-dark
-							z-50
-							focus:outline-1
-							focus:outline-neutral-200
-						'
-					>
-						{
-							assetDialog.assets.slice(0, 1).map(v =>
-								<img
-									key={v.id}
-									className='object-cover object-center aspect-square rounded-md w-full h-auto'
-									width={v.width}
-									height={v.height}
-									src={v.src}
-									alt={v.alt}
-								/>
-							)
-						}
-						<div className='flex flex-col items-center justify-center gap-1 text-center'>
-							<AlertDialog.Title className='font-bold text-lg'>Set Image Description</AlertDialog.Title>
-							<AlertDialog.Description className='font-semibold text-base opacity-50'>
-								Write short description about this image.
-							</AlertDialog.Description>
-						</div>
-						<fieldset>
-							<label className='sr-only' htmlFor='asset'>Description</label>
-							<input
-								ref={focusRef}
-								id='asset'
-								autoFocus={true}
-								className='px-2 py-1 rounded-md  outline-1 outline-neutral-200 focus:outline-amber-600 w-full font-semibold text-base'
-								placeholder='e.g., Scandinavian chair'
-								type='text'
-								value={assetDialog.input}
-								onChange={e => setAssetDialog({ ...assetDialog, input: e.target.value })}
-							/>
-						</fieldset>
-						<div className='font-bold text-base flex items-center *:focus:outline-1 *:outline-neutral-200 justify-between w-full *:rounded-md *:cursor-pointer *:px-4 *:py-1 *:transition-colors *:hover:bg-amber-600 *:hover:text-light'>
-							<AlertDialog.Cancel className='opacity-50 hover:opacity-100 transition-opacity' onClick={onSkip}>Skip All</AlertDialog.Cancel>
-							{
-								assetDialog.assets.length > 1
-									? <button onClick={() => { onNext(); focusRef.current!.focus() }}>Next</button>
-									: <AlertDialog.Action onClick={onNext}>Done</AlertDialog.Action>
-							}
-						</div>
-					</AlertDialog.Content>
-				</AlertDialog.Portal>
-			</AlertDialog.Root>
+			<Status
+				status={toast}
+				setStatus={setToast}
+			/>
+			<Alert
+				alert={alert}
+				setAlert={setAlert}
+			/>
+			<Multisteps
+				multisteps={multisteps}
+				setMultisteps={setMultisteps}
+				onSkip={onSkip}
+				onNext={onNext}
+			/>
 		</>
 	)
 }

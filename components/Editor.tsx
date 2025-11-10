@@ -6,11 +6,11 @@ import clsx from 'clsx'
 import { drag, select } from 'd3'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Item, Photo, Layout, Asset, Items } from '@/type/editor'
-import { AccessibleIcon, ContextMenu, Dialog } from 'radix-ui'
+import { ContextMenu, Dialog } from 'radix-ui'
 import { applyBoxConstrain, capitalize, clamp, compose, curry, o, alt as alternative, half, boxConstrain } from '@/utility/fn'
 import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent } from '@/hook/useDrag'
 import { v7 as UUIDv7 } from 'uuid'
-import { ChevronRightIcon, HeartFilledIcon } from '@radix-ui/react-icons'
+import { ChevronRightIcon } from '@radix-ui/react-icons'
 import Fallback from '@/assets/fallback.svg'
 import Image from 'next/image'
 
@@ -574,6 +574,7 @@ const Editable = ({
                             *:data-[state=open]:bg-amber-600
                             *:data-[state=open]:text-light
                             *:data-disabled:opacity-50
+                            *:data-disabled:cursor-not-allowed
                         '
                         onContextMenu={e => e.stopPropagation()}
                     >

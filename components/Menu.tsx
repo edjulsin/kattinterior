@@ -31,7 +31,7 @@ const Menu = () => {
                     className={clsx('fixed inset-0 z-50 group bg-dark data-[state=open]:fade-in data-[state=closed]:fade-out data-[state=closed]:anim-delay-[500ms]', { 'overflow-y-scroll': scrollable })}
                 >
                     <Dialog.Content>
-                        <div className='grid size-full grid-rows-[auto_1fr_auto] text-white place-items-center max-w-7xl mx-auto gap-y-[5dvh]'>
+                        <div className='grid size-full grid-rows-[auto_1fr_auto] text-font-light place-items-center max-w-7xl mx-auto gap-y-[5dvh]'>
                             <VisuallyHidden.Root>
                                 <Dialog.Title>Navigation menu</Dialog.Title>
                                 <Dialog.Description>Navigate all the pages in Katt Interior Design Website</Dialog.Description>

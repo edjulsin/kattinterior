@@ -7,7 +7,7 @@ import { drag, select } from 'd3'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Item, Photo, Layout, Asset, Items } from '@/type/editor'
 import { ContextMenu, Dialog } from 'radix-ui'
-import { applyBoxConstrain, capitalize, clamp, compose, curry, o, alt as alternative, half, boxConstrain } from '@/utility/fn'
+import { applyBoxConstrain, capitalize, clamp, compose, curry, o, alt as alternative, half, getItemsHeight } from '@/utility/fn'
 import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent } from '@/hook/useDrag'
 import { v7 as UUIDv7 } from 'uuid'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
@@ -18,6 +18,8 @@ const brand = process.env.NEXT_PUBLIC_SITE_NAME
 
 type Box = { x: number, y: number, w: number, h: number }
 
+type UniqueBox = Box & { id: string, i: number }
+
 type Result = {
     dx: number,
     dy: number,
@@ -26,8 +28,6 @@ type Result = {
     container: Box
 }
 
-type IndexedBox = Box & { i: number }
-
 type Rectangle = {
     x0: number,
     y0: number,
@@ -35,9 +35,35 @@ type Rectangle = {
     y1: number
 }
 
+type Line = [[number, number], [number, number]]
+type Lines = Line[]
+type Point = [number, number]
+type Points = Point[]
+
 type ItemCallback = (item: Item) => void
 
 type ImageCallback = (image: Photo) => void
+
+const splitChildrenAsBoxes = (parent: HTMLElement) => {
+    const c = parent.getBoundingClientRect()
+    return [...parent.children].reduce<[UniqueBox[], UniqueBox[]]>(([a, b], e, i) => {
+        const el = e as HTMLElement
+        const r = e.getBoundingClientRect()
+        const box = {
+            id: el.dataset.id!,
+            i: i,
+            x: r.x - c.x,
+            y: r.y - c.y,
+            w: r.width,
+            h: r.height
+        }
+        if(el.dataset.active === 'true') {
+            return [[...a, box], b]
+        } else {
+            return [a, [...b, box]]
+        }
+    }, [[], []])
+}
 
 const generateItemBoxes = ({ container, item, image }: { container: HTMLElement, item: HTMLElement, image: HTMLElement }): { container: Box, item: Item, image: Box } => {
     const co = container.getBoundingClientRect()
@@ -174,6 +200,175 @@ const crop = ([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], [yMin, yMax]]
     return { ...item, x, y, w, h, sx, sy, sw, sh }
 }
 
+const offsetX = ([x, y]: Point): Point => ([Math.floor(x) + .5, Math.round(y)])
+const offsetY = ([x, y]: Point): Point => ([Math.round(x), Math.floor(y) + .5])
+const corners = ({ x, y, w, h }: Box): Points => ([
+    [x, y],
+    [x + w, y],
+    [x + w, y + h],
+    [x, y + h]
+])
+
+const center = ({ x, y, w, h }: Box): Point => ([x + w * .5, y + h * .5])
+
+const centers = ({ x, y, w, h }: Box): Points => ([
+    [x, y + h * .5],
+    [x + w * .5, y],
+    [x + w, y + h * .5],
+    [x + w * .5, y + h]
+])
+const eq = (a: number, b: number) => Math.round(a) === Math.round(b)
+
+const toPoints = (item: Box) => ([...corners(item), center(item)])
+
+const xs = (box: Box) => ([box.x, box.x + box.w * .5, box.x + box.w])
+const ys = (box: Box) => ([box.y, box.y + box.h * .5, box.y + box.h])
+const smaller = (a: number, b: number): number => {
+    const c = Math.abs(a)
+    const d = Math.abs(b)
+    return Math.min(c, d) === c ? a : b
+}
+const smallest = (a: Box | UniqueBox | Item, b: Box | UniqueBox | Item): Point => {
+    const reducer = (xs: number[], ys: number[]) => {
+        const [x, ...xss] = xs
+        const [y, ...yss] = ys
+        const initial = yss.reduce((a, b) => smaller(a, b - x), y - x)
+        return xss.reduce((a, b) => ys.reduce((c, d) => smaller(c, d - b), a), initial)
+    }
+    const axs = xs(a)
+    const ays = ys(a)
+    const bxs = xs(b)
+    const bys = ys(b)
+    const ox = reducer(axs, bxs)
+    const oy = reducer(ays, bys)
+    return [ox, oy]
+}
+
+const snap = (threshold: number, box: Box | UniqueBox | Item, boxes: Box[] | UniqueBox[] | Items): Point => {
+    if(boxes.length === 0) {
+        return [0, 0]
+    } else {
+        const [x, ...xs] = boxes
+        const [a, b] = xs.reduce<Point>(
+            ([px, py], x) => {
+                const [cx, cy] = smallest(box, x)
+                return [smaller(px, cx), smaller(py, cy)]
+            },
+            smallest(box, x)
+        )
+        const limit = (v: number) => Math.abs(v) <= threshold ? v : 0
+        return [limit(a), limit(b)]
+    }
+}
+
+const intersections = ([ax, ay]: Point, points: Points): Lines => {
+    if(points.length > 0) {
+        const [[ix, iy], ...xs] = points
+        const x = eq(ax, ix)
+        const y = eq(ay, iy)
+        if(x || y) {
+            return [[[ax, ay], [ix, iy]]]
+        } else {
+            return intersections([ax, ay], xs)
+        }
+    } else {
+        return []
+    }
+}
+
+const removeDuplicateLines = (lines: Lines, acc: Lines) => {
+    if(lines.length > 0) {
+        const [x, ...xs] = lines
+        const duplicate = ([, d]: Line, [, f]: Line) => {
+            const [g, h] = d
+            const [i, j] = f
+            return eq(g, i) && eq(h, j)
+        }
+        const ys = xs.filter(y =>
+            !duplicate(x, y)
+        )
+        return removeDuplicateLines(ys, [...acc, x])
+    } else {
+        return acc
+    }
+}
+
+const snapLines = (canvas: Box | UniqueBox | Item, box: Box | UniqueBox | Item, boxes: (Box | UniqueBox | Item)[]) => {
+    const zs = centers(canvas)
+    const xs = toPoints(box)
+    return removeDuplicateLines(
+        [
+            ...xs.flatMap(x =>
+                intersections(x, zs)
+            ),
+            ...boxes.flatMap(box => {
+                const ys = toPoints(box)
+                return xs.flatMap(x =>
+                    intersections(x, ys)
+                )
+            })
+        ],
+        []
+    )
+}
+
+const EditDescription = ({ onSave, open, onOpenChange }: { onSave: (alt: string) => void, open: boolean, onOpenChange: (v: boolean) => void }) => {
+    const [alt, setAlt] = useState('')
+    return (
+        <Dialog.Root open={open} onOpenChange={onOpenChange}>
+            <Dialog.Portal>
+                <Dialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
+                <Dialog.Content
+                    className='
+                    flex
+                    flex-col
+                    gap-y-1
+                    justify-center
+                    font-sans 
+                    fixed 
+                    top-[50%] 
+                    left-[50%] 
+                    -translate-x-[50%] 
+                    -translate-y-[50%] 
+                    min-w-2xs 
+                    rounded-md 
+                    ring-1
+                    ring-neutral-200
+                    px-5
+                    py-3
+                    bg-light
+                    dark:bg-dark
+                    z-50
+                '
+                >
+                    <Dialog.Title className='font-bold text-lg'>Edit description</Dialog.Title>
+                    <Dialog.Description className='font-semibold text-base opacity-50'>
+                        Short description about the image.
+                    </Dialog.Description>
+                    <fieldset className='py-3'>
+                        <label htmlFor='alt' className='sr-only'>Description</label>
+                        <input
+                            id='alt'
+                            autoFocus={true}
+                            className='px-2 py-1 rounded-md outline-1 outline-neutral-200 transition-colors focus:outline-amber-600 w-full font-semibold text-base'
+                            value={alt}
+                            onChange={v => setAlt(v.target.value)}
+                            type='text'
+                            placeholder='e.g., Scandinavian chair'
+                        />
+                    </fieldset>
+                    <Dialog.Close
+                        className='text-center font-bold text-base rounded-md cursor-pointer px-2 py-1 transition-colors hover:bg-amber-600 hover:text-light w-full'
+                        onClick={() => onSave(alt)}
+                    >
+                        Save changes
+                    </Dialog.Close>
+                </Dialog.Content>
+            </Dialog.Portal>
+        </Dialog.Root>
+    )
+}
+
 const Editable = ({
     sizeExtent,
     translateExtent,
@@ -199,7 +394,6 @@ const Editable = ({
     setAsThumbnail,
     setImageAlt
 }: EditableProps) => {
-    const [alt, setAlt] = useState(image.alt)
     const [cropMode, setCropMode] = useState(false)
     const [dialog, setDialog] = useState(false)
     const [error, setError] = useState(false)
@@ -675,151 +869,13 @@ const Editable = ({
                     </ContextMenu.Content>
                 </ContextMenu.Portal>
             </ContextMenu.Root>
-            <Dialog.Root open={dialog} onOpenChange={setDialog}>
-                <Dialog.Portal>
-                    <Dialog.Overlay className='z-50 fixed inset-0 bg-neutral-300/50' />
-                    <Dialog.Content
-                        className='
-                            flex
-                            flex-col
-                            gap-y-1
-                            justify-center
-                            font-sans 
-                            fixed 
-                            top-[50%] 
-                            left-[50%] 
-                            -translate-x-[50%] 
-                            -translate-y-[50%] 
-                            min-w-2xs 
-                            rounded-md 
-                            ring-1
-                            ring-neutral-200
-                            px-5
-                            py-3
-                            bg-light
-                            dark:bg-dark
-                            z-50
-                        '
-                    >
-                        <Dialog.Title className='font-bold text-lg'>Edit description</Dialog.Title>
-                        <Dialog.Description className='font-semibold text-base opacity-50'>
-                            Short description about the image.
-                        </Dialog.Description>
-                        <fieldset className='py-3'>
-                            <label htmlFor='alt' className='sr-only'>Description</label>
-                            <input
-                                id='alt'
-                                autoFocus={true}
-                                className='px-2 py-1 rounded-md outline-1 outline-neutral-200 transition-colors focus:outline-amber-600 w-full font-semibold text-base'
-                                value={alt}
-                                onChange={v => setAlt(v.target.value)}
-                                type='text'
-                                placeholder='e.g., Scandinavian chair'
-                            />
-                        </fieldset>
-                        <Dialog.Close
-                            className='text-center font-bold text-base rounded-md cursor-pointer px-2 py-1 transition-colors hover:bg-amber-600 hover:text-light w-full'
-                            onClick={() => setImageAlt({ ...image, alt: alternative(alt) })}
-                        >
-                            Save changes
-                        </Dialog.Close>
-                    </Dialog.Content>
-                </Dialog.Portal>
-            </Dialog.Root>
+            <EditDescription
+                open={dialog}
+                onOpenChange={setDialog}
+                onSave={(alt: string) => setImageAlt({ ...image, alt: alternative(alt) })}
+            />
         </div>
     )
-}
-
-const offsetX = ([x, y]: [number, number]): [number, number] => ([Math.floor(x) + .5, Math.round(y)])
-const offsetY = ([x, y]: [number, number]): [number, number] => ([Math.round(x), Math.floor(y) + .5])
-const corners = ({ x, y, w, h }: Box) => ([
-    [x, y],
-    [x + w, y],
-    [x + w, y + h],
-    [x, y + h]
-])
-
-const center = ({ x, y, w, h }: Box) => ([x + w * .5, y + h * .5])
-
-const centers = ({ x, y, w, h }: Box) => ([
-    [x, y + h * .5],
-    [x + w * .5, y],
-    [x + w, y + h * .5],
-    [x + w * .5, y + h]
-])
-const eq = (a: number, b: number) => Math.round(a) === Math.round(b)
-
-const toPoints = (item: Box) => ([...corners(item), center(item)])
-
-const xs = (box: Box) => ([box.x, box.x + box.w * .5, box.x + box.w])
-const ys = (box: Box) => ([box.y, box.y + box.h * .5, box.y + box.h])
-const smaller = (a: number, b: number) => {
-    const c = Math.abs(a)
-    const d = Math.abs(b)
-    return Math.min(c, d) === c ? a : b
-}
-const smallest = (a: Box | IndexedBox, b: Box | IndexedBox) => {
-    const reducer = (xs: number[], ys: number[]) => {
-        const [x, ...xss] = xs
-        const [y, ...yss] = ys
-        const initial = yss.reduce((a, b) => smaller(a, b - x), y - x)
-        return xss.reduce((a, b) => ys.reduce((c, d) => smaller(c, d - b), a), initial)
-    }
-    const axs = xs(a)
-    const ays = ys(a)
-    const bxs = xs(b)
-    const bys = ys(b)
-    const ox = reducer(axs, bxs)
-    const oy = reducer(ays, bys)
-    return [ox, oy]
-}
-
-const snap = (threshold: number, box: Box | IndexedBox, boxes: Box[] | IndexedBox[]) => {
-    if(boxes.length === 0) {
-        return [0, 0]
-    } else {
-        const [x, ...xs] = boxes
-        const result = xs.reduce(
-            ([px, py], x) => {
-                const [cx, cy] = smallest(box, x)
-                return [smaller(px, cx), smaller(py, cy)]
-            },
-            smallest(box, x)
-        )
-        return result.map(v => Math.abs(v) <= threshold ? v : 0)
-    }
-}
-
-const intersections = ([ax, ay]: number[], points: number[][]): number[][][] => {
-    if(points.length > 0) {
-        const [[ix, iy], ...xs] = points
-        const x = eq(ax, ix)
-        const y = eq(ay, iy)
-        if(x || y) {
-            return [[[ax, ay], [ix, iy]]]
-        } else {
-            return intersections([ax, ay], xs)
-        }
-    } else {
-        return []
-    }
-}
-
-const removeDuplicateLines = (lines: number[][][], acc: number[][][]) => {
-    if(lines.length > 0) {
-        const [x, ...xs] = lines
-        const duplicate = ([, d]: number[][], [, f]: number[][]) => {
-            const [g, h] = d
-            const [i, j] = f
-            return eq(g, i) && eq(h, j)
-        }
-        const ys = xs.filter(y =>
-            !duplicate(x, y)
-        )
-        return removeDuplicateLines(ys, [...acc, x])
-    } else {
-        return acc
-    }
 }
 
 type GroupEvent = { x: number, y: number, dx: number, dy: number, subject: { x: number, y: number } }
@@ -970,18 +1026,18 @@ const Group = ({ onEffect, container, onDragStart, onDrag, onDragEnd, x0, y0, x1
     )
 }
 
-
-const itemsToGroup = (ox: number, oy: number, items: Item[] | Box[] | IndexedBox[]) => items.reduce((acc, curr) => ({
-    x0: Math.min(acc.x0, curr.x + ox),
-    y0: Math.min(acc.y0, curr.y + oy),
-    x1: Math.max(acc.x1, curr.x + curr.w + ox),
-    y1: Math.max(acc.y1, curr.y + curr.h + oy)
-}), {
-    x0: Infinity,
-    y0: Infinity,
-    x1: -Infinity,
-    y1: -Infinity
-})
+const itemsToGroup = (ox: number, oy: number, items: Item[] | Box[] | UniqueBox[]) =>
+    items.reduce((acc, curr) => ({
+        x0: Math.min(acc.x0, curr.x + ox),
+        y0: Math.min(acc.y0, curr.y + oy),
+        x1: Math.max(acc.x1, curr.x + curr.w + ox),
+        y1: Math.max(acc.y1, curr.y + curr.h + oy)
+    }), {
+        x0: Infinity,
+        y0: Infinity,
+        x1: -Infinity,
+        y1: -Infinity
+    })
 
 const Edit = ({
     className = '',
@@ -1113,27 +1169,16 @@ const Edit = ({
 
         const onDelete = (e: { key: string }) => {
             if(e.key === 'Delete') {
-                const actives = [...container.children].reduce<string[]>((a, b) => {
-                    const item = b as HTMLDivElement
-                    const active = item.dataset.active === 'true'
-                    if(active) {
-                        return [...a, item.dataset.id as string]
-                    } else {
-                        return a
-                    }
-                }, [])
+                const [actives] = splitChildrenAsBoxes(container)
+                const ids = actives.map(v => v.id)
 
                 if(actives.length > 0) {
                     setInteractive(true)
                     setLayout((layout: Layout) => {
                         const items = layout.items.filter(v =>
-                            !actives.includes(v.id)
+                            !ids.includes(v.id)
                         )
-                        const height = items.length > 0
-                            ? Math.max(
-                                ...items.map(v => v.y + v.h)
-                            )
-                            : 0
+                        const height = getItemsHeight(items)
                         return { ...layout, items, height }
                     })
                     setActives([])
@@ -1241,11 +1286,7 @@ const Edit = ({
     const applyChange = curry((index: number, item: Item) =>
         setLayout((layout: Layout) => {
             const items = layout.items.with(index, item)
-            const height = items.length > 0
-                ? Math.max(
-                    ...items.map(v => v.y + v.h)
-                )
-                : 0
+            const height = getItemsHeight(items)
             return { ...layout, height, items }
         })
     )
@@ -1268,8 +1309,8 @@ const Edit = ({
     )
 
     const drawActiveLines = (item: Item) => {
-        const cx = item.x + item.w * .5
-        const cy = item.y + item.h * .5
+        const cx = item.x + half(item.w)
+        const cy = item.y + half(item.h)
 
         drawBlueLines([
             [[0, cy], [item.x, cy]],
@@ -1298,23 +1339,7 @@ const Edit = ({
         const container = containerRef.current!
         const c = container.getBoundingClientRect()
 
-        const [actives, inactives] = [...container.children].reduce<IndexedBox[][]>(([actives, inactives], curr, i) => {
-            const item = curr as HTMLDivElement
-            const active = item.dataset.active === 'true'
-            const r = item.getBoundingClientRect()
-            const next = {
-                i: i,
-                x: r.x - c.x,
-                y: r.y - c.y,
-                w: r.width,
-                h: r.height
-            }
-            if(active) {
-                return [actives.concat([next]), inactives]
-            } else {
-                return [actives, inactives.concat([next])]
-            }
-        }, [[], []])
+        const [actives, inactives] = splitChildrenAsBoxes(container)
 
         const group = itemsToGroup(0, 0, actives)
 
@@ -1338,29 +1363,11 @@ const Edit = ({
             y: initial.y + e.dy
         })
 
-        const canvas = centers({ ...constrain, h: c.height })
+        const canvas = { ...constrain, h: c.height }
 
-        const [ox, oy] = snap(5, moved, [{ ...constrain, h: c.height }, ...inactives])
+        const [ox, oy] = snap(5, moved, [canvas, ...inactives])
 
         const result = applyBoxConstrain(constrain, { ...moved, x: moved.x + ox, y: moved.y + oy })
-
-        const points = toPoints(result)
-
-        const lines = removeDuplicateLines(
-            inactives.reduce(
-                (acc, curr) => {
-                    const lines = toPoints(curr)
-                    const result = points.flatMap(point =>
-                        intersections(point, lines)
-                    )
-                    return [...acc, ...result]
-                },
-                points.flatMap(point =>
-                    intersections(point, canvas)
-                )
-            ),
-            []
-        )
 
         const dx = result.x - initial.x
         const dy = result.y - initial.y
@@ -1377,11 +1384,11 @@ const Edit = ({
                 },
                 layout.items
             )
-            const height = Math.max(
-                ...items.map(v => v.y + v.h)
-            )
+            const height = getItemsHeight(items)
             return { ...layout, items, height }
         })
+
+        const lines = snapLines(canvas, result, inactives)
 
         if(lines.length > 0) {
             drawOrangeLines(lines)
@@ -1433,14 +1440,14 @@ const Edit = ({
         }
     }
 
-    const onGroupEffect = curry((group: Items, effect: string) => {
+    const onGroupEffect = curry((group: Items, effect: string) =>
         setLayout((layout: Layout) => {
             const table: Record<string, number> = layout.items.reduce((a, b, i) => ({ ...a, [b.id]: i }), {})
             const indexes = group.map(v => table[v.id])
             const items = indexes.reduce((a, b) => a.with(b, { ...a[b], effect }), layout.items)
             return { ...layout, items }
         })
-    })
+    )
 
     const sizeExtent: Extent = [
         [15, layout.width],
@@ -1467,22 +1474,8 @@ const Edit = ({
             h: c.height
         }
         const constrain = { ...container, h: Infinity }
-        const others = [...containerRef.current!.children].reduce<Box[]>((a, b) => {
-            const next = b as HTMLDivElement
-            const id = next.dataset.id as string
-            if(item.id === id) {
-                return a
-            } else {
-                const r = next.getBoundingClientRect()
-                const box = {
-                    x: r.x - c.x,
-                    y: r.y - c.y,
-                    w: r.width,
-                    h: r.height
-                }
-                return a.concat([box])
-            }
-        }, [])
+
+        const [_, others] = splitChildrenAsBoxes(containerRef.current!)
 
         const [ox, oy] = snap(5, item, [constrain, ...others])
 
@@ -1492,25 +1485,7 @@ const Edit = ({
             y: item.y + oy
         })
 
-        const points = toPoints(result)
-
-        const canvas = centers(container)
-
-        const lines = removeDuplicateLines(
-            others.reduce(
-                (acc, curr) => {
-                    const lines = toPoints(curr)
-                    const result = points.flatMap(point =>
-                        intersections(point, lines)
-                    )
-                    return [...acc, ...result]
-                },
-                points.flatMap(point =>
-                    intersections(point, canvas)
-                )
-            ),
-            []
-        )
+        const lines = snapLines(container, result, others)
 
         setInteractive(false)
         applyChange(index, result)
@@ -1541,22 +1516,12 @@ const Edit = ({
             w: c.width,
             h: c.height
         }
+
         const constrain = { ...container, h: Infinity }
-        const items = [...containerRef.current!.children].reduce<Box[]>((a, b) => {
-            const next = b as HTMLDivElement
-            const r = next.getBoundingClientRect()
-            const box = {
-                x: r.x - c.x,
-                y: r.y - c.y,
-                w: r.width,
-                h: r.height
-            }
-            return a.concat([box])
-        }, [])
 
-        const [dx, dy] = snap(5, item, [constrain, ...items])
+        const [[prev], others] = splitChildrenAsBoxes(containerRef.current!)
 
-        const prev = items[index]
+        const [dx, dy] = snap(5, item, [constrain, ...others])
 
         const xs = toPoints(prev)
         const ys = toPoints(item)
@@ -1590,25 +1555,7 @@ const Edit = ({
             }
         )
 
-        const points = toPoints(result)
-
-        const canvas = centers(container)
-
-        const lines = removeDuplicateLines(
-            items.toSpliced(index, 1).reduce(
-                (acc, curr) => {
-                    const lines = toPoints(curr)
-                    const result = points.flatMap(point =>
-                        intersections(point, lines)
-                    )
-                    return [...acc, ...result]
-                },
-                points.flatMap(point =>
-                    intersections(point, canvas)
-                )
-            ),
-            []
-        )
+        const lines = snapLines(container, result, others)
 
         setInteractive(false)
         applyChange(index, item)
@@ -1654,9 +1601,7 @@ const Edit = ({
                     }
                 )
             ])
-            const height = Math.max(
-                ...items.map(v => v.y + v.h)
-            )
+            const height = getItemsHeight(items)
             return { ...layout, items, height }
         })
     })

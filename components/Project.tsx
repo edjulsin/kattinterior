@@ -219,7 +219,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
 
     const lcp = largest ?? ({ id: '' })
 
-    const formatAlt = (v: string) => `${v} Designed By ${brand}`
+    const formatAlt = (v: string) => `${v || 'Interior'} Designed By ${brand}`
 
     return (
         <article className='flex flex-col items-center justify-center gap-y-30 py-5 w-full overflow-clip'>

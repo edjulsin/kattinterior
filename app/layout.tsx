@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) =>
 	<html lang='en'>
 		<body
-			className={`${serif.variable} ${sans.variable} antialiased flex flex-col justify-center items-center bg-light dark:bg-dark dark:text-white transition-colors duration-300 ease-in-out`}>
+			className={`${serif.variable} ${sans.variable} antialiased flex flex-col justify-center items-center bg-light text-font-dark dark:bg-dark dark:text-font-light transition-colors duration-300 ease-in-out`}>
 			{children}
 		</body>
 	</html>

@@ -16,7 +16,7 @@ import downscale from 'downscale';
 import { v7 as UUIDv7 } from 'uuid'
 import Droppable from './Droppable';
 import { useDrag, UseDragListener } from '@/hook/useDrag';
-import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternative, capitalize, groupByRow, extent, ab } from '@/utility/fn';
+import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternative, capitalize, groupByRow, extent, getItemsHeight } from '@/utility/fn';
 import { rebuildPath } from '@/action/server';
 
 const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
@@ -1036,9 +1036,7 @@ const Left = ({ onDelete, asset, onDrag, onDrop }: {
 			{
 				<ul
 					ref={ref}
-					className={
-						clsx('size-full p-4 flex flex-col items-center gap-y-4 overflow-y-auto', { 'hidden': items.length === 0 })
-					}
+					className={clsx('size-full p-4 flex flex-col items-center gap-y-4 overflow-y-auto', { 'hidden': items.length === 0 })}
 				>
 					{
 						items.map((item, i) =>
@@ -1297,11 +1295,7 @@ const Edit = ({ project }: { project: Project }) => {
 				const items = value.items.filter(v =>
 					!ids.includes(v.src)
 				)
-				const height = items.length > 0
-					? Math.max(
-						...items.map(v => v.y + v.h)
-					)
-					: 0
+				const height = getItemsHeight(items)
 				return { ...a, [key]: { ...value, items, height } }
 			}, {}) as Template
 		)
@@ -1334,11 +1328,7 @@ const Edit = ({ project }: { project: Project }) => {
 							}
 							return { ...item, ...box }
 						})
-						const height = items.length > 0
-							? Math.max(
-								...items.map(v => v.y + v.h)
-							)
-							: 0
+						const height = getItemsHeight(items)
 						return {
 							...acc,
 							[key]: { ...value, items, height }
@@ -1701,9 +1691,7 @@ const Edit = ({ project }: { project: Project }) => {
 						return result
 					})
 				)
-				const height = Math.max(
-					...items.map(v => v.y + v.h)
-				)
+				const height = getItemsHeight(items)
 
 				return { ...layout, items, height }
 			})
@@ -1726,9 +1714,7 @@ const Edit = ({ project }: { project: Project }) => {
 				...asset,
 				[x.id]: {
 					...x,
-					alt: alternative(
-						multisteps.input.trim()
-					)
+					alt: alternative(multisteps.input)
 				}
 			}
 		})
@@ -1787,11 +1773,7 @@ const Edit = ({ project }: { project: Project }) => {
 					[n]
 				).flat()
 
-				const height = items.length > 0
-					? Math.max(
-						...items.map(v => v.y + v.h)
-					)
-					: 0
+				const height = getItemsHeight(items)
 
 				return { ...layout, height, items }
 			} else {
@@ -1897,11 +1879,7 @@ const Edit = ({ project }: { project: Project }) => {
 																}
 																return { ...item, ...box }
 															})
-															const height = items.length > 0
-																? Math.max(
-																	...items.map(v => v.y + v.h)
-																)
-																: 0
+															const height = getItemsHeight(items)
 
 															return { ...layout, items, height }
 														})

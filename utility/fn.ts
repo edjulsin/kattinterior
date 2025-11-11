@@ -333,6 +333,11 @@ export const toStorageURL = (path: string) =>
 
 export const toPathURL = (url: string) => url.split('/').slice(-2).join('/')
 
+export const getItemsHeight = (items: Items) =>
+    Math.max(
+        ...items.map(v => v.y + v.h).concat([0])
+    )
+
 export function storageAvailable(type: 'sessionStorage' | 'localStorage') {
     let storage;
     try {

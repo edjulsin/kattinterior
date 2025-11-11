@@ -15,7 +15,7 @@ const DashboardLayout = ({ children }: Readonly<{ children: React.ReactNode }>) 
             </nav>
         </header>
         <main className='w-full'>
-            { children }
+            {children}
         </main>
     </div>
 

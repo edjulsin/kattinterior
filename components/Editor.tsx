@@ -80,10 +80,8 @@ const eventTransformer = <T extends HTMLElement>(e: UseDragEvent<T>): Result => 
     container: e.subject.container
 })
 
-const Handle = ({ className, ...rest }: DragPropsType<HTMLSpanElement> & { className: string }) => {
-    const ref = useDrag<HTMLSpanElement>({ ...rest })
-    return <span ref={ref} className={className}></span>
-}
+const Handle = ({ className, ...rest }: DragPropsType<HTMLSpanElement> & { className: string }) =>
+    <span ref={useDrag<HTMLSpanElement>({ ...rest })} className={className}></span>
 
 const effects = [
     'scale-up',
@@ -94,6 +92,8 @@ const effects = [
     'slide-from-top',
     'slide-from-bottom'
 ]
+
+type Extent = [[number, number], [number, number]]
 
 type EditableProps = {
     onContextMenu: ItemCallback,
@@ -117,8 +117,8 @@ type EditableProps = {
     sendToBack: ItemCallback,
     setAsThumbnail: ImageCallback,
     setImageAlt: ImageCallback,
-    sizeExtent: number[][],
-    translateExtent: number[][],
+    sizeExtent: Extent,
+    translateExtent: Extent,
 }
 
 const bottomCenter = (item: Item): [number, number] => ([item.x + half(item.w), item.y + item.h])
@@ -130,9 +130,53 @@ const bottomLeft = (item: Item): [number, number] => ([item.x, item.y + item.h])
 const topLeft = (item: Item): [number, number] => ([item.x, item.y])
 const topRight = (item: Item): [number, number] => ([item.x + item.w, item.y])
 
+const resize = ([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], [yMin, yMax]]: Extent, [ox, oy]: [number, number], scale: number, item: Item) => {
+    const c = clamp(
+        Math.max(wMin / item.w, hMin / item.h),
+        Math.min(wMax / item.w, hMax / item.h),
+        scale
+    )
+    return applyBoxConstrain(
+        { x: xMin, y: yMin, w: xMax - xMin, h: yMax - yMin },
+        {
+            ...item,
+            x: ox - (ox - item.x) * c,
+            y: oy - (oy - item.y) * c,
+            w: item.w * c,
+            h: item.h * c
+        }
+    )
+}
+
+const crop = ([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], [yMin, yMax]]: Extent, [ox, oy]: [number, number], dx: number, dy: number, image: Box, item: Item) => {
+    const l = Math.max(xMin, image.x)
+    const t = Math.max(yMin, image.y)
+    const r = Math.min(xMax, image.x + image.w)
+    const b = Math.min(yMax, image.y + image.h)
+    const ld = item.x - l
+    const rd = r - (item.x + item.w)
+    const td = item.y - t
+    const bd = b - (item.y + item.h)
+    const cx = item.x + half(item.w)
+    const cy = item.y + half(item.h)
+    const xs = 1 + ([ld, 0, rd][1 + Math.sign(cx - ox)]) / item.w
+    const ys = 1 + ([td, 0, bd][1 + Math.sign(cy - oy)]) / item.h
+    const xx = clamp(wMin / item.w, Math.min(xs, wMax / item.w), dx)
+    const yy = clamp(hMin / item.h, Math.min(ys, hMax / item.h), dy)
+    const x = ox - (ox - item.x) * xx
+    const y = oy - (oy - item.y) * yy
+    const w = item.w * xx
+    const h = item.h * yy
+    const sx = (x - image.x) / image.w
+    const sy = (y - image.y) / image.h
+    const sw = w / image.w
+    const sh = h / image.h
+    return { ...item, x, y, w, h, sx, sy, sw, sh }
+}
+
 const Editable = ({
-    sizeExtent: [[wMin, wMax], [hMin, hMax]],
-    translateExtent: [[xMin, xMax], [yMin, yMax]],
+    sizeExtent,
+    translateExtent,
     onDuplicate,
     onEffect,
     active,
@@ -159,6 +203,8 @@ const Editable = ({
     const [cropMode, setCropMode] = useState(false)
     const [dialog, setDialog] = useState(false)
     const [error, setError] = useState(false)
+
+    const [[xMin, xMax], [yMin, yMax]] = translateExtent
 
     const modifier = <T extends HTMLElement>(drag: UseDragBehavior<T>) =>
         drag
@@ -214,37 +260,15 @@ const Editable = ({
 
     useEffect(() => () => setCropMode(false), [active])
 
-    const resize = (origin: (item: Item) => ([number, number]), dx: number, dy: number, item: Item) => {
-        const [ox, oy] = origin(item)
-        const m = Math.max(dx, dy)
-        const s = 1 + m * (m === dx ? 1 / item.w : 1 / item.h)
-        const c = clamp(
-            Math.max(wMin / item.w, hMin / item.h),
-            Math.min(wMax / item.w, hMax / item.h),
-            s
-        )
-        const result = applyBoxConstrain(
-            { x: xMin, y: yMin, w: xMax, h: yMax },
-            {
-                ...item,
-                x: ox - (ox - item.x) * c,
-                y: oy - (oy - item.y) * c,
-                w: item.w * c,
-                h: item.h * c
-            }
-        )
-
-        return result
-    }
-
     const resizers = [
         {
             style: 'top-0 left-[4px] right-[4px] h-[8px] -translate-y-[50%] opacity-0 cursor-n-resize', // top-center
             callback: ({ dy, item }: Result): Item =>
                 resize(
-                    bottomCenter,
-                    -Infinity,
-                    -dy,
+                    sizeExtent,
+                    translateExtent,
+                    bottomCenter(item),
+                    1 + -dy / item.h,
                     item
                 )
         },
@@ -252,9 +276,10 @@ const Editable = ({
             style: 'bottom-0 left-[4px] right-[4px] h-[8px] translate-y-[50%] opacity-0 cursor-s-resize', // bottom-center
             callback: ({ dy, item }: Result): Item =>
                 resize(
-                    topCenter,
-                    -Infinity,
-                    dy,
+                    sizeExtent,
+                    translateExtent,
+                    topCenter(item),
+                    1 + dy / item.h,
                     item
                 )
         },
@@ -262,9 +287,10 @@ const Editable = ({
             style: 'left-0 top-[4px] bottom-[4px] w-[8px] -translate-x-[50%] opacity-0 cursor-w-resize', // left-center
             callback: ({ dx, item }: Result): Item =>
                 resize(
-                    rightCenter,
-                    -dx,
-                    -Infinity,
+                    sizeExtent,
+                    translateExtent,
+                    rightCenter(item),
+                    1 + -dx / item.w,
                     item
                 )
         },
@@ -272,9 +298,10 @@ const Editable = ({
             style: 'right-0 top-[4px] bottom-[4px] w-[8px] translate-x-[50%] opacity-0 cursor-e-resize', // right-center
             callback: ({ dx, item }: Result): Item =>
                 resize(
-                    leftCenter,
-                    dx,
-                    -Infinity,
+                    sizeExtent,
+                    translateExtent,
+                    leftCenter(item),
+                    1 + dx / item.w,
                     item
                 )
         },
@@ -282,9 +309,10 @@ const Editable = ({
             style: 'left-0 top-0 cursor-nwse-resize size-2 -translate-x-[50%] -translate-y-[50%] outline-1 outline-blue-500 bg-white', // top-left
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    bottomRight,
-                    -dx,
-                    -dy,
+                    sizeExtent,
+                    translateExtent,
+                    bottomRight(item),
+                    1 + Math.max(-dx / item.w, -dy / item.h),
                     item
                 )
         },
@@ -292,9 +320,10 @@ const Editable = ({
             style: 'top-0 right-0 cursor-nesw-resize size-2 translate-x-[50%] -translate-y-[50%] outline-1 outline-blue-500 bg-white', // top-right
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    bottomLeft,
-                    dx,
-                    -dy,
+                    sizeExtent,
+                    translateExtent,
+                    bottomLeft(item),
+                    1 + Math.max(dx / item.w, -dy / item.h),
                     item
                 )
         },
@@ -302,9 +331,10 @@ const Editable = ({
             style: 'right-0 bottom-0 cursor-nwse-resize size-2 translate-x-[50%] translate-y-[50%] outline-1 outline-blue-500 bg-white', // bottom-right
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    topLeft,
-                    dx,
-                    dy,
+                    sizeExtent,
+                    translateExtent,
+                    topLeft(item),
+                    1 + Math.max(dx / item.w, dy / item.h),
                     item
                 )
         },
@@ -312,41 +342,25 @@ const Editable = ({
             style: 'bottom-0 left-0 cursor-nesw-resize size-2 -translate-x-[50%] translate-y-[50%] outline-1 outline-blue-500 bg-white', // bottom-left
             callback: ({ dx, dy, item }: Result): Item =>
                 resize(
-                    topRight,
-                    -dx,
-                    dy,
+                    sizeExtent,
+                    translateExtent,
+                    topRight(item),
+                    1 + Math.max(-dx / item.w, dy / item.h),
                     item
                 )
         }
     ]
-
-    const crop = (origin: (item: Item) => ([number, number]), dx: number, dy: number, image: Box, item: Item) => {
-        const [ox, oy] = origin(item)
-        const xx = 1 + dx / item.w
-        const yy = 1 + dy / item.h
-        const x = ox - (ox - item.x) * xx
-        const y = oy - (oy - item.y) * yy
-        const w = item.w * xx
-        const h = item.h * yy
-        const sx = (x - image.x) / image.w
-        const sy = (y - image.y) / image.h
-        const sw = w / image.w
-        const sh = h / image.h
-        return { ...item, x, y, w, h, sx, sy, sw, sh }
-    }
 
     const croppers = [
         {
             style: 'top-0 left-[4px] right-[4px] h-[8px] -translate-y-[50%] opacity-0 cursor-n-resize', // top-center
             callback: ({ dy, item, image }: Result): Item =>
                 crop(
-                    bottomCenter,
-                    0,
-                    clamp(
-                        hMin - item.h,
-                        item.y - Math.max(image.y, yMin),
-                        -dy
-                    ),
+                    sizeExtent,
+                    translateExtent,
+                    bottomCenter(item),
+                    1,
+                    1 + -dy / item.h,
                     image,
                     item
                 )
@@ -355,13 +369,11 @@ const Editable = ({
             style: 'bottom-0 left-[4px] right-[4px] h-[8px] translate-y-[50%] opacity-0 cursor-s-resize', // bottom-center
             callback: ({ dy, item, image }: Result): Item =>
                 crop(
-                    topCenter,
-                    0,
-                    clamp(
-                        hMin - item.h,
-                        Math.min(image.y + image.h, yMax) - (item.y + item.h),
-                        dy
-                    ),
+                    sizeExtent,
+                    translateExtent,
+                    topCenter(item),
+                    1,
+                    1 + dy / item.h,
                     image,
                     item
                 )
@@ -370,12 +382,10 @@ const Editable = ({
             style: 'left-0 top-[4px] bottom-[4px] w-[8px] -translate-x-[50%] opacity-0 cursor-w-resize', // left-center
             callback: ({ dx, item, image }: Result): Item =>
                 crop(
-                    rightCenter,
-                    clamp(
-                        wMin - item.w,
-                        item.x - Math.max(xMin, image.x),
-                        -dx
-                    ),
+                    sizeExtent,
+                    translateExtent,
+                    rightCenter(item),
+                    1 + -dx / item.w,
                     1,
                     image,
                     item
@@ -385,12 +395,10 @@ const Editable = ({
             style: 'right-0 top-[4px] bottom-[4px] w-[8px] translate-x-[50%] opacity-0 cursor-e-resize', // right-center
             callback: ({ dx, item, image }: Result): Item =>
                 crop(
-                    leftCenter,
-                    clamp(
-                        wMin - item.w,
-                        Math.min(image.x + image.w, xMax) - (item.x + item.w),
-                        dx
-                    ),
+                    sizeExtent,
+                    translateExtent,
+                    leftCenter(item),
+                    1 + dx / item.w,
                     1,
                     image,
                     item
@@ -400,17 +408,11 @@ const Editable = ({
             style: 'left-0 top-0 cursor-nwse-resize size-2 -translate-x-[50%] -translate-y-[50%] outline-1 outline-red-500 bg-white', // top-left
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    bottomRight,
-                    clamp(
-                        wMin - item.w,
-                        item.x - Math.max(xMin, image.x),
-                        -dx
-                    ),
-                    clamp(
-                        hMin - item.h,
-                        item.y - Math.max(yMin, image.y),
-                        -dy
-                    ),
+                    sizeExtent,
+                    translateExtent,
+                    bottomRight(item),
+                    1 + -dx / item.w,
+                    1 + -dy / item.h,
                     image,
                     item
                 )
@@ -419,9 +421,11 @@ const Editable = ({
             style: 'top-0 right-0 cursor-nesw-resize size-2 translate-x-[50%] -translate-y-[50%] outline-1 outline-red-500 bg-white', // top-right
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    bottomLeft,
-                    clamp(wMin - item.w, Math.min(image.x + image.w, xMax) - (item.x + item.w), dx),
-                    clamp(hMin - item.h, item.y - Math.max(yMin, image.y), -dy),
+                    sizeExtent,
+                    translateExtent,
+                    bottomLeft(item),
+                    1 + dx / item.w,
+                    1 + -dy / item.h,
                     image,
                     item
                 )
@@ -430,9 +434,11 @@ const Editable = ({
             style: 'right-0 bottom-0 cursor-nwse-resize size-2 translate-x-[50%] translate-y-[50%] outline-1 outline-red-500 bg-white', // bottom-right
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    topLeft,
-                    clamp(wMin - item.w, Math.min(image.x + image.w, xMax) - (item.x + item.w), dx),
-                    clamp(hMin - item.h, Math.min(image.y + image.h, yMax) - (item.y + item.h), dy),
+                    sizeExtent,
+                    translateExtent,
+                    topLeft(item),
+                    1 + dx / item.w,
+                    1 + dy / item.h,
                     image,
                     item
                 )
@@ -441,9 +447,11 @@ const Editable = ({
             style: 'bottom-0 left-0 cursor-nesw-resize size-2 -translate-x-[50%] translate-y-[50%] outline-1 outline-red-500 bg-white', // bottom-left
             callback: ({ dx, dy, item, image }: Result): Item =>
                 crop(
-                    topRight,
-                    clamp(wMin - item.w, item.x - Math.max(image.x, xMin), -dx),
-                    clamp(hMin - item.h, Math.min(image.y + image.h, yMax) - (item.y + item.h), dy),
+                    sizeExtent,
+                    translateExtent,
+                    topRight(item),
+                    1 + -dx / item.w,
+                    1 + dy / item.h,
                     image,
                     item
                 )
@@ -574,6 +582,7 @@ const Editable = ({
                             *:data-[state=open]:bg-amber-600
                             *:data-[state=open]:text-light
                             *:data-disabled:opacity-50
+                            *:data-disabled:cursor-not-allowed
                         '
                         onContextMenu={e => e.stopPropagation()}
                     >
@@ -1433,12 +1442,12 @@ const Edit = ({
         })
     })
 
-    const sizeExtent = [
+    const sizeExtent: Extent = [
         [15, layout.width],
         [15, Infinity]
     ]
 
-    const translateExtent = [
+    const translateExtent: Extent = [
         [0, layout.width],
         [0, Infinity]
     ]

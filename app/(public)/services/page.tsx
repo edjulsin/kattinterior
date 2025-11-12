@@ -72,7 +72,7 @@ const ServicesPage = async () =>
             '
         >
             <Image
-                className='rounded-tl-full rounded-tr-full w-full max-w-sm h-auto object-cover object-center'
+                className='rounded-tl-full rounded-tr-full w-full aspect-[2_/_3] max-w-md h-auto object-cover object-center'
                 src={image1}
                 width={1080}
                 height={1350}
@@ -103,11 +103,19 @@ const ServicesPage = async () =>
                 Every interior whispers a story — of comfort, character, and soul. When it feels like you, that’s when it feels like home.
             </p>
         </div>
-        <section className='max-w-2xs md:max-w-md xl:max-w-full flex flex-col xl:flex-row gap-y-10 gap-x-10 justify-center items-center'>
-            <div className='grid justify-center items-center place-items-center'>
+        <section className='max-w-2xs md:max-w-xl xl:max-w-full flex flex-col xl:flex-row gap-10 justify-center items-center'>
+            <div
+                className='
+                    grid 
+                    place-content-center 
+                    place-items-center
+                    md:grid-cols-[.7fr_.3fr_.7fr]
+                    md:grid-rows-[.3fr_.7fr_.3fr]
+                '
+            >
                 <div className='col-span-2 col-start-1 row-start-1 row-span-2'>
                     <Image
-                        className='w-full aspect-[1_/_1.25] max-w-2xs hidden md:block object-cover object-center'
+                        className='w-full aspect-[1_/_1.5] max-w-xs hidden md:block object-cover object-center'
                         src={image2}
                         width={1080}
                         height={1440}
@@ -116,7 +124,7 @@ const ServicesPage = async () =>
                 </div>
                 <div className='parallax w-full col-span-2 col-start-2 row-start-2 row-span-2 rounded-tl-full rounded-tr-full'>
                     <Image
-                        className='z-10 aspect-[1_/_1.25] max-w-xs w-full object-cover object-center'
+                        className='z-10 aspect-[1_/_1.5] max-w-xs w-full object-cover object-center'
                         src={image3}
                         width={1440}
                         height={1080}
@@ -124,7 +132,7 @@ const ServicesPage = async () =>
                     />
                 </div>
             </div>
-            <div className='flex flex-col justify-center gap-y-5 xl:max-w-md'>
+            <div className='flex flex-col justify-center gap-y-5 max-w-md'>
                 <h2 className='font-serif text-2xl md:text-3xl slide-from-bottom anim-delay-[100ms]'>How we work</h2>
                 <p className='font-sans text-base md:text-lg font-medium slide-from-bottom'>
                     Every space begins with a story. At KATTINTERIOR, we listen—to your rituals, your rhythm, your roots.
@@ -135,7 +143,7 @@ const ServicesPage = async () =>
         </section>
         <section className='flex flex-col xl:flex-row-reverse gap-y-10 justify-center items-center gap-x-10 max-w-2xs md:max-w-md xl:max-w-full'>
             <Image
-                className='w-full h-auto max-w-md object-cover object-center'
+                className='w-full h-auto max-w-md xl:max-w-sm xl:aspect-[1_/_1.4] object-cover object-center'
                 src={image4}
                 alt='Beautifull custom wall decoration by Chaterina.'
                 width={1080}

@@ -16,7 +16,7 @@ import downscale from 'downscale';
 import { v7 as UUIDv7 } from 'uuid'
 import Droppable from './Droppable';
 import { useDrag, UseDragListener } from '@/hook/useDrag';
-import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternative, capitalize, groupByRow, extent, getItemsHeight } from '@/utility/fn';
+import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternative, capitalize, groupByRow, extent, getItemsHeight, half } from '@/utility/fn';
 import { rebuildPath } from '@/action/server';
 
 const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
@@ -1740,7 +1740,7 @@ const Edit = ({ project }: { project: Project }) => {
 				)
 				const [n, ...ns] = [r, ...rs].map(row => {
 					const [min, max] = extent(v => ([v.x, v.x + v.w]), row)
-					const dx = (layout.width / 2) - ((min + max) / 2)
+					const dx = half(layout.width) - half(min + max)
 					return row.map(v => {
 						return { ...v, x: v.x + dx, y: Math.max(v.y + dy, 0) }
 					})

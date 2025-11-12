@@ -65,7 +65,7 @@ const splitChildrenAsBoxes = (parent: HTMLElement) => {
     }, [[], []])
 }
 
-const generateItemBoxes = ({ container, item, image }: { container: HTMLElement, item: HTMLElement, image: HTMLElement }): { container: Box, item: Item, image: Box } => {
+const generateItemBoxes = ({ container, item, image }: { container: HTMLElement, item: HTMLElement, image: HTMLElement }) => {
     const co = container.getBoundingClientRect()
     const it = item.getBoundingClientRect()
     const im = image.getBoundingClientRect()
@@ -228,7 +228,7 @@ const smaller = (a: number, b: number): number => {
     const d = Math.abs(b)
     return Math.min(c, d) === c ? a : b
 }
-const smallest = (a: Box | UniqueBox | Item, b: Box | UniqueBox | Item): Point => {
+const smallest = (a: Box, b: Box): Point => {
     const reducer = (xs: number[], ys: number[]) => {
         const [x, ...xss] = xs
         const [y, ...yss] = ys
@@ -244,7 +244,7 @@ const smallest = (a: Box | UniqueBox | Item, b: Box | UniqueBox | Item): Point =
     return [ox, oy]
 }
 
-const snap = (threshold: number, box: Box | UniqueBox | Item, boxes: Box[] | UniqueBox[] | Items): Point => {
+const snap = (threshold: number, box: Box, boxes: Box[]): Point => {
     if(boxes.length === 0) {
         return [0, 0]
     } else {
@@ -293,7 +293,7 @@ const removeDuplicateLines = (lines: Lines, acc: Lines) => {
     }
 }
 
-const snapLines = (canvas: Box | UniqueBox | Item, box: Box | UniqueBox | Item, boxes: (Box | UniqueBox | Item)[]) => {
+const snapLines = (canvas: Box, box: Box, boxes: (Box)[]) => {
     const zs = centers(canvas)
     const xs = toPoints(box)
     return removeDuplicateLines(
@@ -1026,7 +1026,7 @@ const Group = ({ onEffect, container, onDragStart, onDrag, onDragEnd, x0, y0, x1
     )
 }
 
-const itemsToGroup = (ox: number, oy: number, items: Item[] | Box[] | UniqueBox[]) =>
+const itemsToGroup = (ox: number, oy: number, items: Box[]) =>
     items.reduce((acc, curr) => ({
         x0: Math.min(acc.x0, curr.x + ox),
         y0: Math.min(acc.y0, curr.y + oy),
@@ -1116,7 +1116,6 @@ const Edit = ({
         })
 
         context.restore()
-
     }
 
     const drawOrangeLines = (lines: number[][][]) => {

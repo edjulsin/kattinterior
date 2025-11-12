@@ -34,7 +34,7 @@ const AboutPage = () =>
         '
         >
             <Image
-                className='w-full h-auto object-cover object-center xl:row-span-2 max-w-sm unfold-y justify-self-center self-end anim-delay-100'
+                className='w-full h-auto max-w-sm aspect-[1_/_1.35] object-cover object-center xl:row-span-2 unfold-y justify-self-center self-end anim-delay-100'
                 src={image1}
                 alt='Wall decoration by Chaterina'
                 width={1080}
@@ -54,14 +54,14 @@ const AboutPage = () =>
         </section>
         <section className='flex flex-col xl:flex-row-reverse xl:items-start gap-y-10 justify-center items-center max-w-2xs md:max-w-sm xl:max-w-full'>
             <Image
-                className='w-full h-auto aspect-[4_/_5.5] max-w-md rounded-tl-full rounded-tr-full object-cover object-center'
+                className='w-full h-auto aspect-[1_/_1.45] max-w-md rounded-tl-full rounded-tr-full object-cover object-center'
                 src={image2}
                 alt='Chaterina in an Art Gallery'
                 width={1080}
                 height={1350}
             />
             <div className='flex flex-col justify-center gap-y-5'>
-                <h2 className='text-xl/relaxed md:text-2xl/relaxed xl:text-3xl/relaxed font-serif slide-from-bottom max-w-xl'>
+                <h2 className='text-xl/relaxed md:text-2xl/relaxed xl:text-3xl/relaxed font-serif slide-from-bottom max-w-lg'>
                     Guided by your story, ignited by our fire within.
                 </h2>
                 <div className='max-w-sm flex flex-col gap-y-5 justify-center font-sans text-base font-medium md:text-lg slide-from-bottom anim-delay-[100ms]'>

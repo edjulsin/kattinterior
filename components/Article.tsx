@@ -36,9 +36,9 @@ const Article = ({ className, heading, project, index }: { heading: string, clas
             className={className}
             href={`/projects/${project.slug}`}
         >
-            <article className='flex flex-col justify-center items-center gap-y-5 md:gap-y-15 xl:gap-y-20'>
+            <article className='flex flex-col justify-center items-center gap-y-5'>
                 <Image
-                    className='w-65 h-90 md:scale-115 xl:scale-130 object-cover object-center'
+                    className='w-full h-auto aspect-[65_/_90] max-w-2xs md:max-w-xs object-cover object-center'
                     src={thumbnail.src}
                     alt={alt(thumbnail.alt)}
                     width={thumbnail.width}

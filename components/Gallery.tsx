@@ -1,7 +1,7 @@
 import React from 'react'
 
 const Gallery = ({ heading, children }: { heading: string, children: React.ReactNode }) =>
-    <section className='flex flex-col gap-y-16'>
+    <section className='flex flex-col gap-y-20'>
         {
             React.createElement(
                 heading,
@@ -12,20 +12,18 @@ const Gallery = ({ heading, children }: { heading: string, children: React.React
         <section
             className='
                 grid 
-                gap-y-20
+                gap-y-30
                 place-items-center 
                 grid-flow-row-dense
-                py-14
-                sm:grid-cols-2
-                sm:[&>*:not(a)]:col-span-2
-                lg:grid-cols-3
-                lg:[&>a]:row-span-4
-                lg:[&>*:not(a)]:col-span-3
-                lg:[&>:nth-child(2)]:row-start-3
-                lg:[&>a:nth-child(3n+1)]:col-start-1
-                lg:[&>a:nth-child(3n+2)]:col-start-2
-                lg:[&>a:nth-child(3n+3)]:col-start-3
-                xl:gap-y-30
+                md:grid-cols-2
+                md:[&>*:not(a)]:col-span-2
+                xl:grid-cols-3
+                xl:[&>a]:row-span-4
+                xl:[&>*:not(a)]:col-span-3
+                xl:[&>:nth-child(2)]:row-start-3
+                xl:[&>a:nth-child(3n+1)]:col-start-1
+                xl:[&>a:nth-child(3n+2)]:col-start-2
+                xl:[&>a:nth-child(3n+3)]:col-start-3
             '
         >
             {children}

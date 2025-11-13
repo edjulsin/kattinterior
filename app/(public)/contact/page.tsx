@@ -5,9 +5,11 @@ import Schema from '@/components/Schema'
 import pageMeta from '@/meta/page'
 import pageSchema from '@/schemas/pageSchema'
 
+const name = process.env.NEXT_PUBLIC_SITE_NAME as string
+
 const meta = {
     title: 'Contact',
-    description: 'Get in touch with Katt Interior Studio to start your interior design project in Bali. Reach out for consultations, inquiries, or collaborations. We’d love to hear from you.',
+    description: `Get in touch with ${name} to start your interior design project in Bali. Reach out for consultations, inquiries, or collaborations. We’d love to hear from you.`,
     path: '/contact'
 }
 

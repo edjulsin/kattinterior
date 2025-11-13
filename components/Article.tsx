@@ -1,26 +1,11 @@
-import { v7 as UUIDv7 } from 'uuid'
 import type { Project } from '@/type/editor'
 import Link from 'next/link'
 import Image from 'next/image'
-import { alt } from '@/utility/fn'
-import fallback from '@/assets/fallback.svg'
+import { alt, getThumbnails } from '@/utility/fn'
 import React from 'react'
 
-const defaultThumbnail = {
-    id: UUIDv7(),
-    src: fallback,
-    alt: 'Fallback thumbnail',
-    width: 29,
-    height: 29,
-    thumbnail: false
-}
 const Article = ({ className, heading, project, index }: { heading: string, className?: string, project: Project, index: number }) => {
-    const [thumbnail] = [
-        ...project.assets.toSorted((a, b) =>
-            Number(!a.thumbnail) - Number(!b.thumbnail)
-        ),
-        defaultThumbnail
-    ]
+    const [thumbnail] = getThumbnails(1, project)
 
     const title = React.createElement(
         heading,
@@ -43,6 +28,8 @@ const Article = ({ className, heading, project, index }: { heading: string, clas
                     alt={alt(thumbnail.alt)}
                     width={thumbnail.width}
                     height={thumbnail.height}
+                    priority={index === 0}
+
                 />
                 <div className='flex justify-center items-center gap-x-3 w-full'>
                     <span className='text-center font-serif text-xs size-12 p-2 flex justify-center items-center flex-col rounded-full outline-1 outline-gold-900 text-gold-900'>

@@ -11,7 +11,7 @@ import pageMeta from '@/meta/page';
 const name = process.env.NEXT_PUBLIC_SITE_NAME as string
 const meta = {
     title: 'About',
-    description: 'Learn about Katt Interior Studio — a Bali-based interior design studio specializing in residential and commercial spaces. Discover our story, design philosophy, and commitment to timeless, functional interiors.',
+    description: `Learn about ${name} — a Bali-based interior design studio specializing in residential and commercial spaces. Discover our story, design philosophy, and commitment to timeless, functional interiors.`,
     path: '/about'
 }
 
@@ -34,7 +34,7 @@ const AboutPage = () =>
         '
         >
             <Image
-                className='w-full h-auto max-w-sm aspect-[1_/_1.35] object-cover object-center xl:row-span-2 unfold-y justify-self-center self-end anim-delay-100'
+                className='w-full h-auto max-w-sm object-cover object-center xl:row-span-2 unfold-y anim-delay-100 self-end justify-self-center '
                 src={image1}
                 alt='Wall decoration by Chaterina'
                 width={1080}

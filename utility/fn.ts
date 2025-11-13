@@ -1,5 +1,7 @@
-import { Item, Items, Template } from '@/type/editor'
+import { Item, Items, Template, Project, Photos } from '@/type/editor'
 import { timeDay, timeHour, timeMinute, timeMonth, timeWeek, timeYear } from 'd3'
+import { v7 as UUIDv7 } from 'uuid'
+import fallback from '@/assets/fallback.svg'
 
 export const curry = (fn: Function) => (...xs: any[]) =>
     xs.length >= fn.length
@@ -383,3 +385,43 @@ export const capitalize = (string: string) => {
 }
 
 export const half = (v: number) => v * .5
+
+export const getThumbnails = (count: number, project: Project) => {
+    const defaultThumbnail = () => ({
+        id: UUIDv7(),
+        src: fallback,
+        alt: 'Fallback thumbnail',
+        width: 29,
+        height: 29,
+        thumbnail: false
+    })
+
+    const generateDefaults = (count: number, acc: Photos): Photos =>
+        count === 0
+            ? acc
+            : generateDefaults(count - 1, [...acc, defaultThumbnail()])
+
+    const table = Object.fromEntries(
+        project.assets.map(v => {
+            return [v.id, v]
+        })
+    )
+
+    const images = project
+        .template
+        .desktop
+        .items
+        .toSorted((a, b) => a.y - b.y)
+        .reduce<Photos>(
+            (a, b) => {
+                const photo = table[b.src]
+                return photo.thumbnail ? a : a.concat([photo])
+            },
+            project.assets.filter(v => v.thumbnail)
+        )
+        .slice(0, count)
+
+    const options = [...images, ...generateDefaults(count, [])]
+
+    return options.slice(0, count)
+}

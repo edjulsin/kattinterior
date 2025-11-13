@@ -1,6 +1,6 @@
 import { Project } from '@/type/editor'
-import { capitalize } from '@/utility/fn'
-import { CreativeWork, WithContext, ImageObject } from 'schema-dts'
+import { capitalize, getThumbnails } from '@/utility/fn'
+import { CreativeWork, WithContext } from 'schema-dts'
 
 const development = process.env.NODE_ENV === 'development'
 const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
@@ -9,18 +9,7 @@ const instagram = process.env.NEXT_PUBLIC_INSTAGRAM_URL
 const banner = `${url}/banner.png`
 
 export default (project: Project): WithContext<CreativeWork> => {
-    const thumbnail = project.assets.find(v => v.thumbnail) ?? project.assets[0]
-    const image: ImageObject | ({}) = thumbnail
-        ? ({
-            "image": {
-                "@type": "ImageObject",
-                "url": thumbnail.src,
-                "width": { "@type": "QuantitativeValue", value: thumbnail.width },
-                "height": { "@type": "QuantitativeValue", value: thumbnail.height }
-            }
-        })
-        : ({})
-
+    const [thumbnail] = getThumbnails(1, project)
     return {
         "@context": "https://schema.org",
         "@type": "CreativeWork",
@@ -57,6 +46,11 @@ export default (project: Project): WithContext<CreativeWork> => {
             },
             "sameAs": instagram
         },
-        ...image
+        "image": {
+            "@type": "ImageObject",
+            "url": thumbnail.src,
+            "width": { "@type": "QuantitativeValue", value: thumbnail.width },
+            "height": { "@type": "QuantitativeValue", value: thumbnail.height }
+        }
     }
 }

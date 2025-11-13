@@ -11,20 +11,22 @@ import { Metadata } from 'next'
 
 const count = 6
 
-const Message = ({ message }: { message: string }) =>
-    <section className='flex flex-col justify-center items-center min-h-[50dvh]'>
-        <h1 className='text-center font-serif text-3xl max-w-lg leading-loose'>{message}</h1>
-    </section>
+const name = process.env.NEXT_PUBLIC_SITE_NAME as string
 
 const meta = {
     title: 'Projects',
-    description: 'Explore a curated portfolio of residential and commercial interior design projects by Katt Interior Studio. Featuring villas, homes, retail spaces, and hospitality interiors across Bali.',
+    description: `Explore a curated portfolio of residential and commercial interior design projects by ${name}. Featuring villas, homes, retail spaces, and hospitality interiors across Bali.`,
     path: '/projects'
 }
 
 export const dynamic = 'force-static'
 
 export const metadata: Metadata = pageMeta(meta)
+
+const Message = ({ message }: { message: string }) =>
+    <section className='flex flex-col justify-center items-center min-h-[50dvh]'>
+        <h1 className='text-center font-serif text-3xl max-w-lg leading-loose'>{message}</h1>
+    </section>
 
 const ProjectsPage = async () => getPublishedProjects(0, count - 1).then(
     (projects: Project[]) =>

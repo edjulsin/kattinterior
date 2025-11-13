@@ -40,7 +40,7 @@ const Articles = ({ heading, start, count }: { heading: string, start: number, c
                 data.map((v, i) =>
                     <Article
                         heading={heading}
-                        index={i}
+                        index={start + i}
                         key={v.id}
                         project={v}
                     />

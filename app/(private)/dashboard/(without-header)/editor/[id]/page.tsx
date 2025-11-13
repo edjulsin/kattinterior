@@ -21,22 +21,23 @@ const EditorPage = async ({ params }: { params: Promise<{ id: string }> }) =>
     params.then(params =>
         getProject(params.id).then(
             (v: Project[]) => {
-                if(v.length > 0) {
-                    const [project] = v
-                    return (
-                        <Schema
-                            key={project.id}
-                            value={
-                                pageSchema({
-                                    title: project.title,
-                                    description: project.description,
-                                    path: `/dashboard/editor/${project.id}`
-                                })
-                            }
-                        >
-                            <Edit project={project} />
-                        </Schema>
-                    )
+                const results = v.map(project =>
+                    <Schema
+                        key={project.id}
+                        value={
+                            pageSchema({
+                                title: project.title,
+                                description: project.description,
+                                path: `/dashboard/editor/${project.id}`
+                            })
+                        }
+                    >
+                        <Edit project={project} />
+                    </Schema>
+                )
+                if(results.length > 0) {
+                    const [result] = results
+                    return result
                 } else {
                     notFound()
                 }

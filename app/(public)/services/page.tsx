@@ -18,9 +18,11 @@ import pageMeta from '@/meta/page'
 
 export const dynamic = 'force-static'
 
+const name = process.env.NEXT_PUBLIC_SITE_NAME as string
+
 const meta = {
     title: 'Services',
-    description: 'Explore expert interior design services by Katt Interior Studio in Bali. We specialize in modern, functional, and aesthetic spaces tailored to your needs.',
+    description: `Explore expert interior design services by ${name} in Bali. We specialize in modern, functional, and aesthetic spaces tailored to your needs.`,
     path: '/services'
 }
 

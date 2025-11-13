@@ -6,9 +6,11 @@ import Intersector from '@/components/Intersector';
 import Parallax from '@/components/Parallax';
 import pageMeta from '@/meta/page';
 
+const name = process.env.NEXT_PUBLIC_SITE_NAME as string
+
 const meta = {
     title: 'Interior Design Packages',
-    description: 'Professional interior design services for villas, apartments, and private homes in Bali. Designed to reflect your lifestyle and create a comfortable, personalized living space.',
+    description: `Professional interior design services for villas, apartments, and private homes in Bali by ${name}. Designed to reflect your lifestyle and create a comfortable, personalized living space.`,
     path: '/services/packages'
 }
 

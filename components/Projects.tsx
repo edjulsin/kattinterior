@@ -8,12 +8,10 @@ import { useRouter } from 'next/navigation'
 import { AccessibleIcon, DropdownMenu } from 'radix-ui'
 import { useCallback, useState } from 'react'
 import clsx from 'clsx'
-import { v7 as UUIDv7 } from 'uuid'
 import { createProject, getAllProjects, getDraftProjects, getFeaturedProjects, getNewestProjects, getOldestProjects, getPublishedProjects, getRecentProjects, searchProjects } from '@/action/client'
-import { debounce, formatISODate } from '@/utility/fn'
+import { debounce, formatISODate, getThumbnails } from '@/utility/fn'
 import Loader from './Loader'
 import Message from './Message'
-import fallback from '@/assets/fallback.svg'
 
 const filters = [
     'All',
@@ -33,15 +31,6 @@ const queries: Record<string, (start: number, end: number) => Promise<Project[]>
     Newest: getNewestProjects,
     Oldest: getOldestProjects,
     Recent: getRecentProjects
-}
-
-const defaultThumbnail = {
-    id: UUIDv7(),
-    src: fallback,
-    alt: 'Fallback thumbnail',
-    width: 29,
-    height: 29,
-    thumbnail: false
 }
 
 const Filter = ({ filter, onFilterChange, className }: { onFilterChange: (filter: string) => void, filter: string, className?: string }) =>
@@ -115,16 +104,9 @@ const List = ({ projects }: { projects: Project[] }) => {
     return (
         <ol className='grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 place-items-center gap-15'>
             {
-                projects.map(project => {
-                    const [thumbnail] = [
-                        ...project.assets.toSorted((a, b) =>
-                            Number(!a.thumbnail) - Number(!b.thumbnail)
-                        ),
-                        defaultThumbnail
-                    ]
-
+                projects.map((project, i) => {
+                    const [thumbnail] = getThumbnails(1, project)
                     const time = formatISODate(now, project.created_at)
-
                     return (
                         <li key={project.id}>
                             <Link href={`/dashboard/editor/${project.id}`}>
@@ -136,6 +118,7 @@ const List = ({ projects }: { projects: Project[] }) => {
                                             width={thumbnail.width}
                                             height={thumbnail.height}
                                             alt={thumbnail.alt}
+                                            priority={i === 0}
                                         />
                                         {
                                             project.featured

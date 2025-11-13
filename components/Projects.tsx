@@ -118,7 +118,6 @@ const List = ({ projects }: { projects: Project[] }) => {
                                             width={thumbnail.width}
                                             height={thumbnail.height}
                                             alt={thumbnail.alt}
-                                            priority={i === 0}
                                         />
                                         {
                                             project.featured

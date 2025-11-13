@@ -79,6 +79,7 @@ const ServicesPage = async () =>
                 width={1080}
                 height={1350}
                 alt='Chaterina working in Gallery'
+                priority={true}
             />
             <div className='flex flex-col justify-center items-center gap-y-5 lg:items-baseline'>
                 <h1 className='font-serif text-base/loose md:text-lg/loose xl:text-xl/loose max-w-3xl slide-from-bottom anim-delay-[300ms]'>

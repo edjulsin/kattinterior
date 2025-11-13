@@ -28,7 +28,6 @@ const Article = ({ className, heading, project, index }: { heading: string, clas
                     alt={alt(thumbnail.alt)}
                     width={thumbnail.width}
                     height={thumbnail.height}
-                    priority={index === 0}
 
                 />
                 <div className='flex justify-center items-center gap-x-3 w-full'>

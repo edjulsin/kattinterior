@@ -213,12 +213,6 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         )
     ].filter(v => v)
 
-    const [largest] = (layout.at(0) ?? ([])).toSorted((a: Item, b: Item) => {
-        return (b.w * b.h) - (a.w * a.h)
-    })
-
-    const lcp = largest ?? ({ id: '' })
-
     const formatAlt = (v: string) => `${v || 'Interior'} Designed By ${brand}`
 
     return (
@@ -253,7 +247,6 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                                                 width={img.width}
                                                 height={img.height}
                                                 alt={formatAlt(img.alt)}
-                                                priority={item.id === lcp.id}
                                             />
                                         </div>
                                     )

@@ -7,7 +7,7 @@ import { drag, select } from 'd3'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Item, Photo, Layout, Asset, Items } from '@/type/editor'
 import { ContextMenu, Dialog } from 'radix-ui'
-import { applyBoxConstrain, capitalize, clamp, compose, curry, o, alt as alternative, half, getItemsHeight } from '@/utility/fn'
+import { applyBoxConstrain, capitalize, clamp, compose, curry, o, alt as alternative, half, getItemsHeight, between, isInsideBox } from '@/utility/fn'
 import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent } from '@/hook/useDrag'
 import { v7 as UUIDv7 } from 'uuid'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
@@ -43,6 +43,28 @@ type Points = Point[]
 type ItemCallback = (item: Item) => void
 
 type ImageCallback = (image: Photo) => void
+
+const isBoxesIntersect = (a: Box, b: Box) => {
+    const points = (v: Box): Extent => ([
+        [v.x, v.x + v.w],
+        [v.y, v.y + v.h]
+    ])
+    const x = points(a)
+    const y = points(b)
+    const intersect = (a: Point, b: Point) => {
+        const c = a.some(c =>
+            between(...b, c)
+        )
+        const d = b.some(d =>
+            between(...a, d)
+        )
+        return c || d
+    }
+    return x.reduce(
+        (a, b, i) => a && intersect(b, y[i]),
+        true
+    )
+}
 
 const splitChildrenAsBoxes = (parent: HTMLElement) => {
     const c = parent.getBoundingClientRect()
@@ -221,8 +243,6 @@ const eq = (a: number, b: number) => Math.round(a) === Math.round(b)
 
 const toPoints = (item: Box) => ([...corners(item), center(item)])
 
-const xs = (box: Box) => ([box.x, box.x + box.w * .5, box.x + box.w])
-const ys = (box: Box) => ([box.y, box.y + box.h * .5, box.y + box.h])
 const smaller = (a: number, b: number): number => {
     const c = Math.abs(a)
     const d = Math.abs(b)
@@ -235,6 +255,8 @@ const smallest = (a: Box, b: Box): Point => {
         const initial = yss.reduce((a, b) => smaller(a, b - x), y - x)
         return xss.reduce((a, b) => ys.reduce((c, d) => smaller(c, d - b), a), initial)
     }
+    const xs = (box: Box) => ([box.x, box.x + box.w * .5, box.x + box.w])
+    const ys = (box: Box) => ([box.y, box.y + box.h * .5, box.y + box.h])
     const axs = xs(a)
     const ays = ys(a)
     const bxs = xs(b)
@@ -1230,24 +1252,17 @@ const Edit = ({
                     const childrens = [...container.children]
                     const actives = childrens.reduce<string[]>((acc, curr) => {
                         const rect = curr.getBoundingClientRect()
-                        const element = curr as HTMLDivElement
-                        const l = rect.x - c.x
-                        const t = rect.y - c.y
-                        const r = l + rect.width
-                        const b = t + rect.height
-                        const xs =
-                            clamp(x, x + w, l) === l ||
-                            clamp(x, x + w, r) === r ||
-                            clamp(l, r, x) === x ||
-                            clamp(l, r, x + w) === x + w
-
-                        const ys =
-                            clamp(y, y + h, t) === t ||
-                            clamp(y, y + h, b) === b ||
-                            clamp(t, b, y) === y ||
-                            clamp(t, b, y + h) === y + h
-
-                        if(xs && ys) {
+                        const element = curr as HTMLElement
+                        const intersected = isBoxesIntersect(
+                            { x, y, w, h },
+                            {
+                                x: rect.x - c.x,
+                                y: rect.y - c.y,
+                                w: rect.width,
+                                h: rect.height
+                            }
+                        )
+                        if(intersected) {
                             return acc.concat([element.dataset.id as string])
                         } else {
                             return acc
@@ -1342,12 +1357,7 @@ const Edit = ({
 
         const group = itemsToGroup(0, 0, actives)
 
-        const constrain = {
-            x: 0,
-            y: 0,
-            w: c.width,
-            h: Infinity
-        }
+        const constrain = { x: 0, y: 0, w: c.width, h: Infinity }
 
         const initial = {
             x: group.x0,
@@ -1407,10 +1417,16 @@ const Edit = ({
             const items = [...container.children]
             const index = items.findIndex(v => {
                 const r = v.getBoundingClientRect()
-                const x = r.x - c.x
-                const y = r.y - c.y
-                const inside = clamp(x, x + r.width, e.x) === e.x && clamp(y, y + r.height, e.y) === e.y
-                return inside
+                return isInsideBox(
+                    {
+                        x: r.x - c.x,
+                        y: r.y - c.y,
+                        w: r.width,
+                        h: r.height
+                    },
+                    e.x,
+                    e.y
+                )
             })
 
             setInteractive(true)
@@ -1466,12 +1482,7 @@ const Edit = ({
 
     const onMove = curry((index: number, item: Item) => {
         const c = containerRef.current!.getBoundingClientRect()
-        const container = {
-            x: 0,
-            y: 0,
-            w: c.width,
-            h: c.height
-        }
+        const container = { x: 0, y: 0, w: c.width, h: c.height }
         const constrain = { ...container, h: Infinity }
 
         const [_, others] = splitChildrenAsBoxes(containerRef.current!)
@@ -1509,12 +1520,7 @@ const Edit = ({
     const onResize = curry((index: number, item: Item) => {
         const [[wMin, wMax], [hMin, hMax]] = sizeExtent
         const c = containerRef.current!.getBoundingClientRect()
-        const container = {
-            x: 0,
-            y: 0,
-            w: c.width,
-            h: c.height
-        }
+        const container = { x: 0, y: 0, w: c.width, h: c.height }
 
         const constrain = { ...container, h: Infinity }
 
@@ -1528,7 +1534,7 @@ const Edit = ({
         const [[i]] = ys.map(([a, b], i) => {
             const [c, d] = xs[i]
             return [i, Math.hypot(a - c, b - d)]
-        }, []).toSorted(([a, b], [c, d]) => b - d)
+        }, []).toSorted(([, b], [, d]) => b - d)
 
         const [ox, oy] = ys[i]
 

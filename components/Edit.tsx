@@ -16,7 +16,7 @@ import downscale from 'downscale';
 import { v7 as UUIDv7 } from 'uuid'
 import Droppable from './Droppable';
 import { useDrag, UseDragListener } from '@/hook/useDrag';
-import { applyBoxConstrain, between, clamp, curry, toStorageURL, alt as alternative, capitalize, groupByRow, extent, getItemsHeight, half } from '@/utility/fn';
+import { applyBoxConstrain, between, curry, toStorageURL, alt as alternative, capitalize, groupByRow, extent, getItemsHeight, half, isInsideBox } from '@/utility/fn';
 import { rebuildPath } from '@/action/server';
 
 const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
@@ -64,6 +64,59 @@ const compressFromFiles = (files: File[]): Promise<Blob[]> =>
 			)
 		)
 	)
+
+const autoFormat = (layout: Layout) => {
+	if(layout.items.length > 0) {
+		const [r, ...rs] = groupByRow(layout.items)
+		const dy = -1 * Math.min(
+			...r.map(v => v.y)
+		)
+		const [n, ...ns] = [r, ...rs].map(row => {
+			const [min, max] = extent(v => ([v.x, v.x + v.w]), row)
+			const dx = half(layout.width) - half(min + max)
+			return row.map(v => {
+				return {
+					...v,
+					x: v.x + dx,
+					y: Math.max(v.y + dy, 0)
+				}
+			})
+		})
+
+		const m = .035
+		const gs = [1, 2, 3, 4, 5].map(v => v * m * layout.width)
+
+		const items = ns.reduce(
+			(a, b) => {
+				const c = a[a.length - 1]
+				const min = Math.max(
+					...c.map(v => v.y + v.h)
+				)
+				const max = Math.min(
+					...b.map(v => v.y)
+				)
+				const diff = max - min
+				const [delta] = gs.toSorted((a, b) =>
+					Math.abs(a - diff) - Math.abs(b - diff)
+				)
+				const d = b.map(v => {
+					return {
+						...v,
+						y: Math.max(v.y + (delta - diff), 0)
+					}
+				})
+				return [...a, d]
+			},
+			[n]
+		).flat()
+
+		const height = getItemsHeight(items)
+
+		return { ...layout, height, items }
+	} else {
+		return layout
+	}
+}
 
 const TextArea = ({ required = false, placeholder, className, value, onChange }: { required?: boolean, placeholder?: string, className?: string, value?: string, onChange: (change: string) => void }) => {
 	const ref = useRef<HTMLTextAreaElement>(null)
@@ -1329,10 +1382,7 @@ const Edit = ({ project }: { project: Project }) => {
 							return { ...item, ...box }
 						})
 						const height = getItemsHeight(items)
-						return {
-							...acc,
-							[key]: { ...value, items, height }
-						}
+						return { ...acc, [key]: { ...value, items, height } }
 					}
 				}, { [breakpoint]: current }) as Template
 		})
@@ -1549,11 +1599,12 @@ const Edit = ({ project }: { project: Project }) => {
 
 		setBroadcast(broadcaster)
 
-		const attachListener = () => {
-			broadcaster.addEventListener('message', () => {
-				broadcaster.postMessage(current)
-			}, { once: true })
-		}
+		const attachListener = () =>
+			broadcaster.addEventListener(
+				'message',
+				() => broadcaster.postMessage(current),
+				{ once: true }
+			)
 
 		task.then(
 			() => {
@@ -1652,16 +1703,35 @@ const Edit = ({ project }: { project: Project }) => {
 	const onDrag = (e: { x: number, y: number, items: Photos }) => {
 		const dropable = sensorRef.current
 		const r = dropable.getBoundingClientRect()
-		const inside = clamp(r.x, r.x + r.width, e.x) === e.x && clamp(r.y, r.y + r.height, e.y) === e.y
 
-		setOver(inside)
+		setOver(
+			isInsideBox(
+				{
+					x: r.x,
+					y: r.y,
+					w: r.width,
+					h: r.height
+				},
+				e.x,
+				e.y
+			)
+		)
 		setOverlay(e)
 	}
 
 	const onDrop = (e: { x: number, y: number, items: Photos }) => {
 		const dropable = sensorRef.current
 		const r = dropable.getBoundingClientRect()
-		const inside = clamp(r.x, r.x + r.width, e.x) === e.x && clamp(r.y, r.y + r.height, e.y) === e.y
+		const inside = isInsideBox(
+			{
+				x: r.x,
+				y: r.y,
+				w: r.width,
+				h: r.height
+			},
+			e.x,
+			e.y
+		)
 
 		if(inside) {
 			setOver(false)
@@ -1731,55 +1801,7 @@ const Edit = ({ project }: { project: Project }) => {
 		setBucket(false)
 	}
 
-	const onAutoFormat = () =>
-		updateLayout(layout => {
-			if(layout.items.length > 0) {
-				const [r, ...rs] = groupByRow(layout.items)
-				const dy = -1 * Math.min(
-					...r.map(v => v.y)
-				)
-				const [n, ...ns] = [r, ...rs].map(row => {
-					const [min, max] = extent(v => ([v.x, v.x + v.w]), row)
-					const dx = half(layout.width) - half(min + max)
-					return row.map(v => {
-						return { ...v, x: v.x + dx, y: Math.max(v.y + dy, 0) }
-					})
-				})
-
-				const m = .035
-				const gs = [1, 2, 3, 4, 5].map(v => v * m * layout.width)
-
-				const items = ns.reduce(
-					(a, b) => {
-						const c = a[a.length - 1]
-						const min = Math.max(
-							...c.map(v => v.y + v.h)
-						)
-						const max = Math.min(
-							...b.map(v => v.y)
-						)
-						const diff = max - min
-						const [delta] = gs.toSorted((a, b) =>
-							Math.abs(a - diff) - Math.abs(b - diff)
-						)
-						const d = b.map(v => {
-							return {
-								...v,
-								y: Math.max(v.y + (delta - diff), 0)
-							}
-						})
-						return [...a, d]
-					},
-					[n]
-				).flat()
-
-				const height = getItemsHeight(items)
-
-				return { ...layout, height, items }
-			} else {
-				return layout
-			}
-		})
+	const onAutoFormat = () => updateLayout(autoFormat)
 
 	const emptyLayout = layout.items.length === 0
 	const hasImages = assets.length > 0
@@ -1890,7 +1912,8 @@ const Edit = ({ project }: { project: Project }) => {
 									].map((v, i) =>
 										<li
 											key={i}
-											className='*:cursor-pointer *:disabled:cursor-not-allowed *:hover:not-disabled:text-amber-600'>
+											className='*:cursor-pointer *:disabled:cursor-not-allowed *:hover:not-disabled:text-amber-600'
+										>
 											{v}
 										</li>
 									)

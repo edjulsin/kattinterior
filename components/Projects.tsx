@@ -104,7 +104,7 @@ const List = ({ projects }: { projects: Project[] }) => {
     return (
         <ol className='grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 place-items-center gap-15'>
             {
-                projects.map((project, i) => {
+                projects.map(project => {
                     const [thumbnail] = getThumbnails(1, project)
                     const time = formatISODate(now, project.created_at)
                     return (

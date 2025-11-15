@@ -3,6 +3,8 @@ import { timeDay, timeHour, timeMinute, timeMonth, timeWeek, timeYear } from 'd3
 import { v7 as UUIDv7 } from 'uuid'
 import fallback from '@/assets/fallback.svg'
 
+export type Box = { x: number, y: number, w: number, h: number }
+
 export const curry = (fn: Function) => (...xs: any[]) =>
     xs.length >= fn.length
         ? fn(...xs)
@@ -22,7 +24,8 @@ export const compose = (...fns: Function[]) => (...args: any[]) =>
 
 export const clamp = (min: number, max: number, value: number) => Math.min(Math.max(min, value), max)
 
-export type Box = { x: number, y: number, w: number, h: number }
+export const isInsideBox = (box: Box, x: number, y: number) =>
+    clamp(box.x, box.x + box.w, x) === x && clamp(box.y, box.y + box.h, y) === y
 
 export const boxConstrain = (container: Box, item: Box) => {
     const dx0 = item.x - container.x
@@ -111,7 +114,7 @@ export const groupByOverlap = curry((overlap: (a: Item, b: Item) => boolean, ite
     }
 })
 
-export const extent = <T,>(fn: (item: T) => Tuple, items: T[]): Tuple => items
+export const extent = (fn: (item: Item) => Tuple, items: Items): Tuple => items
     .reduce(
         ([min, max], b) => {
             const [c, d] = fn(b)
@@ -119,24 +122,6 @@ export const extent = <T,>(fn: (item: T) => Tuple, items: T[]): Tuple => items
         },
         [Infinity, -Infinity]
     )
-    .map(v => Number.isFinite(v) ? v : 0) as Tuple
-
-
-
-export const extents = <T, R>(fn: (item: T) => [Tuple, Tuple], items: T[]): [Tuple, Tuple] => items
-    .reduce(
-        ([[sx, sy], [ex, ey]], b) => {
-            const [[xMin, yMin], [xMax, yMax]] = fn(b)
-            return [
-                [Math.min(sx, xMin), Math.min(sy, yMin)],
-                [Math.max(ex, xMax), Math.max(ey, yMax)]
-            ]
-        },
-        [[Infinity, -Infinity], [Infinity, -Infinity]]
-    )
-    .map(v =>
-        v.map(v => Number.isFinite(v) ? v : 0)
-    ) as [Tuple, Tuple]
 
 export const ab = <T, R>(fn: (a: T, b: T, c: R[]) => R[], values: T[], acc: R[]): R[] => {
     if(values.length > 1) {

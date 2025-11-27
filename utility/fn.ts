@@ -1,31 +1,34 @@
-import { Item, Items, Template, Project, Photos } from '@/type/editor'
+import { Item, Items, Template, Project, Photos, Extent, Point, Points, Box, UniqueBox, Line, Lines } from '@/type/editor'
 import { timeDay, timeHour, timeMinute, timeMonth, timeWeek, timeYear } from 'd3'
 import { v7 as UUIDv7 } from 'uuid'
 import fallback from '@/assets/fallback.svg'
 
-export type Box = { x: number, y: number, w: number, h: number }
+export const curry = <F extends (...args: any[]) => any>(fn: F) => {
+    const curried = (...xs: any[]) =>
+        xs.length >= fn.length
+            ? fn(...xs)
+            : (...ys: any[]) => curried(...xs, ...ys)
 
-export const curry = (fn: Function) => (...xs: any[]) =>
-    xs.length >= fn.length
-        ? fn(...xs)
-        : (...ys: any[]) => curry(fn)(...xs, ...ys)
+    return curried
+}
 
-export const o = (a: Function, b: Function) => (c: any) => a(
-    b(c)
+export const o = curry((a: (v: any) => any, b: (v: any) => any, c: any) =>
+    a(
+        b(c)
+    )
 )
+
 export const first = ([v]: any[]) => v
 export const last = (v: any[]) => v[v.length - 1]
 
-export const compose = (...fns: Function[]) => (...args: any[]) =>
-    fns.slice(0, -1).reduceRight(
-        (a, b) => b(a),
-        fns[fns.length - 1](...args)
-    )
+export const clamp = (min: number, max: number, value: number) =>
+    Math.min(Math.max(min, value), max)
 
-export const clamp = (min: number, max: number, value: number) => Math.min(Math.max(min, value), max)
+export const between = (min: number, max: number, value: number) =>
+    clamp(min, max, value) === value
 
 export const isInsideBox = (box: Box, x: number, y: number) =>
-    clamp(box.x, box.x + box.w, x) === x && clamp(box.y, box.y + box.h, y) === y
+    between(box.x, box.x + box.w, x) && between(box.y, box.y + box.h, y)
 
 export const boxConstrain = (container: Box, item: Box) => {
     const dx0 = item.x - container.x
@@ -38,7 +41,7 @@ export const boxConstrain = (container: Box, item: Box) => {
     }
 }
 
-export const applyBoxConstrain = <T extends Box>(container: Box | T, item: T): T => {
+export const applyBoxConstrain = <T extends Box>(container: Box, item: T): T => {
     const { dx, dy } = boxConstrain(container, item)
     return {
         ...item,
@@ -47,29 +50,30 @@ export const applyBoxConstrain = <T extends Box>(container: Box | T, item: T): T
     }
 }
 
-export type Tuple = [any, any]
+export const xs = (item: Box): Point => ([item.x, item.x + item.w])
+export const ys = (item: Box): Point => ([item.y, item.y + item.h])
 
-export const between = (min: number, max: number, value: number) => Math.min(Math.max(min, value), max) === value
-
-export const xs = (item: Item): Tuple => ([item.x, item.x + item.w])
-export const ys = (item: Item): Tuple => ([item.y, item.y + item.h])
-
-export const minMax = (values: number[]): Tuple => ([
+export const minMax = (values: number[]): Point => ([
     Math.min(...values),
     Math.max(...values)
 ])
 
-export const overlap = curry((fn: (item: Item) => Tuple, a: Item, b: Item): boolean => {
+export const overlap = curry((fn: (item: any) => Point, a: any, b: any): boolean => {
     const c = fn(a)
     const d = fn(b)
-    return c.map(v => between(...d, v)).includes(true) || d.map(v => between(...c, v)).includes(true)
+    const e = [
+        ...c.map(v =>
+            between(...d, v)
+        ),
+        ...d.map(v =>
+            between(...c, v)
+        )
+    ]
+    return e.includes(true)
 })
 
 export const overlapX = overlap(xs)
 export const overlapY = overlap(ys)
-export const overlapXY = overlap((v: Item) => {
-    return [...xs(v), ...ys(v)]
-})
 
 export const groupByOverlap = curry((overlap: (a: Item, b: Item) => boolean, items: Items) => {
     if(items.length > 0) {
@@ -114,14 +118,18 @@ export const groupByOverlap = curry((overlap: (a: Item, b: Item) => boolean, ite
     }
 })
 
-export const extent = (fn: (item: Item) => Tuple, items: Items): Tuple => items
-    .reduce(
+export const extent = (fn: (item: Item) => Point, items: Items): Point =>
+    items.reduce(
         ([min, max], b) => {
             const [c, d] = fn(b)
             return [Math.min(min, c), Math.max(max, d)]
         },
         [Infinity, -Infinity]
     )
+
+export const eqBy = curry((by: (v: any) => any, a: any, b: any) =>
+    by(a) === by(b)
+)
 
 export const ab = <T, R>(fn: (a: T, b: T, c: R[]) => R[], values: T[], acc: R[]): R[] => {
     if(values.length > 1) {
@@ -136,26 +144,29 @@ export const ab = <T, R>(fn: (a: T, b: T, c: R[]) => R[], values: T[], acc: R[])
     }
 }
 
-export const groupByRow = (items: Items): Items[] =>
-    groupByOverlap(overlapY, items).map((v: Items) =>
-        v.toSorted((a, b) => a.y - b.y)
+export const sortLayout = (layout: Items[]) =>
+    layout.map(v =>
+        v.toSorted((a, b) =>
+            Math.sign(a.x - b.x) + Math.sign(a.y - b.y)
+        )
     ).toSorted((a: Items, b: Items) => {
         const [c] = extent(ys, a)
         const [d] = extent(ys, b)
         return c - d
     })
 
+export const groupByRow = (items: Items): Items[] =>
+    sortLayout(
+        groupByOverlap(overlapY, items)
+    )
+
 export const rowTable = (rows: Items[]): Record<string, number> =>
     rows.reduce((a, b, i) => b.reduce((c, d) => ({ ...c, [d.id]: i }), a), {})
 
-export const reduceJoins = (joins: Tuple[], acc: Tuple[]): Tuple[] => {
-    const overlapped = (a: Tuple, b: Tuple) => b.some(c =>
-        between(...a, c)
-    )
-
+export const reduceJoins = (joins: Point[], acc: Point[]): Point[] => {
     if(joins.length > 1) {
         const [x, y, ...rest] = joins.toSorted(([a], [b]) => a - b)
-        if(overlapped(x, y)) {
+        if(overlap((v: Points) => v, x, y)) {
             return reduceJoins([minMax([...x, ...y]), ...rest], acc)
         } else {
             return reduceJoins([y, ...rest], [...acc, x])
@@ -165,7 +176,7 @@ export const reduceJoins = (joins: Tuple[], acc: Tuple[]): Tuple[] => {
     }
 }
 
-export const layoutJoins = (xs: Items[], ys: Items[]): Tuple[] => {
+export const layoutJoins = (xs: Items[], ys: Items[]): Points => {
     const table = rowTable(xs)
     const _ys = ys.map(v =>
         v.filter(v => v.id in table)
@@ -183,7 +194,7 @@ export const layoutJoins = (xs: Items[], ys: Items[]): Tuple[] => {
     const byRow = rows.filter(v => v.length > 1).map(minMax)
 
     const byRows = ab(
-        (a, b, c: Tuple[]) => {
+        (a, b, c: Point[]) => {
             if(a.some(x => b.some(y => x > y))) {
                 return [...c, minMax([...a, ...b])]
             } else {
@@ -193,8 +204,11 @@ export const layoutJoins = (xs: Items[], ys: Items[]): Tuple[] => {
         rows,
         []
     )
+
     return reduceJoins([...byRow, ...byRows], [])
 }
+
+export const twice = (v: number) => v * 2
 
 export const getLayout = (template: Template) => {
     const desktop = groupByRow(template.desktop.items)
@@ -209,19 +223,17 @@ export const getLayout = (template: Template) => {
         []
     )
 
-    const changes = joins.map(([a, b]) =>
-        desktop.slice(a, b + 1).flat()
-    )
-
     const unchanges = desktop.filter((_, i) =>
         !joins.some(v =>
             between(...v, i)
         )
     )
 
-    const rows = [...changes, ...unchanges]
-        .map(v => v.toSorted((a, b) => a.y - b.y))
-        .toSorted(([a], [b]) => a.y - b.y)
+    const changes = joins.map(([a, b]) =>
+        desktop.slice(a, b + 1).flat()
+    )
+
+    const rows = sortLayout([...unchanges, ...changes])
 
     const reduceLayout = (a: Items[], b: Items[]) => {
         const tableA = rowTable(a)
@@ -325,6 +337,11 @@ export const getItemsHeight = (items: Items) =>
         ...items.map(v => v.y + v.h).concat([0])
     )
 
+export const getItemsWidth = (items: Items) =>
+    Math.max(
+        ...items.map(v => v.x + v.w).concat([0])
+    )
+
 export function storageAvailable(type: 'sessionStorage' | 'localStorage') {
     let storage;
     try {
@@ -371,21 +388,21 @@ export const capitalize = (string: string) => {
 
 export const half = (v: number) => v * .5
 
+export const defaultThumbnail = () => ({
+    id: UUIDv7(),
+    src: fallback,
+    alt: 'Fallback thumbnail',
+    width: 29,
+    height: 29,
+    thumbnail: false
+})
+
+export const counts = <T>(callback: (count: number) => T, count: number, acc: T[]): T[] =>
+    count === 0
+        ? acc
+        : counts(callback, count - 1, [...acc, callback(count - 1)])
+
 export const getThumbnails = (count: number, project: Project) => {
-    const defaultThumbnail = () => ({
-        id: UUIDv7(),
-        src: fallback,
-        alt: 'Fallback thumbnail',
-        width: 29,
-        height: 29,
-        thumbnail: false
-    })
-
-    const generateDefaults = (count: number, acc: Photos): Photos =>
-        count === 0
-            ? acc
-            : generateDefaults(count - 1, [...acc, defaultThumbnail()])
-
     const table = Object.fromEntries(
         project.assets.map(v => {
             return [v.id, v]
@@ -406,7 +423,224 @@ export const getThumbnails = (count: number, project: Project) => {
         )
         .slice(0, count)
 
-    const options = [...images, ...generateDefaults(count, [])]
+    const options = [
+        ...images,
+        ...counts(() => defaultThumbnail(), count, [])
+    ]
 
     return options.slice(0, count)
+}
+
+export const isBoxesIntersect = (a: Box, b: Box) =>
+    overlapX(a, b) && overlapY(a, b)
+
+export const splitChildrenAsBoxes = (parent: HTMLElement) => {
+    const c = parent.getBoundingClientRect()
+    return [...parent.children].reduce<[UniqueBox[], UniqueBox[]]>(([a, b], e, i) => {
+        const el = e as HTMLElement
+        const r = e.getBoundingClientRect()
+        const box = {
+            id: el.dataset.id!,
+            i: i,
+            x: r.x - c.x,
+            y: r.y - c.y,
+            w: r.width,
+            h: r.height
+        }
+        if(el.dataset.active === 'true') {
+            return [[...a, box], b]
+        } else {
+            return [a, [...b, box]]
+        }
+    }, [[], []])
+}
+
+export const generateItemBoxes = ({ container, item, image }: { container: HTMLElement, item: HTMLElement, image: HTMLElement }) => {
+    const co = container.getBoundingClientRect()
+    const it = item.getBoundingClientRect()
+    const im = image.getBoundingClientRect()
+    return {
+        container: {
+            x: 0,
+            y: 0,
+            w: co.width,
+            h: co.height
+        },
+        item: {
+            id: item.dataset.id!,
+            src: item.dataset.src!,
+            z: Number(item.dataset.z),
+            x: it.x - co.x,
+            y: it.y - co.y,
+            w: it.width,
+            h: it.height,
+            sx: (it.x - im.x) / im.width,
+            sy: (it.y - im.y) / im.height,
+            sw: it.width / im.width,
+            sh: it.height / im.height,
+            effect: item.dataset.effect as string
+        },
+        image: {
+            x: im.x - co.x,
+            y: im.y - co.y,
+            w: im.width,
+            h: im.height
+        }
+    }
+}
+
+export const bottomCenter = (item: Item): Point => ([item.x + half(item.w), item.y + item.h])
+export const topCenter = (item: Item): Point => ([item.x + half(item.w), item.y])
+export const rightCenter = (item: Item): Point => ([item.x + item.w, item.y + half(item.h)])
+export const leftCenter = (item: Item): Point => ([item.x, item.y + half(item.h)])
+export const bottomRight = (item: Item): Point => ([item.x + item.w, item.y + item.h])
+export const bottomLeft = (item: Item): Point => ([item.x, item.y + item.h])
+export const topLeft = (item: Item): Point => ([item.x, item.y])
+export const topRight = (item: Item): Point => ([item.x + item.w, item.y])
+
+export const resize = curry(([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], [yMin, yMax]]: Extent, [ox, oy]: Point, scale: number, item: Item) => {
+    const c = clamp(
+        Math.max(wMin / item.w, hMin / item.h),
+        Math.min(wMax / item.w, hMax / item.h),
+        scale
+    )
+    return applyBoxConstrain(
+        { x: xMin, y: yMin, w: xMax - xMin, h: yMax - yMin },
+        {
+            ...item,
+            x: ox - (ox - item.x) * c,
+            y: oy - (oy - item.y) * c,
+            w: item.w * c,
+            h: item.h * c
+        }
+    )
+})
+
+export const trunc = Math.trunc
+
+export const crop = curry(([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], [yMin, yMax]]: Extent, [ox, oy]: Point, dx: number, dy: number, image: Box, item: Item) => {
+    const l = Math.max(xMin, image.x)
+    const t = Math.max(yMin, image.y)
+    const r = Math.min(xMax, image.x + image.w)
+    const b = Math.min(yMax, image.y + image.h)
+    const ld = item.x - l
+    const rd = r - (item.x + item.w)
+    const td = item.y - t
+    const bd = b - (item.y + item.h)
+    const cx = item.x + half(item.w)
+    const cy = item.y + half(item.h)
+    const xs = 1 + ([ld, 0, rd][1 + Math.sign(cx - ox)]) / item.w
+    const ys = 1 + ([td, 0, bd][1 + Math.sign(cy - oy)]) / item.h
+    const xx = clamp(wMin / item.w, Math.min(xs, wMax / item.w), dx)
+    const yy = clamp(hMin / item.h, Math.min(ys, hMax / item.h), dy)
+    const x = ox - (ox - item.x) * xx
+    const y = oy - (oy - item.y) * yy
+    const w = item.w * xx
+    const h = item.h * yy
+    const sx = (x - image.x) / image.w
+    const sy = (y - image.y) / image.h
+    const sw = w / image.w
+    const sh = h / image.h
+    return { ...item, x, y, w, h, sx, sy, sw, sh }
+})
+
+export const corners = ({ x, y, w, h }: Box): Points => ([
+    [x, y],
+    [x + w, y],
+    [x + w, y + h],
+    [x, y + h]
+])
+
+export const center = ({ x, y, w, h }: Box): Point => ([x + w * .5, y + h * .5])
+
+export const centers = ({ x, y, w, h }: Box): Points => ([
+    [x, y + h * .5],
+    [x + w, y + h * .5],
+    [x + w * .5, y],
+    [x + w * .5, y + h]
+])
+
+export const eq = (a: number, b: number) => Math.round(a) === Math.round(b)
+
+export const origins = (item: Box) => ([...corners(item), ...centers(item)])
+
+export const smaller = (a: number, b: number): number => {
+    const [e] = [a, b].toSorted((a, b) =>
+        Math.abs(a) - Math.abs(b)
+    )
+    return e
+}
+
+export const smallest = (a: Box, b: Box): Point => {
+    const reducer = (xs: number[], ys: number[]) => {
+        const [x, ...xss] = xs
+        const [y, ...yss] = ys
+        const initial = yss.reduce((a, b) => smaller(a, b - x), y - x)
+        return xss.reduce((a, b) => ys.reduce((c, d) => smaller(c, d - b), a), initial)
+    }
+    const xs = (box: Box) => ([box.x, box.x + box.w * .5, box.x + box.w])
+    const ys = (box: Box) => ([box.y, box.y + box.h * .5, box.y + box.h])
+    const axs = xs(a)
+    const ays = ys(a)
+    const bxs = xs(b)
+    const bys = ys(b)
+    const ox = reducer(axs, bxs)
+    const oy = reducer(ays, bys)
+    return [ox, oy]
+}
+
+export const snap = (threshold: number, box: Box, boxes: Box[]): Point => {
+    if(boxes.length === 0) {
+        return [0, 0]
+    } else {
+        const [x, ...xs] = boxes
+        const [a, b] = xs.reduce<Point>(
+            ([px, py], x) => {
+                const [cx, cy] = smallest(box, x)
+                return [smaller(px, cx), smaller(py, cy)]
+            },
+            smallest(box, x)
+        )
+        const limit = (v: number) => Math.abs(v) <= threshold ? v : 0
+        return [limit(a), limit(b)]
+    }
+}
+
+export const intersections = ([ax, ay]: Point, points: Points) =>
+    points.reduce<Lines>((acc, [ix, iy]) => {
+        if(eq(ax, ix) || eq(ay, iy)) {
+            return [...acc, [[ax, ay], [ix, iy]]]
+        } else {
+            return acc
+        }
+    }, [])
+
+export const removeDuplicateLines = (lines: Lines, acc: Lines): Lines => {
+    if(lines.length > 0) {
+        const [x, ...xs] = lines
+        const duplicate = ([, d]: Line, [, f]: Line) => {
+            const [g, h] = d
+            const [i, j] = f
+            return eq(g, i) && eq(h, j)
+        }
+        const ys = xs.filter(y =>
+            !duplicate(x, y)
+        )
+        return removeDuplicateLines(ys, [...acc, x])
+    } else {
+        return acc
+    }
+}
+
+export const snapLines = (box: Box, boxes: Box[]) => {
+    const xs = centers(box)
+    return removeDuplicateLines(
+        boxes.flatMap(box => {
+            const ys = centers(box)
+            return xs.flatMap(x =>
+                intersections(x, ys)
+            )
+        }),
+        []
+    )
 }

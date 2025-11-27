@@ -5,9 +5,9 @@
 import clsx from 'clsx'
 import { drag, select } from 'd3'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Item, Photo, Layout, Asset, Items } from '@/type/editor'
+import { Item, Photo, Layout, Asset, Items, Box, Extent, Point } from '@/type/editor'
 import { ContextMenu, Dialog } from 'radix-ui'
-import { applyBoxConstrain, capitalize, clamp, compose, curry, o, alt as alternative, half, getItemsHeight, between, isInsideBox } from '@/utility/fn'
+import { applyBoxConstrain, capitalize, clamp, curry, o, alt as alternative, half, getItemsHeight, isInsideBox, generateItemBoxes, resize, bottomCenter, topCenter, rightCenter, leftCenter, bottomRight, bottomLeft, topLeft, topRight, crop, eq, splitChildrenAsBoxes, isBoxesIntersect, snap, snapLines, centers } from '@/utility/fn'
 import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent } from '@/hook/useDrag'
 import { v7 as UUIDv7 } from 'uuid'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
@@ -15,10 +15,6 @@ import Fallback from '@/assets/fallback.svg'
 import Image from 'next/image'
 
 const brand = process.env.NEXT_PUBLIC_SITE_NAME
-
-type Box = { x: number, y: number, w: number, h: number }
-
-type UniqueBox = Box & { id: string, i: number }
 
 type Result = {
     dx: number,
@@ -35,101 +31,9 @@ type Rectangle = {
     y1: number
 }
 
-type Line = [[number, number], [number, number]]
-type Lines = Line[]
-type Point = [number, number]
-type Points = Point[]
-
 type ItemCallback = (item: Item) => void
 
 type ImageCallback = (image: Photo) => void
-
-const isBoxesIntersect = (a: Box, b: Box) => {
-    const points = (v: Box): Extent => ([
-        [v.x, v.x + v.w],
-        [v.y, v.y + v.h]
-    ])
-    const x = points(a)
-    const y = points(b)
-    const intersect = (a: Point, b: Point) => {
-        const c = a.some(c =>
-            between(...b, c)
-        )
-        const d = b.some(d =>
-            between(...a, d)
-        )
-        return c || d
-    }
-    return x.reduce(
-        (a, b, i) => a && intersect(b, y[i]),
-        true
-    )
-}
-
-const splitChildrenAsBoxes = (parent: HTMLElement) => {
-    const c = parent.getBoundingClientRect()
-    return [...parent.children].reduce<[UniqueBox[], UniqueBox[]]>(([a, b], e, i) => {
-        const el = e as HTMLElement
-        const r = e.getBoundingClientRect()
-        const box = {
-            id: el.dataset.id!,
-            i: i,
-            x: r.x - c.x,
-            y: r.y - c.y,
-            w: r.width,
-            h: r.height
-        }
-        if(el.dataset.active === 'true') {
-            return [[...a, box], b]
-        } else {
-            return [a, [...b, box]]
-        }
-    }, [[], []])
-}
-
-const generateItemBoxes = ({ container, item, image }: { container: HTMLElement, item: HTMLElement, image: HTMLElement }) => {
-    const co = container.getBoundingClientRect()
-    const it = item.getBoundingClientRect()
-    const im = image.getBoundingClientRect()
-    return {
-        container: {
-            x: 0,
-            y: 0,
-            w: co.width,
-            h: co.height
-        },
-        item: {
-            id: item.dataset.id!,
-            src: item.dataset.src!,
-            z: Number(item.dataset.z),
-            x: it.x - co.x,
-            y: it.y - co.y,
-            w: it.width,
-            h: it.height,
-            sx: (it.x - im.x) / im.width,
-            sy: (it.y - im.y) / im.height,
-            sw: it.width / im.width,
-            sh: it.height / im.height,
-            effect: item.dataset.effect as string
-        },
-        image: {
-            x: im.x - co.x,
-            y: im.y - co.y,
-            w: im.width,
-            h: im.height
-        }
-    }
-}
-const eventTransformer = <T extends HTMLElement>(e: UseDragEvent<T>): Result => ({
-    dx: e.x - e.subject.x,
-    dy: e.y - e.subject.y,
-    image: e.subject.image,
-    item: e.subject.item,
-    container: e.subject.container
-})
-
-const Handle = ({ className, ...rest }: DragPropsType<HTMLSpanElement> & { className: string }) =>
-    <span ref={useDrag<HTMLSpanElement>({ ...rest })} className={className}></span>
 
 const effects = [
     'scale-up',
@@ -140,8 +44,6 @@ const effects = [
     'slide-from-top',
     'slide-from-bottom'
 ]
-
-type Extent = [[number, number], [number, number]]
 
 type EditableProps = {
     onContextMenu: ItemCallback,
@@ -169,170 +71,19 @@ type EditableProps = {
     translateExtent: Extent,
 }
 
-const bottomCenter = (item: Item): [number, number] => ([item.x + half(item.w), item.y + item.h])
-const topCenter = (item: Item): [number, number] => ([item.x + half(item.w), item.y])
-const rightCenter = (item: Item): [number, number] => ([item.x + item.w, item.y + half(item.h)])
-const leftCenter = (item: Item): [number, number] => ([item.x, item.y + half(item.h)])
-const bottomRight = (item: Item): [number, number] => ([item.x + item.w, item.y + item.h])
-const bottomLeft = (item: Item): [number, number] => ([item.x, item.y + item.h])
-const topLeft = (item: Item): [number, number] => ([item.x, item.y])
-const topRight = (item: Item): [number, number] => ([item.x + item.w, item.y])
-
-const resize = ([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], [yMin, yMax]]: Extent, [ox, oy]: [number, number], scale: number, item: Item) => {
-    const c = clamp(
-        Math.max(wMin / item.w, hMin / item.h),
-        Math.min(wMax / item.w, hMax / item.h),
-        scale
-    )
-    return applyBoxConstrain(
-        { x: xMin, y: yMin, w: xMax - xMin, h: yMax - yMin },
-        {
-            ...item,
-            x: ox - (ox - item.x) * c,
-            y: oy - (oy - item.y) * c,
-            w: item.w * c,
-            h: item.h * c
-        }
-    )
-}
-
-const crop = ([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], [yMin, yMax]]: Extent, [ox, oy]: [number, number], dx: number, dy: number, image: Box, item: Item) => {
-    const l = Math.max(xMin, image.x)
-    const t = Math.max(yMin, image.y)
-    const r = Math.min(xMax, image.x + image.w)
-    const b = Math.min(yMax, image.y + image.h)
-    const ld = item.x - l
-    const rd = r - (item.x + item.w)
-    const td = item.y - t
-    const bd = b - (item.y + item.h)
-    const cx = item.x + half(item.w)
-    const cy = item.y + half(item.h)
-    const xs = 1 + ([ld, 0, rd][1 + Math.sign(cx - ox)]) / item.w
-    const ys = 1 + ([td, 0, bd][1 + Math.sign(cy - oy)]) / item.h
-    const xx = clamp(wMin / item.w, Math.min(xs, wMax / item.w), dx)
-    const yy = clamp(hMin / item.h, Math.min(ys, hMax / item.h), dy)
-    const x = ox - (ox - item.x) * xx
-    const y = oy - (oy - item.y) * yy
-    const w = item.w * xx
-    const h = item.h * yy
-    const sx = (x - image.x) / image.w
-    const sy = (y - image.y) / image.h
-    const sw = w / image.w
-    const sh = h / image.h
-    return { ...item, x, y, w, h, sx, sy, sw, sh }
-}
-
 const offsetX = ([x, y]: Point): Point => ([Math.floor(x) + .5, Math.round(y)])
 const offsetY = ([x, y]: Point): Point => ([Math.round(x), Math.floor(y) + .5])
-const corners = ({ x, y, w, h }: Box): Points => ([
-    [x, y],
-    [x + w, y],
-    [x + w, y + h],
-    [x, y + h]
-])
 
-const center = ({ x, y, w, h }: Box): Point => ([x + w * .5, y + h * .5])
+const eventTransformer = <T extends HTMLElement>(e: UseDragEvent<T>): Result => ({
+    dx: e.x - e.subject.x,
+    dy: e.y - e.subject.y,
+    image: e.subject.image,
+    item: e.subject.item,
+    container: e.subject.container
+})
 
-const centers = ({ x, y, w, h }: Box): Points => ([
-    [x, y + h * .5],
-    [x + w * .5, y],
-    [x + w, y + h * .5],
-    [x + w * .5, y + h]
-])
-const eq = (a: number, b: number) => Math.round(a) === Math.round(b)
-
-const toPoints = (item: Box) => ([...corners(item), center(item)])
-
-const smaller = (a: number, b: number): number => {
-    const c = Math.abs(a)
-    const d = Math.abs(b)
-    return Math.min(c, d) === c ? a : b
-}
-const smallest = (a: Box, b: Box): Point => {
-    const reducer = (xs: number[], ys: number[]) => {
-        const [x, ...xss] = xs
-        const [y, ...yss] = ys
-        const initial = yss.reduce((a, b) => smaller(a, b - x), y - x)
-        return xss.reduce((a, b) => ys.reduce((c, d) => smaller(c, d - b), a), initial)
-    }
-    const xs = (box: Box) => ([box.x, box.x + box.w * .5, box.x + box.w])
-    const ys = (box: Box) => ([box.y, box.y + box.h * .5, box.y + box.h])
-    const axs = xs(a)
-    const ays = ys(a)
-    const bxs = xs(b)
-    const bys = ys(b)
-    const ox = reducer(axs, bxs)
-    const oy = reducer(ays, bys)
-    return [ox, oy]
-}
-
-const snap = (threshold: number, box: Box, boxes: Box[]): Point => {
-    if(boxes.length === 0) {
-        return [0, 0]
-    } else {
-        const [x, ...xs] = boxes
-        const [a, b] = xs.reduce<Point>(
-            ([px, py], x) => {
-                const [cx, cy] = smallest(box, x)
-                return [smaller(px, cx), smaller(py, cy)]
-            },
-            smallest(box, x)
-        )
-        const limit = (v: number) => Math.abs(v) <= threshold ? v : 0
-        return [limit(a), limit(b)]
-    }
-}
-
-const intersections = ([ax, ay]: Point, points: Points): Lines => {
-    if(points.length > 0) {
-        const [[ix, iy], ...xs] = points
-        const x = eq(ax, ix)
-        const y = eq(ay, iy)
-        if(x || y) {
-            return [[[ax, ay], [ix, iy]]]
-        } else {
-            return intersections([ax, ay], xs)
-        }
-    } else {
-        return []
-    }
-}
-
-const removeDuplicateLines = (lines: Lines, acc: Lines) => {
-    if(lines.length > 0) {
-        const [x, ...xs] = lines
-        const duplicate = ([, d]: Line, [, f]: Line) => {
-            const [g, h] = d
-            const [i, j] = f
-            return eq(g, i) && eq(h, j)
-        }
-        const ys = xs.filter(y =>
-            !duplicate(x, y)
-        )
-        return removeDuplicateLines(ys, [...acc, x])
-    } else {
-        return acc
-    }
-}
-
-const snapLines = (canvas: Box, box: Box, boxes: (Box)[]) => {
-    const zs = centers(canvas)
-    const xs = toPoints(box)
-    return removeDuplicateLines(
-        [
-            ...xs.flatMap(x =>
-                intersections(x, zs)
-            ),
-            ...boxes.flatMap(box => {
-                const ys = toPoints(box)
-                return xs.flatMap(x =>
-                    intersections(x, ys)
-                )
-            })
-        ],
-        []
-    )
-}
+const Handle = ({ className, ...rest }: DragPropsType<HTMLSpanElement> & { className: string }) =>
+    <span ref={useDrag<HTMLSpanElement>({ ...rest })} className={className}></span>
 
 const EditDescription = ({ onSave, open, onOpenChange }: { onSave: (alt: string) => void, open: boolean, onOpenChange: (v: boolean) => void }) => {
     const [alt, setAlt] = useState('')
@@ -761,9 +512,9 @@ const Editable = ({
                                         key={i + (cropMode ? 'cropper' : 'resizer')}
                                         className={clsx('absolute invisible', { 'visible pointer-events-auto': active && interactive }, style)}
                                         modifier={modifier}
-                                        onDragStart={compose(cropMode ? onCropStart : onResizeStart, callback)}
-                                        onDrag={compose(cropMode ? onCrop : onResize, callback)}
-                                        onDragEnd={compose(cropMode ? onCropEnd : onResizeEnd, callback)}
+                                        onDragStart={o(cropMode ? onCropStart : onResizeStart, callback)}
+                                        onDrag={o(cropMode ? onCrop : onResize, callback)}
+                                        onDragEnd={o(cropMode ? onCropEnd : onResizeEnd, callback)}
                                         transform={eventTransformer}
                                     />
                                 )
@@ -1061,7 +812,7 @@ const itemsToGroup = (ox: number, oy: number, items: Box[]) =>
         y1: -Infinity
     })
 
-const Edit = ({
+const Editor = ({
     className = '',
     asset,
     setAsset,
@@ -1397,7 +1148,7 @@ const Edit = ({
             return { ...layout, items, height }
         })
 
-        const lines = snapLines(canvas, result, inactives)
+        const lines = snapLines(result, [canvas, ...inactives])
 
         if(lines.length > 0) {
             drawOrangeLines(lines)
@@ -1495,7 +1246,7 @@ const Edit = ({
             y: item.y + oy
         })
 
-        const lines = snapLines(container, result, others)
+        const lines = snapLines(result, [container, ...others])
 
         setInteractive(false)
         applyChange(index, result)
@@ -1528,8 +1279,8 @@ const Edit = ({
 
         const [dx, dy] = snap(5, item, [constrain, ...others])
 
-        const xs = toPoints(prev)
-        const ys = toPoints(item)
+        const xs = centers(prev)
+        const ys = centers(item)
 
         const [[i]] = ys.map(([a, b], i) => {
             const [c, d] = xs[i]
@@ -1560,7 +1311,7 @@ const Edit = ({
             }
         )
 
-        const lines = snapLines(container, result, others)
+        const lines = snapLines(result, [container, ...others])
 
         setInteractive(false)
         applyChange(index, item)
@@ -1697,4 +1448,4 @@ const Edit = ({
     )
 }
 
-export default Edit
+export default Editor

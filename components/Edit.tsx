@@ -616,7 +616,7 @@ const RightMain = ({
 				{
 					['residential', 'commercial'].map(v =>
 						<div key={v} className='flex gap-x-2 items-center justify-center'>
-							<RadioGroup.Item value={v} id={v} className='peer size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-200 cursor-pointer'>
+							<RadioGroup.Item value={v} id={v} className='peer size-4 rounded-full flex items-center justify-center outline-1 outline-neutral-300 cursor-pointer'>
 								<RadioGroup.Indicator className='rounded-full size-2 bg-amber-600' />
 							</RadioGroup.Item>
 							<label className='text-base font-medium cursor-pointer' htmlFor={v}>{capitalize(v)}</label>
@@ -1848,13 +1848,6 @@ const Edit = ({ project }: { project: Project }) => {
 										layout={layout}
 										setLayout={updateLayout}
 									/>
-									<div className='absolute top-0 left-0 size-full flex flex-col justify-center items-center pointer-events-none'>
-										<div
-											ref={sensorRef}
-											style={{ width: layout.width + 'px', height: '100%' }}
-											className={clsx({ 'outline-1 outline-blue-500': over })}
-										/>
-									</div>
 									<Sensor ref={sensorRef} active={over} style={{ width: layout.width + 'px', height: '100%' }} />
 								</div>
 							</article >

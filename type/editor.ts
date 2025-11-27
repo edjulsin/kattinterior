@@ -61,3 +61,12 @@ export type Project = {
 }
 
 export type Asset = Record<string, Photo>
+
+
+export type Box = { x: number, y: number, w: number, h: number }
+export type UniqueBox = Box & { id: string, i: number }
+export type Extent = [[number, number], [number, number]]
+export type Line = Extent
+export type Lines = Line[]
+export type Point = [number, number]
+export type Points = Point[]

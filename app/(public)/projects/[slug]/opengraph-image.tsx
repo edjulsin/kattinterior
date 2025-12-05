@@ -11,6 +11,9 @@ const size = { width: 1200, height: 630 }
 const defaultOG = () => new ImageResponse(
     <div
         style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             width: '100%',
             height: '100%',
             backgroundColor: 'white'
@@ -68,32 +71,34 @@ export const generateImageMetadata = async ({ params }: { params: { slug: string
                     contentType: 'image/png'
                 }
             }),
-            () => ([])
+            () => []
         )
     } else {
         return []
     }
 }
 
-const opengraph = async ({ params }: { params: { slug: string } }) => {
-    const slug = (params.slug + '').trim().toLowerCase()
-    if(isSlug(slug)) {
-        return getPublishedProject(slug).then(
-            (v: Project[]) => {
-                const [result] = [
-                    ...v.map(v => {
-                        const [a, b, c] = getThumbnails(3, v)
-                        return projectOG([b, a, c])
-                    }),
-                    defaultOG
-                ]
-                return result
-            },
-            () => defaultOG()
-        )
-    } else {
-        return defaultOG()
-    }
-}
+const opengraph = async ({ params }: { params: Promise<{ slug: string }> }) =>
+    params.then(v => {
+        const slug = (v.slug + '').trim().toLowerCase()
+        if(isSlug(slug)) {
+            return getPublishedProject(slug).then(
+                (v: Project[]) => {
+                    const [result] = [
+                        ...v.map(v => {
+                            const [a, b, c] = getThumbnails(3, v)
+                            return projectOG([b, a, c])
+                        }),
+                        defaultOG()
+                    ]
+
+                    return result
+                },
+                () => defaultOG()
+            )
+        } else {
+            return defaultOG()
+        }
+    })
 
 export default opengraph

@@ -1,7 +1,7 @@
+import { describe, expect, test } from 'vitest'
 import { Box, Extent, Item, Items, Point, Points } from '@/type/editor'
 import { center, centers, corners, counts, crop, getLayout, groupByRow, half, origins, resize, snapLines, trunc } from '@/utility/fn'
 import { v7 as UUIDv7 } from 'uuid'
-import { describe, expect, test } from 'vitest'
 
 const canvas = {
     x: 0,
@@ -13,7 +13,7 @@ const canvas = {
 const col = 3
 const size = canvas.w / col
 
-const generateRandomItem = (size: number, x: number, y: number) => {
+const generateRandomItem = (x: number, y: number, size: number) => {
     return {
         id: UUIDv7(),
         src: '',
@@ -77,9 +77,9 @@ const templateToItems = (size: number, template: Points[]) =>
     template.flatMap(v =>
         v.map(([x, y]) =>
             generateRandomItem(
-                size,
                 x * size + Math.sign(x) * x,
-                y * size + Math.sign(y) * y
+                y * size + Math.sign(y) * y,
+                size
             )
         )
     ).toSorted((a, b) =>
@@ -442,20 +442,29 @@ describe('fn', () => {
     })
 
     describe('resize', () => {
+        test('should not change the size or position of an item if scale is 1', () => {
+            const result = resize(sizeExtent, translateExtent, origin, 1, item)
+
+            expect(result.x).toBe(item.x)
+            expect(result.y).toBe(item.y)
+            expect(result.w).toBe(item.w)
+            expect(result.h).toBe(item.h)
+        })
+
         describe('should change the size of an item & constrain it within its container', () => {
             describe('scale-up', () => {
                 test('should make item bigger but not bigger than its constrain', () => {
                     ups.map(scale =>
                         resize(sizeExtent, translateExtent, origin, scale, item)
                     ).forEach(result => {
-                        expect(result.w).toBeGreaterThan(item.w)
-                        expect(result.h).toBeGreaterThan(item.h)
-                        expect(result.w).toBeLessThanOrEqual(maxWidth)
-                        expect(result.h).toBeLessThanOrEqual(maxHeight)
-                        expect(result.x).toBeGreaterThanOrEqual(canvas.x)
-                        expect(result.y).toBeGreaterThanOrEqual(canvas.y)
-                        expect(result.x + result.w).toBeLessThanOrEqual(canvas.x + canvas.w)
-                        expect(result.y + result.h).toBeLessThanOrEqual(canvas.y + canvas.h)
+                        expect(result.w).greaterThan(item.w)
+                        expect(result.h).greaterThan(item.h)
+                        expect(result.w).lessThanOrEqual(maxWidth)
+                        expect(result.h).lessThanOrEqual(maxHeight)
+                        expect(result.x).greaterThanOrEqual(canvas.x)
+                        expect(result.y).greaterThanOrEqual(canvas.y)
+                        expect(result.x + result.w).lessThanOrEqual(canvas.x + canvas.w)
+                        expect(result.y + result.h).lessThanOrEqual(canvas.y + canvas.h)
                     })
                 })
             })
@@ -464,14 +473,14 @@ describe('fn', () => {
                     downs.map(scale =>
                         resize(sizeExtent, translateExtent, origin, scale, item)
                     ).forEach(result => {
-                        expect(result.w).toBeLessThan(item.w)
-                        expect(result.h).toBeLessThan(item.h)
+                        expect(result.w).lessThan(item.w)
+                        expect(result.h).lessThan(item.h)
                         expect(result.w).greaterThanOrEqual(minWidth)
                         expect(result.h).greaterThanOrEqual(minHeight)
-                        expect(result.x).toBeGreaterThanOrEqual(canvas.x)
-                        expect(result.y).toBeGreaterThanOrEqual(canvas.y)
-                        expect(result.x + result.w).toBeLessThanOrEqual(canvas.x + canvas.w)
-                        expect(result.y + result.h).toBeLessThanOrEqual(canvas.y + canvas.h)
+                        expect(result.x).greaterThanOrEqual(canvas.x)
+                        expect(result.y).greaterThanOrEqual(canvas.y)
+                        expect(result.x + result.w).lessThanOrEqual(canvas.x + canvas.w)
+                        expect(result.y + result.h).lessThanOrEqual(canvas.y + canvas.h)
                     })
                 })
             })
@@ -485,8 +494,8 @@ describe('fn', () => {
 
                     expect(a).toBe(c)
                     expect(b).toBe(d)
-                    expect(result.w).toBeGreaterThan(item.w)
-                    expect(result.h).toBeGreaterThan(item.h)
+                    expect(result.w).greaterThan(item.w)
+                    expect(result.h).greaterThan(item.h)
                 })
             })
             test('scale-down', () => {
@@ -496,8 +505,8 @@ describe('fn', () => {
 
                     expect(a).toBe(c)
                     expect(b).toBe(d)
-                    expect(result.w).toBeLessThan(item.w)
-                    expect(result.h).toBeLessThan(item.h)
+                    expect(result.w).lessThan(item.w)
+                    expect(result.h).lessThan(item.h)
                 })
             })
         })
@@ -512,14 +521,14 @@ describe('fn', () => {
             const fn = crop(sizeExtent, translateExtent)
 
             const constrainTest = (canvas: Box, result: Item) => {
-                expect(result.x).toBeGreaterThanOrEqual(image.x)
-                expect(result.x).toBeGreaterThanOrEqual(canvas.x)
-                expect(result.x + result.w).toBeLessThanOrEqual(image.x + image.w)
-                expect(result.x + result.w).toBeLessThanOrEqual(canvas.x + canvas.w)
-                expect(result.sx).toBeGreaterThanOrEqual(0)
-                expect(result.sy).toBeGreaterThanOrEqual(0)
-                expect(result.sw).toBeLessThanOrEqual(1)
-                expect(result.sh).toBeLessThanOrEqual(1)
+                expect(result.x).greaterThanOrEqual(image.x)
+                expect(result.x).greaterThanOrEqual(canvas.x)
+                expect(result.x + result.w).lessThanOrEqual(image.x + image.w)
+                expect(result.x + result.w).lessThanOrEqual(canvas.x + canvas.w)
+                expect(result.sx).greaterThanOrEqual(0)
+                expect(result.sy).greaterThanOrEqual(0)
+                expect(result.sw).lessThanOrEqual(1)
+                expect(result.sh).lessThanOrEqual(1)
             }
 
             describe('scale-up', () => {
@@ -531,8 +540,8 @@ describe('fn', () => {
 
                         expect(a).toBe(c)
                         expect(b).toBe(d)
-                        expect(result.w).toBeGreaterThan(item.w)
-                        expect(result.h).toBeGreaterThan(item.h)
+                        expect(result.w).greaterThan(item.w)
+                        expect(result.h).greaterThan(item.h)
                         constrainTest(canvas, result)
                     })
                     xs.forEach((point, i) => {
@@ -542,7 +551,7 @@ describe('fn', () => {
 
                         expect(a).toBe(c)
                         expect(b).toBe(d)
-                        expect(result.w).toBeGreaterThan(item.w)
+                        expect(result.w).greaterThan(item.w)
                         expect(result.h).toBe(item.h)
                         constrainTest(canvas, result)
                     })
@@ -554,7 +563,7 @@ describe('fn', () => {
                         expect(a).toBe(c)
                         expect(b).toBe(d)
                         expect(result.w).toBe(item.w)
-                        expect(result.h).toBeGreaterThan(item.h)
+                        expect(result.h).greaterThan(item.h)
                         constrainTest(canvas, result)
                     })
                 })
@@ -569,10 +578,10 @@ describe('fn', () => {
 
                         expect(a).toBe(c)
                         expect(b).toBe(d)
-                        expect(result.w).toBeLessThan(item.w)
-                        expect(result.h).toBeLessThan(item.h)
-                        expect(result.w).toBeGreaterThanOrEqual(minWidth)
-                        expect(result.w).toBeGreaterThanOrEqual(minHeight)
+                        expect(result.w).lessThan(item.w)
+                        expect(result.h).lessThan(item.h)
+                        expect(result.w).greaterThanOrEqual(minWidth)
+                        expect(result.w).greaterThanOrEqual(minHeight)
                         constrainTest(canvas, result)
                     })
                     xs.forEach((point, i) => {
@@ -582,10 +591,10 @@ describe('fn', () => {
 
                         expect(a).toBe(c)
                         expect(b).toBe(d)
-                        expect(result.w).toBeLessThan(item.w)
+                        expect(result.w).lessThan(item.w)
                         expect(result.h).toBe(item.h)
-                        expect(result.w).toBeGreaterThanOrEqual(minWidth)
-                        expect(result.w).toBeGreaterThanOrEqual(minHeight)
+                        expect(result.w).greaterThanOrEqual(minWidth)
+                        expect(result.w).greaterThanOrEqual(minHeight)
                         constrainTest(canvas, result)
                     })
                     ys.forEach((point, i) => {
@@ -596,9 +605,9 @@ describe('fn', () => {
                         expect(a).toBe(c)
                         expect(b).toBe(d)
                         expect(result.w).toBe(item.w)
-                        expect(result.h).toBeLessThan(item.h)
-                        expect(result.w).toBeGreaterThanOrEqual(minWidth)
-                        expect(result.w).toBeGreaterThanOrEqual(minHeight)
+                        expect(result.h).lessThan(item.h)
+                        expect(result.w).greaterThanOrEqual(minWidth)
+                        expect(result.w).greaterThanOrEqual(minHeight)
                         constrainTest(canvas, result)
                     })
                 })

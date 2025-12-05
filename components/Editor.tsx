@@ -83,7 +83,11 @@ const eventTransformer = <T extends HTMLElement>(e: UseDragEvent<T>): Result => 
 })
 
 const Handle = ({ className, ...rest }: DragPropsType<HTMLSpanElement> & { className: string }) =>
-    <span ref={useDrag<HTMLSpanElement>({ ...rest })} className={className}></span>
+    <span
+        ref={useDrag<HTMLSpanElement>({ ...rest })}
+        data-testid='handle'
+        className={className}
+    />
 
 const EditDescription = ({ onSave, open, onOpenChange }: { onSave: (alt: string) => void, open: boolean, onOpenChange: (v: boolean) => void }) => {
     const [alt, setAlt] = useState('')
@@ -197,7 +201,7 @@ const Editable = ({
         )
         const y = clamp(
             yMin,
-            yMax,
+            yMax - e.item.h,
             e.item.y + e.dy
         )
         return { ...e.item, x, y }
@@ -447,13 +451,14 @@ const Editable = ({
     return (
         <div
             ref={itemRef}
-            className='absolute bg-light'
+            className='absolute'
             onContextMenu={() => onContextMenu(value)}
             data-id={value.id}
             data-z={value.z}
             data-src={value.src}
             data-active={active}
             data-effect={value.effect}
+            data-testid='editable'
             style={{
                 transform: `translate(${value.x}px, ${value.y}px)`,
                 width: value.w + 'px',
@@ -518,7 +523,6 @@ const Editable = ({
                                         transform={eventTransformer}
                                     />
                                 )
-
                             }
                         </div>
                     </div>
@@ -553,7 +557,7 @@ const Editable = ({
                         '
                         onContextMenu={e => e.stopPropagation()}
                     >
-                        <ContextMenu.Item className='px-3 py-1.5' onSelect={() => setCropMode(true)}>
+                        <ContextMenu.Item data-testid='crop' className='px-3 py-1.5' onSelect={() => setCropMode(true)}>
                             Crop Image
                         </ContextMenu.Item>
                         <ContextMenu.Separator className='bg-neutral-200 py-[.5px] my-1' />
@@ -813,7 +817,6 @@ const itemsToGroup = (ox: number, oy: number, items: Box[]) =>
     })
 
 const Editor = ({
-    className = '',
     asset,
     setAsset,
     layout,
@@ -821,7 +824,6 @@ const Editor = ({
 }: {
     asset: Asset,
     setAsset: (fn: (asset: Asset) => Asset) => void,
-    className?: string | '',
     layout: Layout,
     setLayout: (fn: (layout: Layout) => Layout) => void
 }) => {
@@ -875,7 +877,7 @@ const Editor = ({
         context.strokeStyle = blue
 
         context.beginPath()
-        context.rect(ox - 1, oy - 1, container.width + 1, container.height + 1)
+        context.rect(ox - 1, oy - 1, container.width + 2, container.height + 2)
         context.clip()
 
         lines.forEach(([[sx, sy], [ex, ey]]) => {
@@ -917,7 +919,7 @@ const Editor = ({
         context.strokeStyle = orange
 
         context.beginPath()
-        context.rect(ox - 1, oy - 1, container.width + 1, container.height + 1)
+        context.rect(ox - 1, oy - 1, container.width + 2, container.height + 2)
         context.clip()
 
         context.stroke(path)
@@ -1127,7 +1129,11 @@ const Editor = ({
 
         const [ox, oy] = snap(5, moved, [canvas, ...inactives])
 
-        const result = applyBoxConstrain(constrain, { ...moved, x: moved.x + ox, y: moved.y + oy })
+        const result = applyBoxConstrain(constrain, {
+            ...moved,
+            x: moved.x + ox,
+            y: moved.y + oy
+        })
 
         const dx = result.x - initial.x
         const dy = result.y - initial.y
@@ -1385,11 +1391,12 @@ const Editor = ({
     return ( // add sticky effect
         <section
             ref={rootRef}
-            className={clsx('relative size-full flex flex-col items-center', className)}
+            className='relative size-full flex flex-col items-center'
         >
             <div
                 ref={containerRef}
-                className='outline-1 outline-neutral-200'
+                className='relative outline-1 outline-neutral-200'
+                data-testid='container'
                 style={{
                     width: layout.width + 'px',
                     height: layout.height + 'px'

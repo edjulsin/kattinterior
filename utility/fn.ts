@@ -498,7 +498,7 @@ export const bottomLeft = (item: Item): Point => ([item.x, item.y + item.h])
 export const topLeft = (item: Item): Point => ([item.x, item.y])
 export const topRight = (item: Item): Point => ([item.x + item.w, item.y])
 
-export const resize = curry(([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], [yMin, yMax]]: Extent, [ox, oy]: Point, scale: number, item: Item) => {
+export const resize = curry(([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], [yMin, yMax]]: Extent, [ox, oy]: Point, scale: number, item: Box) => {
     const c = clamp(
         Math.max(wMin / item.w, hMin / item.h),
         Math.min(wMax / item.w, hMax / item.h),
@@ -533,14 +533,14 @@ export const crop = curry(([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], 
     const ys = 1 + ([td, 0, bd][1 + Math.sign(cy - oy)]) / item.h
     const xx = clamp(wMin / item.w, Math.min(xs, wMax / item.w), dx)
     const yy = clamp(hMin / item.h, Math.min(ys, hMax / item.h), dy)
-    const x = ox - (ox - item.x) * xx
-    const y = oy - (oy - item.y) * yy
-    const w = item.w * xx
-    const h = item.h * yy
-    const sx = (x - image.x) / image.w
-    const sy = (y - image.y) / image.h
-    const sw = w / image.w
-    const sh = h / image.h
+    const x = Math.max(ox - (ox - item.x) * xx, xMin)
+    const y = Math.max(oy - (oy - item.y) * yy, yMin)
+    const w = clamp(wMin, wMax, item.w * xx)
+    const h = clamp(hMin, hMax, item.h * yy)
+    const sx = Math.max((x - image.x) / image.w, 0)
+    const sy = Math.max((y - image.y) / image.h, 0)
+    const sw = Math.min(w / image.w, 1)
+    const sh = Math.min(h / image.h, 1)
     return { ...item, x, y, w, h, sx, sy, sw, sh }
 })
 
@@ -570,6 +570,14 @@ export const smaller = (a: number, b: number): number => {
     )
     return e
 }
+
+export const sequences = <T>(cb: (item: T, index: number) => void, items: T[]) =>
+    items.reduce(
+        (a, b, i) => a.then(() =>
+            cb(b, i)
+        ),
+        Promise.resolve()
+    )
 
 export const smallest = (a: Box, b: Box): Point => {
     const reducer = (xs: number[], ys: number[]) => {

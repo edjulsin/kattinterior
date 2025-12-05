@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { Locator, page } from 'vitest/browser'
 import { Asset, Box, Extent, Item, Layout } from '@/type/editor'
 import { v7 as UUIDv7 } from 'uuid'
-import { counts, defaultThumbnail, getItemsHeight, half, resize, sequences, crop, center, clamp } from '@/utility/fn'
+import { counts, defaultThumbnail, half, resize, sequences, crop, center, clamp } from '@/utility/fn'
 import Editor from '@/components/Editor'
 import React, { ComponentProps } from 'react'
 

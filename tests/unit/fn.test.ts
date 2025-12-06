@@ -114,13 +114,6 @@ const strictOrderTest = (xs: Items, ys: Items) =>
         })
     })
 
-const variableOrderTest = (xs: Items, ys: Items) =>
-    test('should have both columns and rows in ascending order', () => {
-        xs.forEach((item, i) =>
-            expect(item.id).toBe(ys[i].id)
-        )
-    })
-
 const run = (description: string, layoutFn: (items: Items) => Items[], test: (items: Items, layout: Items[]) => void, items: Items) => {
     const ordered = layoutFn(items)
     const reversed = layoutFn(

@@ -46,7 +46,7 @@ export const uploadFiles = (
 
                         signal.addEventListener('abort', cancel, { once: true })
 
-                        upload.findPreviousUploads().then(
+                        return upload.findPreviousUploads().then(
                             v => {
                                 if(v.length) {
                                     upload.resumeFromPreviousUpload(v[0])

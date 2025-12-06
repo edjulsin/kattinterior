@@ -627,10 +627,4 @@ describe('fn', () => {
             expect(snapLines(a, [b]).length).toBe(4)
         })
     })
-
-    describe('failed test', () => {
-        test('1 + 1 = 3', () => {
-            expect(1 + 1).toBe(3)
-        })
-    })
 })

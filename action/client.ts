@@ -3,17 +3,21 @@
 import { toPathURL } from '@/utility/fn';
 import { createBrowserClient } from '@supabase/ssr'
 import * as tus from 'tus-js-client'
-import { Project } from '@/type/editor';
+import { Photos, Project } from '@/type/editor';
 import { v7 as UUIDv7 } from 'uuid'
+import type { User } from '@/type/user';
 
-const client = () => createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_KEY!
-)
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+
+const client = () => createBrowserClient(url, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+
+export const uploadFile = (bucketName: string, path: string, blob: Blob) =>
+    client().storage.from(bucketName).upload(toPathURL(path), blob)
 
 export const uploadFiles = (
-    signal: AbortSignal,
-    files: [string, Blob][]
+    bucketName: string,
+    files: [string, Blob][],
+    signal: AbortSignal
 ) =>
     client().auth.getSession().then(({ data }) =>
         data?.session?.access_token
@@ -21,7 +25,7 @@ export const uploadFiles = (
                 files.map(([name, file]) =>
                     new Promise<void>((resolve, reject) => {
                         const upload = new tus.Upload(file, {
-                            endpoint: `${process.env.NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/upload/resumable`,
+                            endpoint: `${url}/storage/v1/upload/resumable`,
                             retryDelays: [0, 3000, 5000, 10000, 20000],
                             removeFingerprintOnSuccess: true,
                             headers: {
@@ -30,7 +34,7 @@ export const uploadFiles = (
                             uploadDataDuringCreation: true,
                             chunkSize: 6 * 1024 * 1024,
                             metadata: {
-                                bucketName: process.env.NEXT_PUBLIC_SUPABASE_BUCKET!,
+                                bucketName: bucketName,
                                 objectName: toPathURL(name),
                                 contentType: file.type,
                                 cacheControl: 3600 + ''
@@ -58,14 +62,18 @@ export const uploadFiles = (
                     })
                 )
             )
-            : Promise.reject()
+            : Promise.reject('You are not authorized')
     )
 
-export const deleteFiles = (paths: string[]) =>
-    client().storage.from(process.env.NEXT_PUBLIC_SUPABASE_BUCKET!).remove(
+export const deleteFiles = (bucketName: string, paths: string[]) =>
+    client().storage.from(bucketName).remove(
         paths.map(v =>
             toPathURL(v)
         )
+    ).then(v =>
+        v.error === null
+            ? Promise.resolve(v.data)
+            : Promise.reject(v.error)
     )
 
 export const signIn = (email: string) =>
@@ -74,8 +82,8 @@ export const signIn = (email: string) =>
         options: { shouldCreateUser: false }
     }).then(v =>
         v.error === null
-            ? Promise.resolve()
-            : Promise.reject()
+            ? Promise.resolve(v.data)
+            : Promise.reject(v.error)
     )
 
 export const signOut = () => client().auth.signOut()
@@ -103,33 +111,50 @@ export const createProject = async () => {
             items: []
         }
     }
-    return client().from('projects').insert({ id, template, category }).then(() => id)
+    const assets: Photos = []
+    return client().from('projects').insert({ id, template, category, assets }).then(v =>
+        v.error === null
+            ? Promise.resolve(id)
+            : Promise.reject(v.error)
+    )
 }
 
 export const updateProject = async (project: Partial<Project>) => {
-    const changes = {
-        ...project,
-        updated_at: new Date().toISOString()
-    }
+    const changes = { ...project, updated_at: new Date().toISOString() }
+    const connection = client()
+    const update = () =>
+        connection
+            .from('projects')
+            .update(changes)
+            .eq('id', project.id)
+            .then(v =>
+                v.error === null
+                    ? Promise.resolve(v.data)
+                    : Promise.reject(v.error)
+            )
 
-    const init = () => client().from('projects')
-    const update = () => init().update(changes).eq('id', project.id).then(v =>
-        v.error === null
-            ? Promise.resolve()
-            : Promise.reject()
-    )
     if('featured' in changes && changes.featured) {
-        return init()
+        return connection
+            .from('projects')
             .update({ featured: false, updated_at: changes.updated_at })
             .eq('featured', true)
             .neq('id', project.id)
-            .then(update)
+            .then(v =>
+                v.error === null
+                    ? update()
+                    : Promise.reject(v.data)
+            )
     } else {
         return update()
     }
 }
 
-export const deleteProject = async (id: string) => client().from('projects').delete().eq('id', id)
+export const deleteProject = async (id: string) =>
+    client().from('projects').delete().eq('id', id).then(v =>
+        v.error === null
+            ? Promise.resolve(v.data)
+            : Promise.reject(v.error)
+    )
 
 export const getAllProjects = async (start: number, end: number) =>
     client()
@@ -137,14 +162,11 @@ export const getAllProjects = async (start: number, end: number) =>
         .select('*')
         .order('created_at', { ascending: false })
         .range(start, end)
-        .then(v => {
-            if(v.error === null) {
-                return Promise.resolve(v.data ?? ([]))
-            } else {
-                return Promise.reject()
-            }
-        })
-
+        .then(v =>
+            v.error === null
+                ? Promise.resolve(v.data ?? ([]))
+                : Promise.reject(v.error)
+        )
 
 export const getDraftProjects = async (start: number, end: number) =>
     client()
@@ -153,14 +175,11 @@ export const getDraftProjects = async (start: number, end: number) =>
         .eq('published', false)
         .order('created_at', { ascending: false })
         .range(start, end)
-        .then(v => {
-            if(v.error === null) {
-                return Promise.resolve(v.data ?? ([]))
-            } else {
-                return Promise.reject()
-            }
-        })
-
+        .then(v =>
+            v.error === null
+                ? Promise.resolve(v.data ?? ([]))
+                : Promise.reject(v.error)
+        )
 
 export const getPublishedProjects = async (start: number, end: number) =>
     client()
@@ -169,14 +188,11 @@ export const getPublishedProjects = async (start: number, end: number) =>
         .eq('published', true)
         .order('created_at', { ascending: false })
         .range(start, end)
-        .then(v => {
-            if(v.error === null) {
-                return Promise.resolve(v.data ?? ([]))
-            } else {
-                return Promise.reject()
-            }
-        })
-
+        .then(v =>
+            v.error === null
+                ? Promise.resolve(v.data ?? ([]))
+                : Promise.reject(v.error)
+        )
 
 export const getFeaturedProjects = async (start: number, end: number) =>
     client()
@@ -185,14 +201,11 @@ export const getFeaturedProjects = async (start: number, end: number) =>
         .eq('featured', true)
         .order('created_at', { ascending: false })
         .range(start, end)
-        .then(v => {
-            if(v.error === null) {
-                return Promise.resolve(v.data ?? ([]))
-            } else {
-                return Promise.reject()
-            }
-        })
-
+        .then(v =>
+            v.error === null
+                ? Promise.resolve(v.data ?? ([]))
+                : Promise.reject(v.error)
+        )
 
 export const getNewestProjects = getAllProjects
 
@@ -202,14 +215,11 @@ export const getOldestProjects = async (start: number, end: number) =>
         .select('*')
         .order('created_at', { ascending: true })
         .range(start, end)
-        .then(v => {
-            if(v.error === null) {
-                return Promise.resolve(v.data ?? ([]))
-            } else {
-                return Promise.reject()
-            }
-        })
-
+        .then(v =>
+            v.error === null
+                ? Promise.resolve(v.data ?? ([]))
+                : Promise.reject(v.error)
+        )
 
 export const getRecentProjects = async (start: number, end: number) =>
     client()
@@ -217,13 +227,11 @@ export const getRecentProjects = async (start: number, end: number) =>
         .select('*')
         .order('updated_at', { ascending: false })
         .range(start, end)
-        .then(v => {
-            if(v.error === null) {
-                return Promise.resolve(v.data ?? ([]))
-            } else {
-                return Promise.reject()
-            }
-        })
+        .then(v =>
+            v.error === null
+                ? Promise.resolve(v.data ?? ([]))
+                : Promise.reject(v.error)
+        )
 
 export const searchProjects = async (start: number, end: number, search: string[]) =>
     client()
@@ -231,14 +239,11 @@ export const searchProjects = async (start: number, end: number, search: string[
         .select('*')
         .ilikeAnyOf('name', search.map(v => `%${v.trim()}%`))
         .range(start, end)
-        .then(v => {
-            if(v.error === null) {
-                return Promise.resolve(v.data ?? ([]))
-            } else {
-                return Promise.reject()
-            }
-        })
-
+        .then(v =>
+            v.error === null
+                ? Promise.resolve(v.data ?? ([]))
+                : Promise.reject(v.error)
+        )
 
 export const getAllContacts = async (start: number, end: number) =>
     client()
@@ -246,14 +251,11 @@ export const getAllContacts = async (start: number, end: number) =>
         .select('*')
         .order('updated_at', { ascending: false })
         .range(start, end)
-        .then(v => {
-            if(v.error === null) {
-                return Promise.resolve(v.data ?? ([]))
-            } else {
-                return Promise.reject()
-            }
-        })
-
+        .then(v =>
+            v.error === null
+                ? Promise.resolve(v.data ?? ([]))
+                : Promise.reject(v.error)
+        )
 
 export const searchContacts = async (start: number, end: number, search: string) =>
     client()
@@ -261,10 +263,42 @@ export const searchContacts = async (start: number, end: number, search: string)
         .select('*')
         .or(`name.ilike.%${search.trim()}%,email.ilike.%${search.trim()}%`)
         .range(start, end)
-        .then(v => {
-            if(v.error === null) {
-                return Promise.resolve(v.data ?? ([]))
-            } else {
-                return Promise.reject()
-            }
-        })
+        .then(v =>
+            v.error === null
+                ? Promise.resolve(v.data ?? ([]))
+                : Promise.reject(v.error)
+        )
+
+export const updateProfile = async (user: User) => {
+    const c = client()
+    const data = Object.fromEntries(
+        Object.entries(user).filter(([k]) =>
+            ['name', 'avatar'].includes(k)
+        )
+    )
+    return Promise.all([
+        c.auth.updateUser({ data }).then(v =>
+            v.error === null
+                ? Promise.resolve(v.data)
+                : Promise.reject(v.error)
+        ),
+        c.from('users').update({ ...data }).eq('id', user.id).then(v =>
+            v.error === null
+                ? Promise.resolve(v.data)
+                : Promise.reject(v.error)
+        )
+    ]).then(() =>
+        c.auth.refreshSession().then(v =>
+            v.error === null
+                ? Promise.resolve(v.data)
+                : Promise.reject(v.error)
+        )
+    )
+}
+
+export const updateRole = async (user: User) =>
+    client().from('roles').update({ role: user.role }).eq('user_id', user.id).then(v =>
+        v.error === null
+            ? Promise.resolve(v.data)
+            : Promise.reject(v.error)
+    )

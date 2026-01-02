@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { sendEmail } from '@/action/server'
+import { sendEmail } from '@/action/admin'
 import { CheckCircledIcon, CrossCircledIcon } from '@radix-ui/react-icons'
 
 const send = (state: { message: string, token: string, name: string, email: string, error: boolean, success: boolean, mail: string }, formData: FormData) =>

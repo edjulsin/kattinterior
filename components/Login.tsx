@@ -1,7 +1,7 @@
 'use client'
 
 import Logo from './Logo'
-import { signIn } from '@/action/server'
+import { signIn } from '@/action/anon'
 import { useActionState } from 'react'
 import { CheckCircledIcon, CrossCircledIcon } from '@radix-ui/react-icons'
 import { isEmail } from 'validator'

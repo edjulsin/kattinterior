@@ -1,4 +1,4 @@
-import { getPublishedProjects } from '@/action/admin'
+import { getPublishedProjects } from '@/action/anon'
 import Article from '@/components/Article'
 import Articles from '@/components/Articles'
 import Bottom from '@/components/Bottom'
@@ -32,7 +32,7 @@ const ProjectsPage = async () => getPublishedProjects(0, count - 1).then(
     (projects: Project[]) =>
         projects.length === 0
             ? <Message message='Oops! Looks like we don’t have any projects right now. Stay tuned!' />
-            : <Gallery heading='h1'>
+            : <Gallery heading='h1' all={true}>
 
                 {
                     projects.map((v, i) =>

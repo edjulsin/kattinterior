@@ -5,7 +5,7 @@ import Loader from './Loader'
 import Message from './Message'
 import Article from './Article'
 import { Project } from '@/type/editor'
-import { getPublishedProjects } from '@/action/admin'
+import { getPublishedProjects } from '@/action/anon'
 
 const Articles = ({ heading, start, count }: { heading: string, start: number, count: number }) => {
     const [data, setData] = useState<Project[]>([])

@@ -20,9 +20,7 @@ const ContactsDashboard = async () => getAllContacts(0, 20).then(
     contacts => <Contacts fetchCount={20} contacts={contacts} />,
     () => <Error title='Database Error' />
 ).then(content =>
-    <Schema
-        value={pageSchema(meta)}
-    >
+    <Schema value={pageSchema(meta)}>
         {content}
     </Schema>
 )

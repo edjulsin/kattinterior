@@ -1,4 +1,4 @@
-import { getPublishedProjects } from '@/action/admin'
+import { getPublishedProjects } from '@/action/anon'
 import Bottom from '@/components/Bottom'
 import { Project } from '@/type/editor'
 import Image from 'next/image'
@@ -30,7 +30,7 @@ export const metadata: Metadata = pageMeta(meta)
 
 const Projects = async () => getPublishedProjects(0, 5).then(
     (projects: Project[]) => projects.length > 0
-        ? <Gallery heading='h4'>
+        ? <Gallery heading='h4' all={false}>
 
             {
                 projects.map((v, i) =>
@@ -42,9 +42,6 @@ const Projects = async () => getPublishedProjects(0, 5).then(
                     />
                 )
             }
-            <div className='text center font-semibold font-sans text-gold-950 text-lg'>
-                <Link href='/projects'>All our projects &rarr;</Link>
-            </div>
         </Gallery>
         : ([])
     ,

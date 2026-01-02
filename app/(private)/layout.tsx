@@ -1,9 +1,9 @@
 import Dark from '@/components/Dark';
 
-const Layout = ({ children }: { children: React.ReactNode }) =>
+const PrivateLayout = ({ children }: { children: React.ReactNode }) =>
     <>
         <Dark />
         {children}
     </>
 
-export default Layout
+export default PrivateLayout

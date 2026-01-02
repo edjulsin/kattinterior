@@ -1,4 +1,4 @@
-import { isAuthorized } from '@/action/server'
+import { authorize } from '@/action/server'
 import Login from '@/components/Login'
 import { redirect } from 'next/navigation'
 
@@ -17,12 +17,9 @@ const meta = {
 export const metadata: Metadata = pageMeta(meta)
 
 const LoginPage = async () =>
-    isAuthorized().then(
+    authorize().then(
         () => { redirect('/dashboard') },
-        () =>
-            <Schema value={pageSchema(meta)}>
-                <Login />
-            </Schema>
+        () => <Schema value={pageSchema(meta)}><Login /></Schema>
     )
 
 export default LoginPage

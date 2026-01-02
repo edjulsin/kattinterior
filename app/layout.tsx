@@ -15,8 +15,7 @@ const sans = localFont({
 	variable: '--font-sans'
 })
 
-const development = process.env.NODE_ENV === 'development'
-const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
+const url = process.env.NEXT_PUBLIC_SITE_URL as string
 
 export const metadata: Metadata = {
 	metadataBase: new URL(url as string),
@@ -26,7 +25,7 @@ export const metadata: Metadata = {
 
 // apply challenge to protect login and contact
 // register to search engine after domain purchased
-const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) =>
+const Layout = ({ children }: Readonly<{ children: React.ReactNode }>) =>
 	<html lang='en'>
 		<body
 			className={`${serif.variable} ${sans.variable} antialiased flex flex-col justify-center items-center bg-light text-font-dark dark:bg-dark dark:text-font-light transition-colors duration-300 ease-in-out`}>
@@ -34,4 +33,4 @@ const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) =>
 		</body>
 	</html>
 
-export default RootLayout
+export default Layout

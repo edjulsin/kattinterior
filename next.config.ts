@@ -2,7 +2,6 @@ import type { NextConfig } from "next"
 
 const development = process.env.NODE_ENV === 'development'
 const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL
-const bucket = process.env.NEXT_PUBLIC_SUPABASE_BUCKET
 
 const CSP = `
 	default-src 'self';
@@ -20,8 +19,10 @@ const CSP = `
 
 const nextConfig: NextConfig = {
 	images: {
+		dangerouslyAllowLocalIP: development,
 		remotePatterns: [
-			new URL(`${supabase}/storage/v1/object/public/${bucket}/**`)
+			new URL(`${supabase}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_BUCKET_PROJECTS}/**`),
+			new URL(`${supabase}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_BUCKET_AVATARS}/**`)
 		]
 	},
 	async headers() {

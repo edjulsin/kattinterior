@@ -1,4 +1,4 @@
-import { getNextPublishedProject } from "@/action/admin";
+import { getNextPublishedProject } from "@/action/anon";
 import { Project } from "@/type/editor";
 import Link from "next/link";
 import React from "react";

@@ -1,4 +1,4 @@
-import { getPublishedProject } from '@/action/admin'
+import { getPublishedProject } from '@/action/anon'
 import { Photos, Project } from '@/type/editor'
 import { isSlug } from 'validator'
 import { ImageResponse } from 'next/og'

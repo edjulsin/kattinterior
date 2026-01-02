@@ -1,6 +1,5 @@
 import Bottom from '@/components/Bottom';
 import Image, { StaticImageData } from 'next/image';
-import React from 'react';
 
 const Guide = (
     { thumbnail: { src, alt, width, height }, title, description, contentTitle, contentList: [[headTitle, headDescription], ...contents], contactCopy }: {

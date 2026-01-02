@@ -1,4 +1,4 @@
-import { getPublishedProject, getAllPublishedProjects } from '@/action/admin'
+import { getPublishedProject, getAllPublishedProjects } from '@/action/anon'
 import { notFound } from 'next/navigation'
 import Project from '@/components/Project'
 import { isSlug } from 'validator'

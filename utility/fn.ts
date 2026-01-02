@@ -1,7 +1,56 @@
-import { Item, Items, Template, Project, Photos, Extent, Point, Points, Box, UniqueBox, Line, Lines } from '@/type/editor'
+import { Photo, Item, Items, Template, Project, Photos, Extent, Point, Points, Box, UniqueBox, Line, Lines } from '@/type/editor'
 import { timeDay, timeHour, timeMinute, timeMonth, timeWeek, timeYear } from 'd3'
 import { v7 as UUIDv7 } from 'uuid'
 import fallback from '@/assets/fallback.svg'
+import sanitizer from 'sanitize-html'
+import downscale from 'downscale'
+
+export const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
+
+export const urlToPhoto = (url: string): Promise<Photo> => new Promise((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => {
+        resolve({
+            id: UUIDv7(),
+            src: url,
+            alt: '',
+            width: image.naturalWidth,
+            height: image.naturalHeight,
+            thumbnail: false
+        })
+    }
+    image.onerror = () => {
+        reject(`Cannot load image: ${url}`)
+        URL.revokeObjectURL(url)
+    }
+    image.src = url
+})
+
+export const filesToPhotos = (files: File[] | Blob[]) => Promise.all(
+    files.map((file): Promise<Photo> =>
+        urlToPhoto(
+            fileToUrl(file)
+        )
+    )
+)
+
+export const compressFromFiles = (files: File[]): Promise<Blob[]> =>
+    filesToPhotos(files).then(images =>
+        Promise.all(
+            images.map((v, i) =>
+                files[i].type.includes('svg')
+                    ? Promise.resolve(
+                        new Blob([files[i]], { type: files[i].type })
+                    )
+                    : downscale(files[i], Math.min(v.width, 1920), 0, { returnBlob: true })
+            )
+        )
+    )
+
+export const sanitize = (string: string) => sanitizer(string, {
+    allowedTags: [],
+    allowedAttributes: {}
+})
 
 export const curry = <F extends (...args: any[]) => any>(fn: F) => {
     const curried = (...xs: any[]) =>
@@ -327,8 +376,8 @@ export const animate = (duration: number, callback: (number: number) => void) =>
 
 export const alt = (alt: string) => capitalize(alt.trim()) || 'Interior'
 
-export const toStorageURL = (path: string) =>
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_BUCKET!}/${path}`
+export const toStorageURL = (bucketName: string, path: string) =>
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/${bucketName}/${path}`
 
 export const toPathURL = (url: string) => url.split('/').slice(-2).join('/')
 

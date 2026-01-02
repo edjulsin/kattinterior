@@ -19,9 +19,7 @@ const ProjectsDashboard = async () => getProjects(8).then(
     v => <Projects fetchCount={8} projects={v} />,
     () => <Error title='Database Error' />
 ).then(content =>
-    <Schema
-        value={pageSchema(meta)}
-    >
+    <Schema value={pageSchema(meta)}>
         {content}
     </Schema>
 )

@@ -1,3 +1,4 @@
+import { sanitize } from '@/utility/fn'
 import type { WithContext, Thing } from 'schema-dts'
 
 const Schema = ({ value, children }: {
@@ -8,7 +9,9 @@ const Schema = ({ value, children }: {
         <script
             type='application/ld+json'
             dangerouslySetInnerHTML={{
-                __html: JSON.stringify(value)
+                __html: sanitize(
+                    JSON.stringify(value)
+                )
             }}
         />
         {children}

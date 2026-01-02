@@ -1,10 +1,10 @@
-import { isAuthorized } from '@/action/server';
+import { authorize } from '@/action/server';
 import { redirect } from 'next/navigation';
 
-const DashboardRootLayout = async ({ children }: Readonly<{ children: React.ReactNode }>) =>
-    isAuthorized().then(
+const DashboardLayout = async ({ children }: Readonly<{ children: React.ReactNode }>) =>
+    authorize().then(
         () => children,
         () => { redirect('/login') }
     )
 
-export default DashboardRootLayout
+export default DashboardLayout

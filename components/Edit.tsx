@@ -3,7 +3,7 @@
 'use client'
 
 import { MoveIcon, ResetIcon, CrossCircledIcon, CheckCircledIcon, TrashIcon, Share2Icon, PlayIcon, UploadIcon, CaretDownIcon, DesktopIcon, MobileIcon, BoxIcon, ViewVerticalIcon, InfoCircledIcon, ImageIcon, ChevronLeftIcon, GearIcon, LightningBoltIcon } from '@radix-ui/react-icons'
-import { AlertDialog, Toast, DropdownMenu, Tooltip, AccessibleIcon, Switch, RadioGroup } from 'radix-ui'
+import { AlertDialog, DropdownMenu, Tooltip, AccessibleIcon, Switch, RadioGroup } from 'radix-ui'
 import React, { MouseEvent, PointerEventHandler, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 
@@ -11,59 +11,18 @@ import { Photo, Project, Template, Layout, Photos, Device, Asset, Items } from '
 import Editor from '@/components/Editor';
 import { deleteProject, updateProject, deleteFiles, uploadFiles } from '@/action/client';
 import { useRouter } from 'next/navigation';
-import downscale from 'downscale';
 
 import { v7 as UUIDv7 } from 'uuid'
 import Droppable from './Droppable';
 import { useDrag, UseDragListener } from '@/hook/useDrag';
-import { applyBoxConstrain, between, curry, toStorageURL, alt as alternative, capitalize, groupByRow, extent, getItemsHeight, half, isInsideBox } from '@/utility/fn';
+import { applyBoxConstrain, between, curry, toStorageURL, alt as alternative, capitalize, groupByRow, extent, getItemsHeight, half, isInsideBox, compressFromFiles, filesToPhotos } from '@/utility/fn';
 import { rebuildPath } from '@/action/server';
+import { Status, StatusType } from './Status';
 
-const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
 
-const development = process.env.NODE_ENV === 'development'
-const domain = development ? 'localhost:3000' : process.env.NEXT_PUBLIC_DOMAIN
+const domain = process.env.NEXT_PUBLIC_DOMAIN
 const siteName = process.env.NEXT_PUBLIC_SITE_NAME
-
-const urlToPhoto = (url: string): Promise<Photo> => new Promise((resolve, reject) => {
-	const image = new Image()
-	image.onload = () => {
-		resolve({
-			id: UUIDv7(),
-			src: url,
-			alt: '',
-			width: image.naturalWidth,
-			height: image.naturalHeight,
-			thumbnail: false
-		})
-	}
-	image.onerror = () => {
-		reject(`Cannot load image: ${url}`)
-		URL.revokeObjectURL(url)
-	}
-	image.src = url
-})
-
-const filesToPhotos = (files: File[] | Blob[]) => Promise.all(
-	files.map((file): Promise<Photo> =>
-		urlToPhoto(
-			fileToUrl(file)
-		)
-	)
-)
-
-const compressFromFiles = (files: File[]): Promise<Blob[]> =>
-	filesToPhotos(files).then(images =>
-		Promise.all(
-			images.map((v, i) =>
-				files[i].type.includes('svg')
-					? Promise.resolve(
-						new Blob([files[i]], { type: files[i].type })
-					)
-					: downscale(files[i], Math.min(v.width, 1920), 0, { returnBlob: true })
-			)
-		)
-	)
+const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET_PROJECTS!
 
 const autoFormat = (layout: Layout) => {
 	if(layout.items.length > 0) {
@@ -234,27 +193,6 @@ const Reset = ({ disabled, options }: { disabled: boolean, options: [boolean, st
 			</DropdownMenu.Content>
 		</DropdownMenu.Portal>
 	</DropdownMenu.Root>
-
-type Status = {
-	open: boolean,
-	title: string,
-	description: React.ReactNode | string
-}
-
-const Status = ({ status, setStatus }: { status: Status, setStatus: (status: Status) => void }) =>
-	<Toast.Provider>
-		<Toast.Root
-			className='bg-light dark:bg-dark rounded-lg px-3 py-1 font-sans text-base font-medium outline-1 outline-neutral-200'
-			open={status.open}
-			onOpenChange={open => setStatus({ ...status, open })}
-		>
-			<Toast.Title className='sr-only'>{status.title}</Toast.Title>
-			<Toast.Description className='flex justify-center items-center gap-x-1'>
-				{status.description}
-			</Toast.Description>
-		</Toast.Root>
-		<Toast.Viewport className='fixed right-0 bottom-0 p-5 z-50' />
-	</Toast.Provider>
 
 const MainUpload = ({ uploadAssets }: { uploadAssets: (files: File[]) => Promise<void> }) =>
 	<Droppable className='size-full flex flex-col justify-center items-center' noClick={true} onDrop={uploadAssets}>
@@ -668,7 +606,7 @@ const RightMain = ({
 		<div className='flex items-center gap-x-2 rounded-full'>
 			<Switch.Root
 				id='featured'
-				className={clsx('peer w-8 h-4 rounded-full outline-transparent cursor-pointer', featured ? 'bg-amber-600' : 'bg-neutral-200')}
+				className={clsx('transition-colors peer w-8 h-4 rounded-full outline-transparent cursor-pointer', featured ? 'bg-amber-600' : 'bg-neutral-200')}
 				onCheckedChange={v => setFeatured(v)}
 				checked={featured}
 			>
@@ -802,14 +740,15 @@ const MainHeader = (
 )
 
 const changes = (prev: Partial<Project>, curr: Partial<Project>): Partial<Project> =>
-	Object.entries(curr)
-		.filter(([k, v]) =>
-			!Object.is(prev[k as keyof Partial<Project>], v)
-		)
-		.reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {})
+	Object.entries(curr).filter(([k, v]) =>
+		!Object.is(prev[k as keyof Partial<Project>], v)
+	).reduce((acc, [k, v]) =>
+		({ ...acc, [k]: v }),
+		{}
+	)
 
 const formatAssets = (id: string, images: Photos): Photos => images.map(v => {
-	return { ...v, src: toStorageURL(id + '/' + v.id + '.jpeg') }
+	return { ...v, src: toStorageURL(bucketName, id + '/' + v.id + '.jpeg') }
 })
 
 const formatChanges = (id: string, changes: Partial<Project>) => {
@@ -1232,7 +1171,7 @@ const Edit = ({ project }: { project: Project }) => {
 		action: { text: '', color: '', callback: () => { } },
 	})
 
-	const [toast, setToast] = useState<Status>({
+	const [toast, setToast] = useState<StatusType>({
 		open: false,
 		title: '',
 		description: null
@@ -1311,12 +1250,9 @@ const Edit = ({ project }: { project: Project }) => {
 						v.concat([time])
 					)
 					setBucket(false)
-					setMultisteps({
-						open: true,
-						images: imgs,
-						input: ''
-					})
-					uploadFiles(controller.signal, uploads).then(
+					setMultisteps({ open: true, images: imgs, input: '' })
+
+					return uploadFiles(bucketName, uploads, controller.signal).then(
 						() => setUploadQueues(v =>
 							v.filter(v => v !== time)
 						),
@@ -1333,7 +1269,7 @@ const Edit = ({ project }: { project: Project }) => {
 			})
 		)
 
-	const deleteAssets = (deletes: Photo[]) => {
+	const deleteAssets = async (deletes: Photo[]) => {
 		const ids = deletes.map(v => v.id)
 		const paths = formatAssets(project.id, deletes).map(v => v.src)
 
@@ -1353,7 +1289,7 @@ const Edit = ({ project }: { project: Project }) => {
 			}, {}) as Template
 		)
 
-		deleteFiles(paths).catch(() =>
+		return deleteFiles(bucketName, paths).catch(() =>
 			showErrorToast({
 				title: 'Storage error',
 				description: 'Error when deleting image files.'
@@ -1387,7 +1323,7 @@ const Edit = ({ project }: { project: Project }) => {
 				}, { [breakpoint]: current }) as Template
 		})
 
-	const onBack = () => {
+	const onBack = async () => {
 		const change = changes(previous, current)
 		const back = () => {
 			assets.filter(v =>
@@ -1423,7 +1359,7 @@ const Edit = ({ project }: { project: Project }) => {
 							controllers.forEach(controller =>
 								controller.abort()
 							)
-							exit()
+							return exit()
 						}
 					},
 					cancel: {
@@ -1433,14 +1369,14 @@ const Edit = ({ project }: { project: Project }) => {
 					},
 				})
 			} else {
-				exit()
+				return exit()
 			}
 		} else {
 			back()
 		}
 	}
 
-	const onUnpublish = () => {
+	const onUnpublish = async () => {
 		const change = changes(previous, { ...current, published: false })
 		const task = Object.keys(change).length > 0
 			? () => updateProject(
@@ -1455,7 +1391,7 @@ const Edit = ({ project }: { project: Project }) => {
 
 		setPublished(false)
 
-		task().then(
+		return task().then(
 			() => showSuccessToast({
 				title: 'Success',
 				description: 'Project has been unpublished.'
@@ -1467,7 +1403,7 @@ const Edit = ({ project }: { project: Project }) => {
 		)
 	}
 
-	const onPublish = () => {
+	const onPublish = async () => {
 		type StringKeysOf<T> = {
 			[K in keyof T]: T[K] extends string ? K : never
 		}[keyof T]
@@ -1534,7 +1470,7 @@ const Edit = ({ project }: { project: Project }) => {
 			setPublished(true)
 			setErrors([])
 
-			task().then(
+			return task().then(
 				() => showSuccessToast({
 					title: 'Success',
 					description: 'Project has been published.'
@@ -1559,30 +1495,31 @@ const Edit = ({ project }: { project: Project }) => {
 		action: {
 			text: 'Delete',
 			color: 'text-red-500',
-			callback: () => Promise.all([
-				deleteProject(project.id),
-				deleteFiles(
+			callback: () =>
+				deleteFiles( // confirm this in the ui
+					bucketName,
 					formatAssets(project.id, assets).map(v => v.src)
+				).then(() =>
+					deleteProject(project.id)
+				).then(
+					() => {
+						assets.filter(v =>
+							v.src.startsWith('blob')
+						).forEach(v =>
+							URL.revokeObjectURL(v.src)
+						)
+						rebuildPath('/', 'layout')
+						router.push('/dashboard/projects')
+					},
+					() => showErrorToast({
+						title: 'Database error',
+						description: 'Error when deleting project.'
+					})
 				)
-			]).then(
-				() => {
-					assets.filter(v =>
-						v.src.startsWith('blob')
-					).forEach(v =>
-						URL.revokeObjectURL(v.src)
-					)
-					rebuildPath('/', 'layout')
-					router.push('/dashboard/projects')
-				},
-				() => showErrorToast({
-					title: 'Database error',
-					description: 'Error when deleting project.'
-				})
-			)
 		}
 	})
 
-	const onPreview = () => {
+	const onPreview = async () => {
 		const change = changes(previous, current)
 		const task = Object.keys(change).length > 0
 			? updateProject(
@@ -1606,7 +1543,7 @@ const Edit = ({ project }: { project: Project }) => {
 				{ once: true }
 			)
 
-		task.then(
+		return task.then(
 			() => {
 				const tab = window.open('/preview/' + project.id, project.id)
 				if(tab) {
@@ -1663,7 +1600,7 @@ const Edit = ({ project }: { project: Project }) => {
 						},
 						() => showErrorToast({
 							title: 'Database error',
-							description: 'Error when saving project. Make sure each project has unique slug.'
+							description: 'Error when saving project.'
 						})
 					)
 				}, 3000),

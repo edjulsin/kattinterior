@@ -1,11 +1,9 @@
-import React from 'react';
-
 const Spinner = ({ className }: { className?: string }) =>
     <svg
         viewBox="0 0 40 40"
         xmlns="http://www.w3.org/2000/svg"
         stroke='currentColor'
-        className={ className }
+        className={className}
     >
         <g fill="none" fillRule="evenodd">
             <circle cx="20" cy="20" r="18" strokeOpacity="0.2" strokeWidth="4" />

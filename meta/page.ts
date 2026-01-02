@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 
-const development = process.env.NODE_ENV === 'development'
 const name = process.env.NEXT_PUBLIC_SITE_NAME as string
-const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
+const url = process.env.NEXT_PUBLIC_SITE_URL
 
 const pageMeta = ({ title, description, path, }: { title: string, description: string, path: string }): Metadata => ({
     title: title.includes(name) ? title : `${title} | ${name}`,

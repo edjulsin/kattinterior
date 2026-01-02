@@ -1,4 +1,4 @@
-import { getFeaturedProject } from '@/action/admin';
+import { getFeaturedProject } from '@/action/anon';
 import { Project } from '@/type/editor';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -11,17 +11,17 @@ const Work = () => getFeaturedProject().then(
                 <h3 className='font-sans font-semibold text-gold-900 text-center text-2xl/relaxed md:text-3xl/relaxed uppercase'>Featured work</h3>
                 <ul
                     className='
-                            grid
-                            md:grid-cols-[.9fr_.1fr_.9fr]
-                            md:grid-rows-[.1fr_.9fr_.1fr]
-                            md:*:col-span-2
-                            md:*:row-span-2
-                            md:*:first:col-start-1
-                            md:*:last:col-start-2
-                            md:*:first:row-start-2
-                            md:*:last:row-start-1
-                            md:*:first:z-10
-                        '
+                        grid
+                        md:grid-cols-[.9fr_.1fr_.9fr]
+                        md:grid-rows-[.1fr_.9fr_.1fr]
+                        md:*:col-span-2
+                        md:*:row-span-2
+                        md:*:first:col-start-1
+                        md:*:last:col-start-2
+                        md:*:first:row-start-2
+                        md:*:last:row-start-1
+                        md:*:first:z-10
+                    '
                 >
                     {
                         getThumbnails(2, v).map((img, i) =>

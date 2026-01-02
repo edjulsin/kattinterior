@@ -1,7 +1,6 @@
 import type { WebSite, WithContext } from 'schema-dts'
 
-const development = process.env.NODE_ENV === 'development'
-const url = development ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_SITE_URL
+const url = process.env.NEXT_PUBLIC_SITE_URL
 const name = process.env.NEXT_PUBLIC_SITE_NAME
 const banner = `${url}/banner.png`
 

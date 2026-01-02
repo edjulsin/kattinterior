@@ -2,26 +2,33 @@ import { useDropzone } from 'react-dropzone'
 
 const Droppable = ({
     children,
+    id,
     className = '',
     onDrop,
     noDragsEventBubbling = false,
-    noClick = false
+    noClick = false,
+    autoFocus = false
 }: {
     children: React.ReactNode,
-    className?:
-    string,
+    id?: string,
+    className?: string,
     onDrop: (files: File[]) => Promise<void>,
     noDragsEventBubbling?: boolean,
-    noClick?: boolean
+    noClick?: boolean,
+    autoFocus?: boolean
 }) => {
     const { getRootProps, getInputProps } = useDropzone({
         accept: { 'image/*': [] },
         onDrop: files => onDrop(files),
         noDragEventsBubbling: noDragsEventBubbling,
-        noClick: noClick
+        noClick: noClick,
+        autoFocus: autoFocus
     })
+    const props = Object.fromEntries(
+        Object.entries({ id, className }).filter(([_, v]) => v)
+    )
     return (
-        <div {...getRootProps({ className })}>
+        <div {...getRootProps(props)}>
             <input {...getInputProps()} />
             {children}
         </div>

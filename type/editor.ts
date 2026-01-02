@@ -57,7 +57,8 @@ export type Project = {
     title: string,
     description: string,
     template: Template,
-    assets: Photos
+    assets: Photos,
+    created_by: string,
 }
 
 export type Asset = Record<string, Photo>

@@ -1,28 +1,43 @@
 import { type NextRequest } from 'next/server'
 import { redirect } from 'next/navigation'
-import { verifyEmailToken } from '@/action/server'
+import { verifyToken } from '@/action/server'
 import { isURL } from 'validator'
+import { EmailOtpType } from '@supabase/supabase-js'
+import { confirmUser } from '@/action/admin'
 
-const development = process.env.NODE_ENV === 'development'
-const tld = development ? false : true
+const tld = process.env.NODE_ENV === 'production'
 
-const split = (v: string) => {
+type OTP = { token_hash: string, type: EmailOtpType }
+
+const otp = (v: string): Promise<OTP> => {
     const trimmed = (v + '').trim()
     if(isURL(trimmed, { require_tld: tld })) {
-        const token = (new URL(trimmed).searchParams.get('token') ?? '') + ''
-        return token ? Promise.resolve(token) : Promise.reject()
+        const keys = ['type', 'token_hash']
+        const data = Object.fromEntries(new URL(trimmed).searchParams)
+        if(keys.every(key => key in data && data[key])) {
+            const result = Object.fromEntries(
+                keys.map(key => {
+                    return [key, data[key] ?? '']
+                })
+            ) as OTP
+            return Promise.resolve(result)
+        } else {
+            return Promise.reject('Missing fields.')
+        }
+
     } else {
-        return Promise.reject()
+        return Promise.reject('Not a valid URL.')
     }
 }
 
 export const GET = async (request: NextRequest) =>
-    split(request.url).then(
-        token => verifyEmailToken(token).then(
-            () => '/dashboard',
-            () => '/'
-        ),
-        () => '/'
-    ).then(v => {
-        redirect(v)
-    })
+    otp(request.url).then(otp =>
+        verifyToken(otp).then(v =>
+            Promise.all(
+                ([v.user?.id ?? '']).filter(v => v && ['signup', 'invite'].includes(otp.type)).map(confirmUser)
+            )
+        )
+    ).then(
+        () => { redirect('/dashboard') },
+        () => { redirect('/') }
+    )

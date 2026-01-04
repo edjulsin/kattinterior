@@ -113,13 +113,13 @@ file_size_limit = "50MiB"
 # objects_path = "./images"
 
 [storage.buckets.projects]
-public = false
+public = true
 file_size_limit = "50MiB"
 allowed_mime_types = ["image/*"]
 objects_path = "./projects"
 
 [storage.buckets.avatars]
-public = false
+public = true
 file_size_limit = "50MiB"
 allowed_mime_types = ["image/*"]
 objects_path = "./avatars"

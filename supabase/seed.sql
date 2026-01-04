@@ -4,7 +4,7 @@ SET session_replication_role = replica;
 -- PostgreSQL database dump
 --
 
--- \restrict sQ2Pu7h8tNTQnTTegG3YbCbTxIafO26lnuv7pxuX4L0jmDRyaKMV05HyPcLQcQR
+-- \restrict UJO3N4wVk0dmqvBtnANuR0pKUler7EVGHAuSK8hhEw79NFGcuID5SXxmxb2gLjI
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -975,7 +975,11 @@ INSERT INTO "auth"."audit_log_entries" ("instance_id", "id", "payload", "created
 	('00000000-0000-0000-0000-000000000000', '5f2940d8-cece-4f42-abc5-86fccb8acd5d', '{"action":"token_refreshed","actor_id":"0014b8e6-fed4-41e5-8c46-f3e5c035aa6c","actor_username":"kattinbali@gmail.com","actor_via_sso":false,"log_type":"token"}', '2026-01-03 14:20:53.116995+00', ''),
 	('00000000-0000-0000-0000-000000000000', 'f90e2d82-c521-46ba-b474-f55a12fe4d26', '{"action":"token_refreshed","actor_id":"0014b8e6-fed4-41e5-8c46-f3e5c035aa6c","actor_username":"kattinbali@gmail.com","actor_via_sso":false,"log_type":"token"}', '2026-01-03 14:21:37.099979+00', ''),
 	('00000000-0000-0000-0000-000000000000', '3039bd63-b209-4de9-a301-490adbfb8fca', '{"action":"user_deleted","actor_id":"00000000-0000-0000-0000-000000000000","actor_username":"service_role","actor_via_sso":false,"log_type":"team","traits":{"user_email":"edjulsin.blog@gmail.com","user_id":"cae8369e-5249-470c-8157-238cf1ad928c","user_phone":""}}', '2026-01-03 14:21:37.257773+00', ''),
-	('00000000-0000-0000-0000-000000000000', '40d517c5-abc1-4811-bc5e-bb42e9591719', '{"action":"user_deleted","actor_id":"00000000-0000-0000-0000-000000000000","actor_username":"service_role","actor_via_sso":false,"log_type":"team","traits":{"user_email":"abc@mail.com","user_id":"6e92bc2c-5d7b-4475-afb1-4722375e9d9b","user_phone":""}}', '2026-01-03 14:21:45.175113+00', '');
+	('00000000-0000-0000-0000-000000000000', '40d517c5-abc1-4811-bc5e-bb42e9591719', '{"action":"user_deleted","actor_id":"00000000-0000-0000-0000-000000000000","actor_username":"service_role","actor_via_sso":false,"log_type":"team","traits":{"user_email":"abc@mail.com","user_id":"6e92bc2c-5d7b-4475-afb1-4722375e9d9b","user_phone":""}}', '2026-01-03 14:21:45.175113+00', ''),
+	('00000000-0000-0000-0000-000000000000', 'abee10a8-a63d-471a-be71-7d7ed9f8ebd5', '{"action":"token_refreshed","actor_id":"0014b8e6-fed4-41e5-8c46-f3e5c035aa6c","actor_username":"kattinbali@gmail.com","actor_via_sso":false,"log_type":"token"}', '2026-01-03 15:31:15.452697+00', ''),
+	('00000000-0000-0000-0000-000000000000', '96a418c8-ca62-4f08-a029-66fe143c076c', '{"action":"token_revoked","actor_id":"0014b8e6-fed4-41e5-8c46-f3e5c035aa6c","actor_username":"kattinbali@gmail.com","actor_via_sso":false,"log_type":"token"}', '2026-01-03 15:31:15.454936+00', ''),
+	('00000000-0000-0000-0000-000000000000', '19324e9a-b84d-48dd-84c6-e25a5fb1af30', '{"action":"token_refreshed","actor_id":"0014b8e6-fed4-41e5-8c46-f3e5c035aa6c","actor_username":"kattinbali@gmail.com","actor_via_sso":false,"log_type":"token"}', '2026-01-03 15:31:15.588476+00', ''),
+	('00000000-0000-0000-0000-000000000000', 'b96bd513-0d51-4d63-a610-b75197b1474c', '{"action":"token_refreshed","actor_id":"0014b8e6-fed4-41e5-8c46-f3e5c035aa6c","actor_username":"kattinbali@gmail.com","actor_via_sso":false,"log_type":"token"}', '2026-01-03 15:31:15.690534+00', '');
 
 
 --
@@ -989,7 +993,7 @@ INSERT INTO "auth"."audit_log_entries" ("instance_id", "id", "payload", "created
 --
 
 INSERT INTO "auth"."users" ("instance_id", "id", "aud", "role", "email", "encrypted_password", "email_confirmed_at", "invited_at", "confirmation_token", "confirmation_sent_at", "recovery_token", "recovery_sent_at", "email_change_token_new", "email_change", "email_change_sent_at", "last_sign_in_at", "raw_app_meta_data", "raw_user_meta_data", "is_super_admin", "created_at", "updated_at", "phone", "phone_confirmed_at", "phone_change", "phone_change_token", "phone_change_sent_at", "email_change_token_current", "email_change_confirm_status", "banned_until", "reauthentication_token", "reauthentication_sent_at", "is_sso_user", "deleted_at", "is_anonymous") VALUES
-	('00000000-0000-0000-0000-000000000000', '0014b8e6-fed4-41e5-8c46-f3e5c035aa6c', 'authenticated', 'authenticated', 'kattinbali@gmail.com', '$2a$10$ay38qZXcmv5zT0Poitos.Od0KvkvBqZ1iHNtJn9cmaZjBdWAmeR/u', '2025-12-28 10:33:45.037643+00', '2025-12-28 10:33:30.655948+00', '', NULL, '', '2025-12-28 10:35:18.819618+00', '', '', NULL, '2025-12-28 10:35:28.158441+00', '{"provider": "email", "providers": ["email"]}', '{"name": "Admin", "avatar": {"src": "http://127.0.0.1:54321/storage/v1/object/public/avatars/0014b8e6-fed4-41e5-8c46-f3e5c035aa6c/019b6487-5cb0-717a-8e75-2150b6bdc98a.jpeg", "width": 1080, "height": 1350}, "email_verified": true}', NULL, '2025-12-28 10:33:30.625559+00', '2026-01-03 14:20:08.44395+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
+	('00000000-0000-0000-0000-000000000000', '0014b8e6-fed4-41e5-8c46-f3e5c035aa6c', 'authenticated', 'authenticated', 'kattinbali@gmail.com', '$2a$10$ay38qZXcmv5zT0Poitos.Od0KvkvBqZ1iHNtJn9cmaZjBdWAmeR/u', '2025-12-28 10:33:45.037643+00', '2025-12-28 10:33:30.655948+00', '', NULL, '', '2025-12-28 10:35:18.819618+00', '', '', NULL, '2025-12-28 10:35:28.158441+00', '{"provider": "email", "providers": ["email"]}', '{"name": "Admin", "avatar": {"src": "http://127.0.0.1:54321/storage/v1/object/public/avatars/0014b8e6-fed4-41e5-8c46-f3e5c035aa6c/019b6487-5cb0-717a-8e75-2150b6bdc98a.jpeg", "width": 1080, "height": 1350}, "email_verified": true}', NULL, '2025-12-28 10:33:30.625559+00', '2026-01-03 15:31:15.458927+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
 
 
 --
@@ -1017,7 +1021,7 @@ INSERT INTO "auth"."identities" ("provider_id", "user_id", "identity_data", "pro
 --
 
 INSERT INTO "auth"."sessions" ("id", "user_id", "created_at", "updated_at", "factor_id", "aal", "not_after", "refreshed_at", "user_agent", "ip", "tag", "oauth_client_id", "refresh_token_hmac_key", "refresh_token_counter", "scopes") VALUES
-	('6d7e16c5-e4d3-4b6e-8d4c-35e2ef9a4366', '0014b8e6-fed4-41e5-8c46-f3e5c035aa6c', '2025-12-28 10:35:28.158513+00', '2026-01-03 14:21:37.105373+00', NULL, 'aal1', NULL, '2026-01-03 14:21:37.105278', 'node', '172.19.0.1', NULL, NULL, NULL, NULL, NULL);
+	('6d7e16c5-e4d3-4b6e-8d4c-35e2ef9a4366', '0014b8e6-fed4-41e5-8c46-f3e5c035aa6c', '2025-12-28 10:35:28.158513+00', '2026-01-03 15:31:15.694647+00', NULL, 'aal1', NULL, '2026-01-03 15:31:15.694582', 'node', '172.19.0.1', NULL, NULL, NULL, NULL, NULL);
 
 
 --
@@ -1091,7 +1095,8 @@ INSERT INTO "auth"."refresh_tokens" ("instance_id", "id", "token", "user_id", "r
 	('00000000-0000-0000-0000-000000000000', 252, 'ptj3owcaoqee', '0014b8e6-fed4-41e5-8c46-f3e5c035aa6c', true, '2026-01-02 08:06:28.787283+00', '2026-01-02 10:33:20.384368+00', 'fu2rpbipki5j', '6d7e16c5-e4d3-4b6e-8d4c-35e2ef9a4366'),
 	('00000000-0000-0000-0000-000000000000', 253, 'horw7bpwxvms', '0014b8e6-fed4-41e5-8c46-f3e5c035aa6c', true, '2026-01-02 10:33:20.387559+00', '2026-01-02 13:47:58.761096+00', 'ptj3owcaoqee', '6d7e16c5-e4d3-4b6e-8d4c-35e2ef9a4366'),
 	('00000000-0000-0000-0000-000000000000', 254, 'kgphxm4cy6mh', '0014b8e6-fed4-41e5-8c46-f3e5c035aa6c', true, '2026-01-02 13:47:58.88031+00', '2026-01-03 14:20:08.383395+00', 'horw7bpwxvms', '6d7e16c5-e4d3-4b6e-8d4c-35e2ef9a4366'),
-	('00000000-0000-0000-0000-000000000000', 255, 'tilrvege36xw', '0014b8e6-fed4-41e5-8c46-f3e5c035aa6c', false, '2026-01-03 14:20:08.388451+00', '2026-01-03 14:20:08.388451+00', 'kgphxm4cy6mh', '6d7e16c5-e4d3-4b6e-8d4c-35e2ef9a4366');
+	('00000000-0000-0000-0000-000000000000', 255, 'tilrvege36xw', '0014b8e6-fed4-41e5-8c46-f3e5c035aa6c', true, '2026-01-03 14:20:08.388451+00', '2026-01-03 15:31:15.455738+00', 'kgphxm4cy6mh', '6d7e16c5-e4d3-4b6e-8d4c-35e2ef9a4366'),
+	('00000000-0000-0000-0000-000000000000', 256, 'pqvebo7zbuv3', '0014b8e6-fed4-41e5-8c46-f3e5c035aa6c', false, '2026-01-03 15:31:15.457572+00', '2026-01-03 15:31:15.457572+00', 'tilrvege36xw', '6d7e16c5-e4d3-4b6e-8d4c-35e2ef9a4366');
 
 
 --
@@ -1324,7 +1329,7 @@ INSERT INTO "storage"."prefixes" ("bucket_id", "name", "created_at", "updated_at
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: auth; Owner: supabase_auth_admin
 --
 
-SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 255, true);
+SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 256, true);
 
 
 --
@@ -1359,13 +1364,11 @@ SELECT pg_catalog.setval('"public"."roles_id_seq"', 136, true);
 -- Name: hooks_id_seq; Type: SEQUENCE SET; Schema: supabase_functions; Owner: supabase_functions_admin
 --
 
-SELECT pg_catalog.setval('"supabase_functions"."hooks_id_seq"', 1, false);
-
 
 --
 -- PostgreSQL database dump complete
 --
 
--- \unrestrict sQ2Pu7h8tNTQnTTegG3YbCbTxIafO26lnuv7pxuX4L0jmDRyaKMV05HyPcLQcQR
+-- \unrestrict UJO3N4wVk0dmqvBtnANuR0pKUler7EVGHAuSK8hhEw79NFGcuID5SXxmxb2gLjI
 
 RESET ALL;

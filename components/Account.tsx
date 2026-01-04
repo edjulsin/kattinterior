@@ -71,7 +71,7 @@ const Profile = ({ user, onSave, open, onOpenChange, onError }: { user: User, op
                 const path = `${user.id}/${UUID()}.jpeg`
 
                 setAvatar({
-                    src: toStorageURL('avatars', path),
+                    src: photo.src,
                     width: photo.width,
                     height: photo.height
                 })

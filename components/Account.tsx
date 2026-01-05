@@ -4,10 +4,9 @@ import { CheckCircledIcon, CrossCircledIcon, DotsVerticalIcon, PersonIcon, PlusI
 import { uploadFile, signOut, updateProfile, updateRole } from '@/action/client'
 import { useRouter } from 'next/navigation'
 import { AccessibleIcon, DropdownMenu, Dialog, Switch, AlertDialog } from 'radix-ui'
-import { v7 as UUID } from 'uuid'
 import { User } from '@/type/user'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Droppable from './Droppable'
 import { compressFromFiles, filesToPhotos, toStorageURL } from '@/utility/fn'
 import { Status } from './Status'
@@ -68,17 +67,23 @@ const Profile = ({ user, onSave, open, onOpenChange, onError }: { user: User, op
             filesToPhotos(blobs).then(async photos => {
                 const [blob] = blobs
                 const [photo] = photos
-                const path = `${user.id}/${UUID()}.jpeg`
 
                 setAvatar({
+                    id: photo.id,
                     src: photo.src,
                     width: photo.width,
                     height: photo.height
                 })
 
-                return uploadFile('avatars', path, blob).then(() => { }, onError)
+                return uploadFile('avatars', `${user.id}/${photo.id}.jpeg`, blob).then(() => { }, onError)
             })
         )
+
+    useEffect(() => () => {
+        [avatar].filter(v => v.src.startsWith('blob')).forEach(v =>
+            URL.revokeObjectURL(v.src)
+        )
+    }, [])
 
     const ProfilePicture = user.avatar
         ? <Image
@@ -378,6 +383,7 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
         description: null
     })
     const router = useRouter()
+    const home = () => { router.push('/') }
     const logout = async () => signOut().then(
         () => { router.push('/login') },
         () => { router.push('/') }
@@ -410,13 +416,19 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
     const onSave = async (user: User) =>
         Promise.all(
             [user].filter(v => !Object.is(profileData, v.avatar) || profileData.name !== v.name).map(v =>
-                updateProfile(v).then(
+                updateProfile({
+                    ...v,
+                    avatar: {
+                        ...v.avatar,
+                        src: toStorageURL('avatars', `${v.id}/${v.avatar.id}.jpeg`)
+                    }
+                }).then(
                     () => {
+                        setProfileData(v)
                         showSuccessStatus({
                             title: 'Database Success',
                             description: 'Profile has been updated.'
                         })
-                        setProfileData(user)
                     },
                     () => showErrorStatus({
                         title: 'Database Error',
@@ -497,7 +509,6 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
         description: 'Error when uploading image file to storage.'
     })
 
-    const home = () => { router.push('/') }
     const profile = () => setShowProfile(!showProfile)
     const invite = () => setShowInvite(!showInvite)
 

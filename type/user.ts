@@ -3,6 +3,7 @@ export type User = {
     email: string,
     name: string,
     avatar: {
+        id: string,
         src: string,
         width: number,
         height: number

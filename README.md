@@ -12,7 +12,7 @@ Built with **Next.js**, **Supabase**, and **Tailwind**, it features drag-and-dro
 
 - 🖼️ **Drag-and-drop editor** – Manage images and layouts with ease  
 - 📝 **Blog CMS** – Optimized for content with heavy image usage  
-- 🔑 **Authentication** – Secure login with Supabase  
+- 🔑 **Authentication & user management** – Securely managed by Supabase  
 - 📱 **Responsive design** – Works across desktop, tablet and mobile  
 - ⚡ **Built with Next.js** – Fast, SEO-friendly, and scalable
 - 📧 **Contact management** - Automatic email and contact management

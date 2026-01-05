@@ -63,8 +63,8 @@ const Profile = ({ user, onSave, open, onOpenChange, onError }: { user: User, op
     const [avatar, setAvatar] = useState(user.avatar)
 
     const onUpload = (files: File[]) =>
-        compressFromFiles(files).then(async blobs =>
-            filesToPhotos(blobs).then(async photos => {
+        compressFromFiles(files).then(blobs =>
+            filesToPhotos(blobs).then(photos => {
                 const [blob] = blobs
                 const [photo] = photos
 

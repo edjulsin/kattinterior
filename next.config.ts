@@ -5,7 +5,7 @@ const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL
 
 const CSP = `
 	default-src 'self';
-	script-src 'self' ${development ? "'unsafe-eval' 'unsafe-inline'" : "'unsafe-inline'"};
+	script-src 'self' 'unsafe-eval' 'unsafe-inline';
 	style-src 'self' 'unsafe-inline';
 	img-src 'self' blob: data: ${supabase};
 	connect-src 'self' ${supabase};

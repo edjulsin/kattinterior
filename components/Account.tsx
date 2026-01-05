@@ -79,6 +79,8 @@ const Profile = ({ user, onSave, open, onOpenChange, onError }: { user: User, op
             })
         )
 
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => e.preventDefault()
+
     useEffect(() => () => {
         [avatar].filter(v => v.src.startsWith('blob')).forEach(v =>
             URL.revokeObjectURL(v.src)
@@ -129,7 +131,7 @@ const Profile = ({ user, onSave, open, onOpenChange, onError }: { user: User, op
                     </div>
                     <form
                         className='flex flex-col items-center justify-center gap-y-5 w-full *:w-full *:flex *:flex-col *:items-center *:justify-center *:gap-y-2'
-                        onSubmit={v => v.preventDefault()}
+                        onSubmit={onSubmit}
                     >
                         <fieldset>
                             <label htmlFor='avatar' className='sr-only'>Avatar</label>

@@ -1,9 +1,14 @@
 # Katt Interior — Interior Design Portfolio & Blog Platform
 
-Katt Interior is an interior design portfolio and blogging platform built for a real client.  
+Katt Interior is an interior design portfolio and blogging platform built for interior designer.  
 The platform focuses on **visual quality**, **performance**, **SEO**, and **content authoring usability** for non-technical users.
 
-![Katt Interior](./assets/screenshot.png)
+<p align='center'>
+<img src="./assets/screenshots/1.gif" alt="Hero" style="width: 60%;"/>
+<br/>
+<br/>
+<img src="./assets/screenshots/2.gif" alt="Editor" style="width: 60%;"/>
+</p>
 
 **Tech Stack:** Next.js (App Router), TypeScript, Supabase, Tailwind CSS, Radix UI, Resend
 

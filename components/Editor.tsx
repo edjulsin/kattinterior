@@ -836,7 +836,7 @@ const Editor = ({
     const [[pw, ph], setParentSize] = useState([0, 0])
     const [z, setZ] = useState(0)
 
-    const dpr = (window.devicePixelRatio || 1)
+    const dpr = (window?.devicePixelRatio ?? 1)
 
     const cssSize = { width: Math.round(pw) + 'px', height: Math.round(ph) + 'px' }
 
@@ -845,7 +845,7 @@ const Editor = ({
     const resetCanvas = () => {
         const canvas = canvasRef.current!
         const context = contextRef.current!
-        const dpr = window.devicePixelRatio
+        const dpr = (window?.devicePixelRatio ?? 1)
 
         context.clearRect(0, 0, canvas.width, canvas.height)
         context.setTransform(1, 0, 0, 1, 0, 0)

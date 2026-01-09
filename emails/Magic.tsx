@@ -14,18 +14,19 @@ import {
     pixelBasedPreset
 } from '@react-email/components';
 
+const siteName = process.env.NEXT_PUBLIC_SITE_NAME as string
 const defaultConfirm = '{{ .SiteURL }}/auth/verify?token_hash={{ .TokenHash }}&type=email'
 const defaultLogo = {
     src: '{{ .SiteURL }}/banner.png',
     width: 1200,
     height: 630,
-    alt: 'Katt Interior Design'
+    alt: siteName
 }
 
 const Magic = ({ confirm = defaultConfirm, logo = defaultLogo }: { confirm: string, logo: { src: string, width: number, height: number, alt: string } }) =>
     <Html>
         <Head />
-        <Preview>Your Magic Link</Preview>
+        <Preview>Use this secure link to sign in to {siteName}.</Preview>
         <Tailwind config={{ presets: [pixelBasedPreset] }}>
             <Body className="m-0 p-5 bg-white font-sans">
                 <Container className="p-5 size-full max-w-sm rounded-lg border-1 border-neutral-200">
@@ -59,15 +60,9 @@ const Magic = ({ confirm = defaultConfirm, logo = defaultLogo }: { confirm: stri
         </Tailwind>
     </Html>
 
-
 Magic.PreviewProps = {
-    confirm: '{{ .SiteURL }}/auth/verify?token_hash={{ .TokenHash }}&type=email',
-    logo: {
-        src: '/static/banner.png',
-        width: 1200,
-        height: 630,
-        alt: 'Katt Interior Design'
-    }
+    confirm: defaultConfirm,
+    logo: { ...defaultLogo, src: '/static/banner.png', alt: 'Katt Interior' }
 }
 
 export default Magic

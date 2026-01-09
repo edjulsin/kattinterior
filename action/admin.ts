@@ -4,11 +4,16 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { sanitize } from '@/utility/fn'
 import crypto from 'crypto'
-import { render } from '@react-email/render'
-import contact from '@/emails/Contact'
+import { render, toPlainText } from '@react-email/render'
+import Contact from '@/emails/Contact'
 import { isEmail } from 'validator'
 
-const logo = { src: `${process.env.NEXT_SITE_URL}/banner.png`, width: 1200, height: 630, alt: 'Katt' }
+const siteName = process.env.NEXT_PUBLIC_SITE_NAME as string
+const siteURL = process.env.NEXT_PUBLIC_SITE_URL as string
+const emailFrom = process.env.SMTP_EMAIL_FROM as string
+const emailTo = process.env.SMTP_EMAIL_TO as string
+
+const logo = { src: `${siteURL}/banner.png`, width: 1200, height: 630, alt: 'Katt' }
 
 const smtp = () => new Resend(process.env.SMTP_API_KEY!)
 
@@ -163,19 +168,14 @@ export const sendEmail = async (form: FormData) => {
                 .update(`${form.name}${form.email}${form.message}`)
                 .digest('hex')
         }
-
-        const content = contact({ ...form, logo })
-        const contents = Promise.all([
-            render(content),
-            render(content, { plainText: true })
-        ])
-        return contents.then(([html, text]) =>
+        const content = Contact({ ...form, logo })
+        return render(content).then(v =>
             smtp().emails.send({
-                from: `${form.name} <${process.env.SMTP_EMAIL_FROM!}>`, // change this after acquiring domain
-                to: process.env.SMTP_EMAIL_TO!,
-                subject: 'Contact from Katt',
-                html: html,
-                text: text,
+                from: `${siteName} <${emailFrom}>`,
+                to: emailTo,
+                subject: 'New Contact Form',
+                html: v,
+                text: toPlainText(v),
                 replyTo: form.email
             }, config).then(
                 () => client().from('contacts').upsert({

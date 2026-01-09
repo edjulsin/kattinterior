@@ -16,20 +16,23 @@ import {
     pixelBasedPreset
 } from '@react-email/components';
 
+const siteName = process.env.NEXT_PUBLIC_SITE_NAME as string
+const siteURL = process.env.NEXT_PUBLIC_SITE_URL as string
+
 const defaultName = 'Edwin'
 const defaultemail = 'edjulsin@mail.com'
 const defaultMessage = 'Hey there!'
 const defaultLogo = {
-    src: `${process.env.NEXT_PUBLIC_SITE_URL}/banner.png`,
+    src: `${siteURL}/banner.png`,
     width: 1200,
     height: 630,
-    alt: 'Katt'
+    alt: siteName
 }
 
 const Contact = ({ logo = defaultLogo, name = defaultName, email = defaultemail, message = defaultMessage }: { name: string, email: string, message: string, logo: { src: string, width: number, height: number, alt: string } }) =>
     <Html>
         <Head />
-        <Preview className='capitalize'>You Have Received a Message</Preview>
+        <Preview className='capitalize'>You’ve received a new message from {siteName}. View the contact form details.</Preview>
         <Tailwind config={{ presets: [pixelBasedPreset] }}>
             <Body className="m-0 p-5 bg-white font-sans">
                 <Container className="p-5 max-w-sm rounded-lg border-1 border-neutral-200 text-sm text-neutral-500">
@@ -73,15 +76,10 @@ const Contact = ({ logo = defaultLogo, name = defaultName, email = defaultemail,
     </Html>
 
 Contact.PreviewProps = {
-    name: 'Edwin',
-    email: 'edjulsin@mail.com',
-    message: 'Hey there!',
-    logo: {
-        src: '/static/banner.png',
-        width: 1200,
-        height: 630,
-        alt: 'Katt'
-    }
+    name: defaultName,
+    email: defaultemail,
+    message: defaultMessage,
+    logo: { ...defaultLogo, src: '/static/banner.png', alt: 'Katt Interior' }
 }
 
 export default Contact

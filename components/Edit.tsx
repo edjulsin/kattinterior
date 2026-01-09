@@ -1153,7 +1153,7 @@ const Edit = ({ project }: { project: Project }) => {
 	const [overlay, setOverlay] = useState<{ x: number, y: number, items: Photos }>({ x: 0, y: 0, items: [] })
 	const [menu, setMenu] = useState(false)
 	const [bucket, setBucket] = useState(false)
-	const [breakpoint, setBreakpoint] = useState<Device>('desktop')
+	const [breakpoint, setBreakpoint] = useState<Device>('tablet')
 	const [controllers, setControllers] = useState<AbortController[]>([])
 	const [broadcast, setBroadcast] = useState<BroadcastChannel | null>(null)
 

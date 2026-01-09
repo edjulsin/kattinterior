@@ -13,7 +13,7 @@ const siteURL = process.env.NEXT_PUBLIC_SITE_URL as string
 const emailFrom = process.env.SMTP_EMAIL_FROM as string
 const emailTo = process.env.SMTP_EMAIL_TO as string
 
-const logo = { src: `${siteURL}/banner.png`, width: 1200, height: 630, alt: 'Katt' }
+const logo = { src: `${siteURL}/banner.png`, width: 1200, height: 630, alt: siteName }
 
 const smtp = () => new Resend(process.env.SMTP_API_KEY!)
 

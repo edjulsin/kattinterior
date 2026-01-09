@@ -14,19 +14,18 @@ import {
     pixelBasedPreset
 } from '@react-email/components';
 
-const siteName = process.env.NEXT_PUBLIC_SITE_NAME as string
 const defaultConfirm = '{{ .SiteURL }}/auth/verify?token_hash={{ .TokenHash }}&type=invite'
 const defaultLogo = {
     src: '{{ .SiteURL }}/banner.png',
     width: 1200,
     height: 630,
-    alt: siteName
+    alt: 'Katt Interior'
 }
 
 const Invite = ({ confirm = defaultConfirm, logo = defaultLogo }: { confirm: string, logo: { src: string, width: number, height: number, alt: string } }) =>
     <Html>
         <Head />
-        <Preview>An invitation to join {siteName} has been sent to you.</Preview>
+        <Preview>An invitation to join {logo.alt} has been sent to you.</Preview>
         <Tailwind config={{ presets: [pixelBasedPreset] }}>
             <Body className="m-0 p-5 bg-white font-sans">
                 <Container className="p-5 max-w-sm rounded-lg border-1 border-neutral-200">
@@ -42,7 +41,7 @@ const Invite = ({ confirm = defaultConfirm, logo = defaultLogo }: { confirm: str
                     </Heading>
                     <Section className='text-center'>
                         <Text className='text-left text-neutral-400 text-sm leading-normal'>
-                            Click this button to create an account and login to Katt Interior Design.
+                            Click this button to create an account and login to {logo.alt}.
                         </Text>
                         <Button
                             className="rounded-lg bg-black px-4 py-2 my-5 text-center font-semibold text-sm text-white no-underline leading-normal"
@@ -62,7 +61,7 @@ const Invite = ({ confirm = defaultConfirm, logo = defaultLogo }: { confirm: str
 
 Invite.PreviewProps = {
     confirm: defaultConfirm,
-    logo: { ...defaultLogo, src: '/static/banner.png', alt: 'Katt Interior' }
+    logo: { ...defaultLogo, src: '/static/banner.png' }
 }
 
 export default Invite

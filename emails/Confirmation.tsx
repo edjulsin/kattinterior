@@ -14,20 +14,18 @@ import {
     pixelBasedPreset
 } from '@react-email/components';
 
-const siteName = process.env.NEXT_PUBLIC_SITE_NAME as string
-
 const defaultConfirm = '{{ .SiteURL }}/auth/verify?token_hash={{ .TokenHash }}&type=email'
 const defaultLogo = {
     src: '{{ .SiteURL }}/banner.png',
     width: 1200,
     height: 630,
-    alt: siteName
+    alt: 'Katt Interior'
 }
 
 const Confirmation = ({ confirm = defaultConfirm, logo = defaultLogo }: { confirm: string, logo: { src: string, width: number, height: number, alt: string } }) =>
     <Html>
         <Head />
-        <Preview>Confirm your email to create your account on {siteName}.</Preview>
+        <Preview>Confirm your email to create your account on {logo.alt}.</Preview>
         <Tailwind config={{ presets: [pixelBasedPreset] }}>
             <Body className="bg-white font-sans p-5">
                 <Container className="p-5 max-w-sm rounded-lg border-1 border-neutral-200">
@@ -43,7 +41,7 @@ const Confirmation = ({ confirm = defaultConfirm, logo = defaultLogo }: { confir
                     </Heading>
                     <Section className='text-center'>
                         <Text className='text-left text-neutral-400 text-sm leading-normal'>
-                            Click this button to confirm your account and login to Katt Interior Design.
+                            Click this button to confirm your account and login to {logo.alt}.
                         </Text>
                         <Button
                             className="rounded-lg my-5 bg-black px-4 py-2 font-semibold text-sm text-white no-underline leading-normal"
@@ -63,7 +61,7 @@ const Confirmation = ({ confirm = defaultConfirm, logo = defaultLogo }: { confir
 
 Confirmation.PreviewProps = {
     confirm: defaultConfirm,
-    logo: { ...defaultLogo, src: '/static/banner.png', alt: 'Katt Interior' }
+    logo: { ...defaultLogo, src: '/static/banner.png' }
 }
 
 export default Confirmation

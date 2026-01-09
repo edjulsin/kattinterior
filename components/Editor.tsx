@@ -834,8 +834,9 @@ const Editor = ({
     const [actives, setActives] = useState<string[]>([])
     const [interactive, setInteractive] = useState(true)
     const [[pw, ph], setParentSize] = useState([0, 0])
-    const [dpr, setDpr] = useState(1)
     const [z, setZ] = useState(0)
+
+    const dpr = (window.devicePixelRatio || 1)
 
     const cssSize = { width: Math.round(pw) + 'px', height: Math.round(ph) + 'px' }
 
@@ -938,8 +939,6 @@ const Editor = ({
             const { width, height } = root.getBoundingClientRect()
             setParentSize([width, height])
         })
-        const dpr = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
-        const onDPRChange = () => setDpr(window.devicePixelRatio || 1)
 
         const onDelete = (e: { key: string }) => {
             if(e.key === 'Delete') {
@@ -963,7 +962,6 @@ const Editor = ({
 
         contextRef.current = context
         resizer.observe(root)
-        dpr.addEventListener('change', onDPRChange)
         document.addEventListener('keydown', onDelete)
 
         rootSelection.call(
@@ -1045,7 +1043,6 @@ const Editor = ({
         return () => {
             resizer.disconnect()
             document.removeEventListener('keydown', onDelete)
-            dpr.removeEventListener('change', onDPRChange)
             rootSelection.on('.drag', null)
         }
     }, [])

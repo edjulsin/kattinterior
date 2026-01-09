@@ -1335,6 +1335,7 @@ const Editor = ({
     })
 
     const onCropStart = curry((_index: number, _item: Item) => {
+        clearCanvas()
         setInteractive(false)
     })
 

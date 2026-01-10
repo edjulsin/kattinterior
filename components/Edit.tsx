@@ -1284,8 +1284,7 @@ const Edit = ({ project }: { project: Project }) => {
 				const items = value.items.filter(v =>
 					!ids.includes(v.src)
 				)
-				const height = getItemsHeight(items)
-				return { ...a, [key]: { ...value, items, height } }
+				return { ...a, [key]: { ...value, items } }
 			}, {}) as Template
 		)
 
@@ -1301,23 +1300,24 @@ const Edit = ({ project }: { project: Project }) => {
 		setTemplate((template: Template) => {
 			const result = fn(template[breakpoint])
 			const current = { ...result, edited: true }
+			const hr = current.height / getItemsHeight(current.items)
 			return Object.entries(template)
 				.filter(([key]) => key !== breakpoint)
 				.reduce((acc, [key, value]) => {
 					if(value.edited) {
 						return { ...acc, [key]: value }
 					} else {
-						const ratio = value.width / current.width
+						const wr = value.width / current.width
 						const items = current.items.map(item => {
 							const box = {
-								x: item.x * ratio,
-								y: item.y * ratio,
-								w: item.w * ratio,
-								h: item.h * ratio
+								x: item.x * wr,
+								y: item.y * wr,
+								w: item.w * wr,
+								h: item.h * wr
 							}
 							return { ...item, ...box }
 						})
-						const height = getItemsHeight(items)
+						const height = getItemsHeight(items) * hr
 						return { ...acc, [key]: { ...value, items, height } }
 					}
 				}, { [breakpoint]: current }) as Template
@@ -1698,7 +1698,7 @@ const Edit = ({ project }: { project: Project }) => {
 						return result
 					})
 				)
-				const height = getItemsHeight(items)
+				const height = Math.max(getItemsHeight(items), layout.height)
 
 				return { ...layout, items, height }
 			})
@@ -1821,17 +1821,18 @@ const Edit = ({ project }: { project: Project }) => {
 														screen,
 														() => updateLayout(layout => {
 															const base = template[screen as keyof Template]
-															const ratio = layout.width / base.width
+															const wr = layout.width / base.width
+															const hr = base.height / getItemsHeight(base.items)
 															const items = base.items.map(item => {
 																const box = {
-																	x: item.x * ratio,
-																	y: item.y * ratio,
-																	w: item.w * ratio,
-																	h: item.h * ratio
+																	x: item.x * wr,
+																	y: item.y * wr,
+																	w: item.w * wr,
+																	h: item.h * wr
 																}
 																return { ...item, ...box }
 															})
-															const height = getItemsHeight(items)
+															const height = getItemsHeight(items) * hr
 
 															return { ...layout, items, height }
 														})

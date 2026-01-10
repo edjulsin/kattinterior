@@ -1,5 +1,5 @@
 import { Items, Project as ProjectType, Item } from '@/type/editor';
-import { ab, extent, getLayout, last, ys } from '@/utility/fn';
+import { ab, extent, getItemsHeight, getLayout, last, ys } from '@/utility/fn';
 import Image from 'next/image';
 import Style from './Style';
 
@@ -169,7 +169,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         join([
             ...responsiveStyles(
                 template.mobile.width,
-                template.mobile.height,
+                getItemsHeight(template.mobile.items),
                 mobileIncludes
             ),
             ...mobileIgnores.map(v =>
@@ -184,7 +184,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
             join([
                 ...responsiveStyles(
                     template.tablet.width,
-                    template.tablet.height,
+                    getItemsHeight(template.tablet.items),
                     tabletIncludes
                 ),
                 ...tabletIgnores.map(v =>
@@ -200,7 +200,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
             join([
                 ...responsiveStyles(
                     template.desktop.width,
-                    template.desktop.height,
+                    getItemsHeight(template.desktop.items),
                     desktopIncludes
                 ),
                 ...desktopIgnores.map(v =>

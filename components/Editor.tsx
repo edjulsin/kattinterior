@@ -816,6 +816,8 @@ const itemsToGroup = (ox: number, oy: number, items: Box[]) =>
         y1: -Infinity
     })
 
+const DPR = () => typeof window === 'undefined' ? 1 : devicePixelRatio
+
 const Editor = ({
     asset,
     setAsset,
@@ -836,7 +838,7 @@ const Editor = ({
     const [[pw, ph], setParentSize] = useState([0, 0])
     const [z, setZ] = useState(0)
 
-    const dpr = (window?.devicePixelRatio ?? 1)
+    const dpr = DPR()
 
     const cssSize = { width: Math.round(pw) + 'px', height: Math.round(ph) + 'px' }
 
@@ -845,7 +847,7 @@ const Editor = ({
     const resetCanvas = () => {
         const canvas = canvasRef.current!
         const context = contextRef.current!
-        const dpr = (window?.devicePixelRatio ?? 1)
+        const dpr = DPR()
 
         context.clearRect(0, 0, canvas.width, canvas.height)
         context.setTransform(1, 0, 0, 1, 0, 0)
@@ -951,8 +953,7 @@ const Editor = ({
                         const items = layout.items.filter(v =>
                             !ids.includes(v.id)
                         )
-                        const height = getItemsHeight(items)
-                        return { ...layout, items, height }
+                        return { ...layout, items }
                     })
                     setActives([])
                     clearCanvas()
@@ -1050,7 +1051,7 @@ const Editor = ({
     const applyChange = curry((index: number, item: Item) =>
         setLayout((layout: Layout) => {
             const items = layout.items.with(index, item)
-            const height = getItemsHeight(items)
+            const height = Math.max(getItemsHeight(items), layout.height)
             return { ...layout, height, items }
         })
     )
@@ -1147,7 +1148,7 @@ const Editor = ({
                 },
                 layout.items
             )
-            const height = getItemsHeight(items)
+            const height = Math.max(getItemsHeight(items), layout.height)
             return { ...layout, items, height }
         })
 
@@ -1361,7 +1362,7 @@ const Editor = ({
                     }
                 )
             ])
-            const height = getItemsHeight(items)
+            const height = Math.max(getItemsHeight(items), layout.height)
             return { ...layout, items, height }
         })
     })

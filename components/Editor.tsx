@@ -953,7 +953,8 @@ const Editor = ({
                         const items = layout.items.filter(v =>
                             !ids.includes(v.id)
                         )
-                        return { ...layout, items }
+                        const height = items.length === 0 ? 0 : layout.height
+                        return { ...layout, items, height }
                     })
                     setActives([])
                     clearCanvas()
@@ -961,9 +962,17 @@ const Editor = ({
             }
         }
 
+        const onClickOutside = (e: PointerEvent) => {
+            if(!root.contains(e.target as Node)) {
+                setActives([])
+                clearCanvas()
+            }
+        }
+
         contextRef.current = context
         resizer.observe(root)
         document.addEventListener('keydown', onDelete)
+        document.addEventListener('pointerdown', onClickOutside, { capture: true })
 
         rootSelection.call(
             drag<HTMLElement, unknown>()

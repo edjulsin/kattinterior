@@ -1284,7 +1284,8 @@ const Edit = ({ project }: { project: Project }) => {
 				const items = value.items.filter(v =>
 					!ids.includes(v.src)
 				)
-				return { ...a, [key]: { ...value, items } }
+				const height = items.length === 0 ? 0 : value.height
+				return { ...a, [key]: { ...value, items, height } }
 			}, {}) as Template
 		)
 
@@ -1420,7 +1421,6 @@ const Edit = ({ project }: { project: Project }) => {
 			'description'
 		]
 		const missings = fields.filter(v => (current[v] as string).trim() === '')
-		const contents = Object.values(template).map(v => v.items)
 		if(missings.length > 0) {
 			const keys: StringKeysOf<Project>[] = ['slug', 'title', 'description']
 			setErrors(missings)
@@ -1433,7 +1433,7 @@ const Edit = ({ project }: { project: Project }) => {
 				title: 'Missing fields.',
 				description: 'Fields cannot be empty.'
 			})
-		} else if(contents.some(contents => contents.length === 0)) {
+		} else if(Object.values(template).some(layout => layout.items.length === 0)) {
 			setErrors([])
 			showErrorToast({
 				title: 'Insufficient number of images.',

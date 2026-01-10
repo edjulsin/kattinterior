@@ -1053,6 +1053,7 @@ const Editor = ({
         return () => {
             resizer.disconnect()
             document.removeEventListener('keydown', onDelete)
+            document.removeEventListener('pointerdown', onClickOutside, { capture: true })
             rootSelection.on('.drag', null)
         }
     }, [])

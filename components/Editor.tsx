@@ -962,17 +962,9 @@ const Editor = ({
             }
         }
 
-        const onClickOutside = (e: PointerEvent) => {
-            if(!root.contains(e.target as Node)) {
-                setActives([])
-                clearCanvas()
-            }
-        }
-
         contextRef.current = context
         resizer.observe(root)
         document.addEventListener('keydown', onDelete)
-        document.addEventListener('pointerdown', onClickOutside, { capture: true })
 
         rootSelection.call(
             drag<HTMLElement, unknown>()
@@ -1053,7 +1045,6 @@ const Editor = ({
         return () => {
             resizer.disconnect()
             document.removeEventListener('keydown', onDelete)
-            document.removeEventListener('pointerdown', onClickOutside, { capture: true })
             rootSelection.on('.drag', null)
         }
     }, [])

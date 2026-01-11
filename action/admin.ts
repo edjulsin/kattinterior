@@ -29,7 +29,7 @@ export const confirmUser = async (id: string) =>
         confirmed: true,
         updated_at: new Date().toISOString()
     }).eq('id', id).then(v =>
-        v.error !== null
+        v.error === null
             ? Promise.resolve(v.data)
             : Promise.reject(v.error)
     )

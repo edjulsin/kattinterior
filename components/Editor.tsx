@@ -7,7 +7,7 @@ import { drag, select } from 'd3'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Item, Photo, Layout, Asset, Items, Box, Extent, Point } from '@/type/editor'
 import { ContextMenu, Dialog } from 'radix-ui'
-import { applyBoxConstrain, capitalize, clamp, curry, o, alt as alternative, half, getItemsHeight, isInsideBox, generateItemBoxes, resize, bottomCenter, topCenter, rightCenter, leftCenter, bottomRight, bottomLeft, topLeft, topRight, crop, eq, splitChildrenAsBoxes, isBoxesIntersect, snap, snapLines, centers } from '@/utility/fn'
+import { applyBoxConstrain, capitalize, clamp, curry, o, alt as alternative, half, getItemsHeight, isInsideBox, generateItemBoxes, resize, bottomCenter, topCenter, rightCenter, leftCenter, bottomRight, bottomLeft, topLeft, topRight, crop, eq, splitChildrenAsBoxes, isBoxesIntersect, snap, snapLines, centers, imageToItemScale } from '@/utility/fn'
 import { DragPropsType, useDrag, UseDragBehavior, UseDragEvent } from '@/hook/useDrag'
 import { v7 as UUIDv7 } from 'uuid'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
@@ -429,10 +429,7 @@ const Editable = ({
         }
     ]
 
-    const imgScale = Math.max(
-        value.w / (value.sw * image.width),
-        value.h / (value.sh * image.height)
-    )
+    const imgScale = imageToItemScale(image, value)
 
     const sx = value.sx * image.width
     const sy = value.sy * image.height
@@ -458,7 +455,7 @@ const Editable = ({
             data-src={value.src}
             data-active={active}
             data-effect={value.effect}
-            data-testid='editable'
+            data-testid='item'
             style={{
                 transform: `translate(${value.x}px, ${value.y}px)`,
                 width: value.w + 'px',
@@ -476,13 +473,14 @@ const Editable = ({
                         >
                             {
                                 error
-                                    ? <img
+                                    ? <Image
                                         ref={imageRef}
                                         className='size-full object-cover object-center'
                                         width={1000}
                                         height={1000}
                                         alt='Image not found. Please delete and reupload.'
-                                        src={Fallback.src}
+                                        src={Fallback}
+                                        data-testid='image'
                                     />
                                     : <Image
                                         ref={imageRef}
@@ -501,6 +499,7 @@ const Editable = ({
                                             `,
                                             pointerEvents: cropMode ? 'auto' : 'none'
                                         }}
+                                        data-testid='image'
                                     />
                             }
                         </div>
@@ -816,7 +815,7 @@ const itemsToGroup = (ox: number, oy: number, items: Box[]) =>
         y1: -Infinity
     })
 
-const DPR = () => typeof window === 'undefined' ? 1 : devicePixelRatio
+const DPR = () => typeof window === 'undefined' ? 1 : (window.devicePixelRatio || 1)
 
 const Editor = ({
     asset,
@@ -840,9 +839,9 @@ const Editor = ({
 
     const dpr = DPR()
 
-    const cssSize = { width: Math.round(pw) + 'px', height: Math.round(ph) + 'px' }
+    const cssSize = { width: pw + 'px', height: ph + 'px' }
 
-    const attSize = { width: Math.round(pw * dpr), height: Math.round(ph * dpr) }
+    const attSize = { width: pw * dpr, height: ph * dpr }
 
     const resetCanvas = () => {
         const canvas = canvasRef.current!
@@ -1334,8 +1333,8 @@ const Editor = ({
     })
 
     const onCropStart = curry((_index: number, _item: Item) => {
-        clearCanvas()
         setInteractive(false)
+        clearCanvas()
     })
 
     const onCrop = curry((index: number, item: Item) => {

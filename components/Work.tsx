@@ -2,7 +2,7 @@ import { getFeaturedProject } from '@/action/anon';
 import { Project } from '@/type/editor';
 import clsx from 'clsx';
 import Image from 'next/image';
-import { getThumbnails } from '@/utility/fn';
+import { generateSizes, getThumbnails } from '@/utility/fn';
 
 const Work = () => getFeaturedProject().then(
     (projects: Project[]) =>
@@ -26,12 +26,13 @@ const Work = () => getFeaturedProject().then(
                     {
                         getThumbnails(2, v).map((img, i) =>
                             <li key={img.id} className={clsx({ 'hidden md:block': i === 1 })}>
-                                <Image // use sizes
-                                    className='w-70 md:w-80 xl:w-90 h-auto aspect-[70_/_100] object-center object-cover'
+                                <Image
+                                    className='w-70 md:w-80 xl:w-90 h-auto aspect-70/100 object-center object-cover'
                                     alt={img.alt}
                                     src={img.src}
                                     width={img.width}
                                     height={img.height}
+                                    sizes={generateSizes(0.7, [280, 320, 360], img)}
                                 />
                             </li>
                         )

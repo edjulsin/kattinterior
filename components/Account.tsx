@@ -58,9 +58,18 @@ const AlertCancel = (
     </AlertDialog.Cancel>
 )
 
-const Profile = ({ user, onSave, open, onOpenChange, onError }: { user: User, open: boolean, onOpenChange: (open: boolean) => void, onSave: (user: User) => void, onError: () => void }) => {
+const Profile = ({ user, onSave, onUploadSuccess, onUploadError, open, onOpenChange }: {
+    user: User,
+    open: boolean,
+    onOpenChange: (open: boolean) => any,
+    onSave: (user: User) => any,
+    onUploadError: () => any,
+    onUploadSuccess: () => any
+}) => {
     const [name, setName] = useState(user.name)
     const [avatar, setAvatar] = useState(user.avatar)
+
+    const [local, setLocal] = useState(user.avatar)
 
     const onUpload = (files: File[]) =>
         compressFromFiles(files).then(blobs =>
@@ -68,31 +77,32 @@ const Profile = ({ user, onSave, open, onOpenChange, onError }: { user: User, op
                 const [blob] = blobs
                 const [photo] = photos
 
-                setAvatar({
-                    id: photo.id,
-                    src: photo.src,
-                    width: photo.width,
-                    height: photo.height
-                })
+                const link = `${user.id}/${photo.id}.jpeg`
 
-                return uploadFile('avatars', `${user.id}/${photo.id}.jpeg`, blob).then(() => { }, onError)
+                return Promise.all([
+                    setLocal(photo.src),
+                    setAvatar(
+                        toStorageURL('avatars', link)
+                    ),
+                    uploadFile('avatars', link, blob),
+                ]).then(onUploadSuccess, onUploadError)
             })
         )
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => e.preventDefault()
 
     useEffect(() => () => {
-        [avatar].filter(v => v.src.startsWith('blob')).forEach(v =>
-            URL.revokeObjectURL(v.src)
+        [local].filter(v => v.startsWith('blob')).forEach(v =>
+            URL.revokeObjectURL(v)
         )
-    }, [])
+    }, [local])
 
-    const ProfilePicture = user.avatar
+    const ProfilePicture = local
         ? <Image
-            className='size-full object-center object-cover'
-            width={avatar.width}
-            height={avatar.height}
-            src={avatar.src}
+            className='w-full h-auto object-center object-cover'
+            src={local}
+            fill={true}
+            sizes={`${80 * 3}px`}
             alt={name || 'Anonymous'}
         />
         : null
@@ -137,7 +147,7 @@ const Profile = ({ user, onSave, open, onOpenChange, onError }: { user: User, op
                             <label htmlFor='avatar' className='sr-only'>Avatar</label>
                             <Droppable
                                 id='avatar'
-                                className='relative rounded-full overflow-clip focus:outline-1 focus:outline-amber-600 size-20 flex flex-col items-center justify-center bg-neutral-200 cursor-pointer'
+                                className='relative rounded-full size-20 overflow-clip focus:outline-1 focus:outline-amber-600 flex flex-col items-center justify-center cursor-pointer'
                                 onDrop={onUpload}
                             >
                                 {ProfilePicture || ProfileDefaultWithUpload}
@@ -162,7 +172,7 @@ const Profile = ({ user, onSave, open, onOpenChange, onError }: { user: User, op
                         className='focus:outline-1 focus:outline-amber-600 text-center font-bold text-base px-4 py-2 rounded-md cursor-pointer transition-colors bg-amber-600 text-light w-full'
                         onClick={() => onSave({ ...user, name, avatar })}
                     >
-                        Save
+                        Update Profile
                     </AlertDialog.Action>
                 </AlertDialog.Content>
             </AlertDialog.Portal>
@@ -174,10 +184,10 @@ const Preview = ({ user, open, onOpenChange, onInvite, onDelete, usePromotion, o
     const [role, setRole] = useState(user.role)
     const ProfilePicture = user.avatar
         ? <Image
-            className='size-full object-center object-cover'
-            src={user.avatar.src}
-            width={user.avatar.width}
-            height={user.avatar.height}
+            className='w-full h-auto object-center object-cover'
+            src={user.avatar}
+            fill={true}
+            sizes={`${80 * 3}px`}
             alt={user.name || 'Anonymous'}
         />
         : null
@@ -292,7 +302,7 @@ const Preview = ({ user, open, onOpenChange, onInvite, onDelete, usePromotion, o
                         </AlertDialog.Description>
                     </div>
                     <div className='flex flex-col justify-center items-center gap-y-5'>
-                        <div className='flex flex-col justify-center items-center size-20 rounded-full overflow-clip'>
+                        <div className='relative flex flex-col justify-center items-center size-20 rounded-full overflow-clip'>
                             {ProfilePicture || ProfileDefault}
                         </div>
                         <div className='flex flex-col justify-center items-center font-medium relative'>
@@ -315,7 +325,15 @@ const Preview = ({ user, open, onOpenChange, onInvite, onDelete, usePromotion, o
     )
 }
 
-const Invite = ({ onInvite, open, onOpenChange }: { open: boolean, onOpenChange: (v: boolean) => void, onInvite: (email: string) => void }) => {
+const Invite = ({
+    onInvite,
+    open,
+    onOpenChange
+}: {
+    open: boolean,
+    onOpenChange: (open: boolean) => any,
+    onInvite: (email: string) => any
+}) => {
     const [email, setEmail] = useState('')
     return (
         <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -415,57 +433,49 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
             )
         })
 
-    const onSave = async (user: User) =>
-        Promise.all(
-            [user].filter(v => !Object.is(profileData, v.avatar) || profileData.name !== v.name).map(v =>
-                updateProfile({
-                    ...v,
-                    avatar: {
-                        ...v.avatar,
-                        src: toStorageURL('avatars', `${v.id}/${v.avatar.id}.jpeg`)
-                    }
-                }).then(
-                    () => {
-                        setProfileData(v)
-                        showSuccessStatus({
-                            title: 'Database Success',
-                            description: 'Profile has been updated.'
-                        })
-                    },
-                    () => showErrorStatus({
-                        title: 'Database Error',
-                        description: 'Error when updating user profile.'
+    const onSave = (user: User) => Promise.all(
+        [user].filter(v => v.avatar !== profileData.avatar || v.name !== profileData.name).map(user =>
+            updateProfile(user).then(
+                () => {
+                    setProfileData(user)
+                    showSuccessStatus({
+                        title: 'Database Success',
+                        description: 'Profile has been updated.'
                     })
-                )
+                },
+                () => showErrorStatus({
+                    title: 'Database Error',
+                    description: 'Error when updating user profile.'
+                })
             )
         )
+    )
 
-    const onInvite = async (email: string) =>
-        Promise.all(
-            [email + ''].filter(v => isEmail(v) && profileData.email !== email).map(email =>
-                inviteByEmail(email).then(
-                    users => {
-                        setTeam(m =>
-                            ([...m, ...users]).reduce<User[]>((a, b) => {
-                                if(a.some(v => v.email === b.email)) {
-                                    return a
-                                } else {
-                                    return [...a, b]
-                                }
-                            }, [])
-                        )
-                        showSuccessStatus({
-                            title: 'Invitation Success',
-                            description: 'Invitation has been sent.'
-                        })
-                    },
-                    () => showErrorStatus({
-                        title: 'Invitation Error',
-                        description: 'Error when sending the invitation.'
+    const onInvite = async (email: string) => Promise.all(
+        [email + ''].filter(v => isEmail(v) && profileData.email !== email).map(email =>
+            inviteByEmail(email).then(
+                users => {
+                    setTeam(m =>
+                        ([...m, ...users]).reduce<User[]>((a, b) => {
+                            if(a.some(v => v.email === b.email)) {
+                                return a
+                            } else {
+                                return [...a, b]
+                            }
+                        }, [])
+                    )
+                    showSuccessStatus({
+                        title: 'Invitation Success',
+                        description: 'Invitation has been sent.'
                     })
-                )
+                },
+                () => showErrorStatus({
+                    title: 'Invitation Error',
+                    description: 'Error when sending the invitation.'
+                })
             )
         )
+    )
 
     const onPromote = (user: User) =>
         Promise.all(
@@ -506,22 +516,24 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
             })
         )
 
-    const onError = () => showErrorStatus({
-        title: 'Storage Error',
-        description: 'Error when uploading image file to storage.'
+    const onUploadSuccess = () => showSuccessStatus({
+        title: 'Storage Success',
+        description: 'Successfully upload user profile picture.'
     })
 
-    const profile = () => setShowProfile(!showProfile)
-    const invite = () => setShowInvite(!showInvite)
+    const onUploadError = () => showErrorStatus({
+        title: 'Storage Error',
+        description: 'Error when uploading user profile picture.'
+    })
 
     const ProfileDefault = <AccessibleIcon.Root label='Account'><PersonIcon /></AccessibleIcon.Root>
 
     const ProfilePicture = profileData.avatar
         ? <Image
-            className='size-full object-center object-cover'
-            src={profileData.avatar.src}
-            width={profileData.avatar.width}
-            height={profileData.avatar.height}
+            className='w-full h-auto object-center object-cover'
+            src={profileData.avatar}
+            fill={true}
+            sizes={`${32 * 3}px`}
             alt={profileData.name || 'Anonymous'}
         />
         : null
@@ -533,10 +545,10 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
                 team.map(m => {
                     const ProfilePicture = m.avatar
                         ? <Image
-                            className='size-full object-center object-cover'
-                            src={m.avatar.src}
-                            width={m.avatar.width}
-                            height={m.avatar.height}
+                            className='w-full h-auto object-center object-cover'
+                            src={m.avatar}
+                            fill={true}
+                            sizes={`${32 * 3}px`}
                             alt={m.name || 'Anonymous'}
                         />
                         : null
@@ -552,10 +564,10 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
                             onSelect={onSelect}
                             className='flex gap-x-2 items-center px-4 py-2 rounded-lg outline-1'
                         >
-                            <div className='size-8 overflow-clip rounded-full flex justify-center items-center'>
+                            <div className='relative size-8 overflow-clip rounded-full flex justify-center items-center'>
                                 {ProfilePicture || ProfileDefault}
                             </div>
-                            <div className='flex flex-col justify-center opacity-50 *:max-w-[125px] text-xs font-medium *:overflow-hidden *:text-ellipsis *:whitespace-nowrap'>
+                            <div className='flex flex-col justify-center opacity-50 *:max-w-31.25 text-xs font-medium *:overflow-hidden *:text-ellipsis *:whitespace-nowrap'>
                                 <span className='capitalize'>{m.name || 'anonymous'}</span>
                                 <span>{m.email}</span>
                             </div>
@@ -563,10 +575,7 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
                     )
                 })
             }
-            <DropdownMenu.Item
-                onSelect={invite}
-                className='flex gap-x-2 items-center px-4 py-2 outline-1 rounded-lg'
-            >
+            <DropdownMenu.Item onSelect={() => setShowInvite(true)} className='flex items-center gap-x-2 px-4 py-2 rounded-lg outline-1'>
                 <span>Invite new member</span>
                 <span className='opacity-50'>
                     <PlusIcon />
@@ -593,6 +602,7 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
             <DropdownMenu.Root>
                 <DropdownMenu.Trigger
                     className='
+                        relative
                         outline-1 
                         rounded-full
                         overflow-clip
@@ -616,6 +626,7 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
                         align='end'
                         sideOffset={10}
                         className='
+                            z-50
                             text-sm 
                             font-semibold 
                             font-sans 
@@ -636,10 +647,7 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
                             *:data-highlighted:text-light
                         '
                     >
-                        <DropdownMenu.Item
-                            onSelect={profile}
-                            className='flex flex-col justify-center items-baseline px-4 py-2 outline-1 rounded-lg'
-                        >
+                        <DropdownMenu.Item onSelect={() => setShowProfile(true)} className='flex flex-col justify-center px-4 py-2 outline-1 rounded-lg'>
                             <span>Profile</span>
                             <span className='opacity-50 font-medium text-xs'>
                                 {profileData.email}
@@ -649,27 +657,28 @@ const Account = ({ user, members }: { user: User, members: User[] }) => {
                         {(['admin', 'owner']).includes(user.role) ? Team : null}
                         <DropdownMenu.Item
                             onSelect={home}
-                            className='flex justify-between items-center px-4 py-2 outline-1 rounded-lg'
+                            className='px-4 py-2 outline-1 rounded-lg'
                         >
                             Home
                         </DropdownMenu.Item>
                         <DropdownMenu.Item
                             onSelect={logout}
-                            className='flex justify-between items-center px-4 py-2 outline-1 rounded-lg'
+                            className='px-4 py-2 outline-1 rounded-lg'
                         >
                             Logout
                         </DropdownMenu.Item>
                     </DropdownMenu.Content>
                 </DropdownMenu.Portal>
             </DropdownMenu.Root>
+            {Member}
             <Profile
-                user={profileData}
-                onSave={onSave}
                 open={showProfile}
                 onOpenChange={setShowProfile}
-                onError={onError}
+                user={profileData}
+                onSave={onSave}
+                onUploadError={onUploadError}
+                onUploadSuccess={onUploadSuccess}
             />
-            {Member}
             <Invite
                 open={showInvite}
                 onOpenChange={setShowInvite}

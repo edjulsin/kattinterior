@@ -1,10 +1,10 @@
 import type { Project } from '@/type/editor'
 import Link from 'next/link'
 import Image from 'next/image'
-import { alt, getThumbnails } from '@/utility/fn'
+import { alt, generateSizes, getThumbnails } from '@/utility/fn'
 import React from 'react'
 
-const Article = ({ className, heading, project, index }: { heading: string, className?: string, project: Project, index: number }) => {
+const Article = ({ className, heading, project, index, loading = 'lazy' }: { loading?: 'lazy' | 'eager', heading: string, className?: string, project: Project, index: number }) => {
     const [thumbnail] = getThumbnails(1, project)
 
     const title = React.createElement(
@@ -23,12 +23,13 @@ const Article = ({ className, heading, project, index }: { heading: string, clas
         >
             <article className='flex flex-col justify-center items-center gap-y-5'>
                 <Image
-                    className='w-full h-auto aspect-[65_/_90] max-w-2xs md:max-w-xs object-cover object-center'
+                    className='w-full h-auto aspect-65/90 max-w-2xs md:max-w-xs object-cover object-center'
                     src={thumbnail.src}
                     alt={alt(thumbnail.alt)}
                     width={thumbnail.width}
                     height={thumbnail.height}
-
+                    sizes={generateSizes(65 / 90, [288, 320], thumbnail)}
+                    loading={loading}
                 />
                 <div className='flex justify-center items-center gap-x-3 w-full'>
                     <span className='text-center font-serif text-xs size-12 p-2 flex justify-center items-center flex-col rounded-full outline-1 outline-gold-900 text-gold-900'>

@@ -92,7 +92,7 @@ const Profile = ({ user, onSave, onUploadSuccess, onUploadError, open, onOpenCha
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => e.preventDefault()
 
     useEffect(() => () => {
-        [local].filter(v => v.startsWith('blob')).forEach(v =>
+        [local].filter(v => v !== avatar).forEach(v =>
             URL.revokeObjectURL(v)
         )
     }, [local])

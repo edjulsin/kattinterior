@@ -218,18 +218,15 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
 
     const sizes = (image: Photo, item: Item) => {
         const parallax = (v: Item) => v.effect === 'parallax' ? 1.2 : 1
-        const scale = 1.5
+        const scale = 1.25
         const m = [mobile[item.id]].filter(v => v).map(v => {
-            const scaled = image.width * imageToItemScale(image, v) * parallax(v) * scale
-            return [mw, Math.min(scaled, image.width)]
+            return [mw, Math.min(image.width * imageToItemScale(image, v) * parallax(v) * scale, image.width)]
         })
         const t = [tablet[item.id]].filter(v => v).map(v => {
-            const scaled = image.width * imageToItemScale(image, v) * parallax(v) * scale
-            return [tw, Math.min(scaled, image.width)]
+            return [tw, Math.min(image.width * imageToItemScale(image, v) * parallax(v) * scale, image.width)]
         })
         const d = [desktop[item.id]].filter(v => v).map(v => {
-            const scaled = image.width * imageToItemScale(image, v) * parallax(v) * scale
-            return [dw, Math.min(scaled, image.width)]
+            return [dw, Math.min(image.width * imageToItemScale(image, v) * parallax(v) * scale, image.width)]
         })
         return [m, t, d].flat().map(([vw, rw], i) => i < 2 ? `(max-width: ${vw}px): ${rw}px` : `${rw}px`).join(', ')
     }

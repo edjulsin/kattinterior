@@ -2,6 +2,13 @@ import Image from 'next/image'
 import first from '@/assets/1.jpg'
 import second from '@/assets/2.jpg'
 import third from '@/assets/3.jpg'
+import { generateSizes } from '@/utility/fn'
+
+const parallax = 1.2
+
+const firstSizes = generateSizes(60 / 80, [280, 280, 320].map(v => v * parallax), first)
+const secondSizes = generateSizes(60 / 90, [280, 320, 360], second)
+const thirdSizes = generateSizes(60 / 80, [240].map(v => v * parallax), third)
 
 const Chaterina = () =>
     <section
@@ -17,29 +24,26 @@ const Chaterina = () =>
     >
         <div className='parallax hidden md:block md:row-start-2 md:row-end-4 md:justify-self-end xl:justify-self-center'>
             <Image
-                className='w-70 xl:w-80 h-auto aspect-[60_/_80] object-center object-cover'
+                className='w-70 xl:w-80 h-auto aspect-60/80 object-center object-cover'
                 src={first}
                 alt='Chaterina Working in an Art Gallery'
-                width={1080}
-                height={1350}
+                sizes={firstSizes}
             />
         </div>
         <div className='md:row-start-1 md:row-end-3 md:justify-self-start xl:justify-self-center'>
             <Image
-                className='w-70 md:w-80 xl:w-90 h-auto aspect-[60_/_90] object-left object-cover'
+                className='w-70 md:w-80 xl:w-90 h-auto aspect-60/90 object-left object-cover'
                 src={second}
                 alt='Chaterina find inspirations in an Arts Gallery'
-                width={1080}
-                height={1350}
+                sizes={secondSizes}
             />
         </div>
         <div className='parallax hidden xl:block xl:col-start-3 xl:row-start-1 xl:row-end-4'>
             <Image
-                className='w-60 h-auto aspect-[60_/_80] object-center object-cover'
+                className='w-60 h-auto aspect-60/80 object-center object-cover'
                 src={third}
                 alt='Chaterina Working with a Client'
-                width={1440}
-                height={1080}
+                sizes={thirdSizes}
             />
         </div>
     </section>

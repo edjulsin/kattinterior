@@ -5,6 +5,22 @@ import fallback from '@/assets/fallback.svg'
 import sanitizer from 'sanitize-html'
 import downscale from 'downscale'
 
+export const imageToItemScale = (image: Photo, item: Item) =>
+    Math.max(
+        item.w / (item.sw * image.width),
+        item.h / (item.sh * image.height)
+    )
+
+export const generateSizes = (aspectRatio: number, rws: number[], image: { width: number, height: number }) => {
+    const vws = [384, 768, 1280]
+    const rhs = rws.map(v => (1 / aspectRatio) * v)
+    const sizes = rws.map((w, i) => {
+        return [vws[i], Math.max(w / image.width, rhs[i] / image.height) * image.width]
+    })
+    const scale = 1.5
+    return sizes.map(([vw, rw], i) => (i + 1) < rws.length ? `(max-width: ${vw}px) ${Math.ceil(rw * scale)}px` : `${Math.ceil(rw * scale)}px`).join(', ')
+}
+
 export const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)
 
 export const urlToPhoto = (url: string): Promise<Photo> => new Promise((resolve, reject) => {
@@ -441,8 +457,8 @@ export const defaultThumbnail = () => ({
     id: UUIDv7(),
     src: fallback,
     alt: 'Fallback thumbnail',
-    width: 29,
-    height: 29,
+    width: 1000,
+    height: 1000,
     thumbnail: false
 })
 
@@ -613,13 +629,6 @@ export const eq = (a: number, b: number) => Math.round(a) === Math.round(b)
 
 export const origins = (item: Box) => ([...corners(item), ...centers(item)])
 
-export const smaller = (a: number, b: number): number => {
-    const [e] = [a, b].toSorted((a, b) =>
-        Math.abs(a) - Math.abs(b)
-    )
-    return e
-}
-
 export const sequences = <T>(cb: (item: T, index: number) => void, items: T[]) =>
     items.reduce(
         (a, b, i) => a.then(() =>
@@ -627,6 +636,13 @@ export const sequences = <T>(cb: (item: T, index: number) => void, items: T[]) =
         ),
         Promise.resolve()
     )
+
+export const smaller = (a: number, b: number): number => {
+    const [e] = [a, b].toSorted((a, b) =>
+        Math.abs(a) - Math.abs(b)
+    )
+    return e
+}
 
 export const smallest = (a: Box, b: Box): Point => {
     const reducer = (xs: number[], ys: number[]) => {

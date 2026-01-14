@@ -1,3 +1,5 @@
+'use client'
+
 import Intersection from './Intersection'
 import Spinner from './Spinner'
 
@@ -7,11 +9,12 @@ const Loader = ({ enabled, children, callback }: {
     children?: React.ReactNode
 }) =>
     <Intersection
-        selectors={ [ '.spinner' ] }
-        callback={ callback }
+        selectors={['.spinner']}
+        callback={callback}
+        options={{ threshold: 1 }}
     >
-        { children ?? null }
-        { enabled ? <Spinner className='spinner size-8 text-gold-950' /> : null }
+        {children ?? null}
+        {enabled ? <Spinner /> : null}
     </Intersection>
 
 export default Loader

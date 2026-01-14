@@ -1,5 +1,5 @@
-import { Items, Project as ProjectType, Item } from '@/type/editor';
-import { ab, extent, getItemsHeight, getLayout, last, ys } from '@/utility/fn';
+import { Items, Project as ProjectType, Item, Photo } from '@/type/editor';
+import { ab, extent, getItemsHeight, getLayout, imageToItemScale, last, ys } from '@/utility/fn';
 import Image from 'next/image';
 import Style from './Style';
 
@@ -19,6 +19,15 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
     }
 
     const join = (styles: string[]) => styles.join('\n')
+
+    const dw = template.desktop.width
+    const dh = getItemsHeight(template.desktop.items)
+
+    const tw = template.tablet.width
+    const th = getItemsHeight(template.tablet.items)
+
+    const mw = template.mobile.width
+    const mh = getItemsHeight(template.mobile.items)
 
     const layout = getLayout(template)
 
@@ -114,7 +123,12 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
         const gaps = getGaps(
             layout.map(last)
         )
-        const container = `.layout { aspect-ratio: ${w} / ${h};}`
+        const container = `
+            .layout { 
+                opacity: 100%;
+                aspect-ratio: ${w} / ${h};
+            }
+        `
         return [
             container,
             ...layout.flatMap(([i, row], j) => {
@@ -145,17 +159,16 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                             }
                         `
                         const img = asset[v.src]
-                        const scale = Math.max(
-                            v.w / (v.sw * img.width),
-                            v.h / (v.sh * img.height)
-                        )
+                        const scale = imageToItemScale(img, v)
+                        const imgWidth = ((img.width * scale) / w) * 100
+                        const imgHeight = ((img.height * scale) / h) * 100
                         const image = `
                             .item-${v.id} > .image-${img.id} {
                                 translate: ${-v.sx * 100}% ${-v.sy * 100}%;
-                                width: ${((img.width * scale) / w) * 100}cqw;
-                                height: ${((img.height * scale) / h) * 100}cqh;
-                                max-width: none;
-                                max-height: none;
+                                width: ${imgWidth}cqw;
+                                height: ${imgHeight}cqh;
+                                max-width: ${imgWidth}cqw;
+                                max-height: ${imgHeight}cqh;
                             }   
                         `
                         return [item, image]
@@ -167,11 +180,7 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
 
     const styles = [
         join([
-            ...responsiveStyles(
-                template.mobile.width,
-                getItemsHeight(template.mobile.items),
-                mobileIncludes
-            ),
+            ...responsiveStyles(mw, mh, mobileIncludes),
             ...mobileIgnores.map(v =>
                 `.section-${v} { display: none; height: 0px; }`
             ),
@@ -180,13 +189,9 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
             )
         ]),
         atBreakpoint(
-            template.tablet.width,
+            tw,
             join([
-                ...responsiveStyles(
-                    template.tablet.width,
-                    getItemsHeight(template.tablet.items),
-                    tabletIncludes
-                ),
+                ...responsiveStyles(tw, th, tabletIncludes),
                 ...tabletIgnores.map(v =>
                     `.section-${v} { display: none; height: 0px; }`
                 ),
@@ -196,13 +201,9 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
             ])
         ),
         atBreakpoint(
-            template.desktop.width,
+            dw,
             join([
-                ...responsiveStyles(
-                    template.desktop.width,
-                    getItemsHeight(template.desktop.items),
-                    desktopIncludes
-                ),
+                ...responsiveStyles(dw, dh, desktopIncludes),
                 ...desktopIgnores.map(v =>
                     `.section-${v} { display: none; height: 0px; }`
                 ),
@@ -214,6 +215,20 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
     ].filter(v => v)
 
     const formatAlt = (v: string) => `${v || 'Interior'} Designed By ${brand}`
+
+    const sizes = (image: Photo, item: Item) => {
+        const parallax = (v: Item) => v.effect === 'parallax' ? 1.2 : 1
+        const m = [mobile[item.id]].filter(v => v).map(v =>
+            `(max-width: ${mw}px) ${Math.ceil(image.width * imageToItemScale(image, v) * parallax(v))}px`
+        )
+        const t = [tablet[item.id]].filter(v => v).map(v =>
+            `(max-width: ${tw}px) ${Math.ceil(image.width * imageToItemScale(image, v) * parallax(v))}px`
+        )
+        const d = [desktop[item.id]].filter(v => v).map(v =>
+            `${Math.ceil(image.width * imageToItemScale(image, v) * parallax(v))}px`
+        )
+        return [m, t, d].flat().join(', ')
+    }
 
     return (
         <article className='flex flex-col items-center justify-center gap-y-30 py-5 w-full overflow-clip'>
@@ -229,24 +244,26 @@ const Project = ({ name, location, story, tagline, assets, template }: ProjectTy
                     {tagline}
                 </h3>
             </header>
-            <div className='w-full layout' style={{ containerType: 'size' }}>
+            <div className='w-full opacity-0 layout' style={{ containerType: 'size' }}>
                 {
                     layout.map((items, i) =>
                         <section key={i} className={`w-full section-${i}`}>
                             {
                                 items.map(item => {
-                                    const img = asset[item.src]
+                                    const image = asset[item.src]
                                     return (
                                         <div
                                             key={item.id}
                                             className={`anim-delay-[125ms] item-${item.id}` + (item.effect ? ` ${item.effect}` : '')}
                                         >
                                             <Image
-                                                className={`anim-delay-[125ms] size-80 image-${img.id}`}
-                                                src={img.src}
-                                                width={img.width}
-                                                height={img.height}
-                                                alt={formatAlt(img.alt)}
+                                                className={`anim-delay-[125ms] image-${image.id}`}
+                                                src={image.src}
+                                                width={image.width}
+                                                height={image.height}
+                                                loading={i === 0 ? 'eager' : 'lazy'}
+                                                sizes={sizes(image, item)}
+                                                alt={formatAlt(image.alt)}
                                             />
                                         </div>
                                     )

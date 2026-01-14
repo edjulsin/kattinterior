@@ -11,7 +11,7 @@ import { debounce, formatISODate } from '@/utility/fn'
 const Rows = ({ contacts }: { contacts: Contact[] }) => {
     const now = new Date()
     return contacts.map(({ name, email, updated_at }, i) =>
-        <tr className='text-base not-last:border-b-1 not-last:border-b-neutral-200 text-nowrap *:px-8 *:py-3 *:text-left *:truncate' key={i + email}>
+        <tr className='text-base not-last:border-b not-last:border-b-neutral-200 text-nowrap *:px-8 *:py-3 *:text-left *:truncate' key={i + email}>
             <td className='w-[20%] font-medium opacity-50 capitalize hidden md:table-cell'>{name}</td>
             <td className='w-[40%] font-semibold'>
                 <a className='text-amber-600 underline' href={`mailto:${email}`}>{email}</a>
@@ -111,24 +111,24 @@ const Contacts = ({ fetchCount, contacts }: { fetchCount: number, contacts: Cont
         : data
 
     return (
-        <section className='flex flex-col justify-center items-center gap-y-5'>
-            <header>
-                <div className='flex justify-center items-center bg-light dark:bg-dark px-2 py-1 rounded-xl outline-1 outline-neutral-200 focus-within:outline-amber-600 transition-colors'>
+        <section className='flex flex-col justify-center items-center'>
+            <header className='flex justify-center items-center *:px-3 *:py-1.5'>
+                <div className='flex justify-center items-center gap-x-2 bg-light dark:bg-dark px-2 py-1 rounded-xl outline-1 outline-neutral-200 focus-within:outline-amber-600 transition-colors'>
                     <MagnifyingGlassIcon className='text-gold-900' />
                     <input
-                        className='max-h-6 max-w-30 size-full p-2 font-semibold outline-transparent outline-1'
+                        className='min-w-3xs size-full font-semibold outline-transparent outline-1'
                         placeholder='Find emails...'
                         value={search}
                         onChange={e => onSearch(e.target.value)}
                     />
                 </div>
             </header>
-            <section className='py-15 w-[80%] flex flex-col justify-center items-center'>
+            <section className='py-20 w-[80%] flex flex-col justify-center items-center'>
                 {
                     filtered.length > 0
                         ? <table className='ring-1 ring-neutral-200 rounded-sm text-base table-fixed w-full'>
                             <thead>
-                                <tr className='border-b-1 border-b-neutral-200 opacity-50 text-nowrap *:px-8 *:py-3 *:text-left *:font-semibold *:uppercase'>
+                                <tr className='border-b border-b-neutral-200 opacity-50 text-nowrap *:px-8 *:py-3 *:text-left *:font-semibold *:uppercase'>
                                     <th className='w-[20%] hidden md:table-cell'>Name</th>
                                     <th className='w-[40%]'>Email</th>
                                     <th className='w-[40%]'>Time</th>

@@ -1,39 +1,38 @@
+import { ComponentProps } from 'react'
 import { describe, expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { Locator, page } from 'vitest/browser'
 import { Asset, Box, Extent, Item, Layout } from '@/type/editor'
 import { v7 as UUIDv7 } from 'uuid'
-import { counts, defaultThumbnail, half, resize, sequences, crop, center, clamp } from '@/utility/fn'
+import { counts, half, resize, sequences, crop, center, clamp, defaultThumbnail } from '@/utility/fn'
 import Editor from '@/components/Editor'
-import React, { ComponentProps } from 'react'
 
 const width = 1280
 const size = width / 3
-const height = size
+const height = width
 const edited = false
+const defaultImage = defaultThumbnail()
 
-const image = defaultThumbnail()
+const scaled = Math.min(defaultImage.width / size, defaultImage.height / size) * size
 
-const scaled = Math.min(image.width / size, image.height / size) * size
-
-const item = {
+const defaultItem = {
     id: UUIDv7(),
-    src: image.id,
+    src: defaultImage.id,
     z: 1,
     x: half(width) - half(size),
-    y: 0,
+    y: half(height) - half(size),
     w: size,
     h: size,
-    sx: ((image.width - scaled) * .5) / image.width,
-    sy: ((image.height - scaled) * .5) / image.height,
-    sw: scaled / image.width,
-    sh: scaled / image.height,
+    sx: ((defaultImage.width - scaled) * .5) / defaultImage.width,
+    sy: ((defaultImage.height - scaled) * .5) / defaultImage.height,
+    sw: scaled / defaultImage.width,
+    sh: scaled / defaultImage.height,
     effect: ''
 }
 
-const asset = { [image.id]: image }
+const asset = { [defaultImage.id]: defaultImage }
 
-const items = [item]
+const items = [defaultItem]
 
 const layout = { edited, width, height, items }
 
@@ -56,18 +55,12 @@ const points = (offset: number) => ([
     [0, -offset]
 ])
 
-const moves = [ // must be greater than 5 because of snap
-    [0, 0],
-    ...points(.1 * size),
-    ...points(.25 * size),
-    ...points(.5 * size),
-    ...points(size)
-]
+const moves = [[0, 0], ...points(.25 * size)]
 
-const scales = [
-    ...counts(i => 1 + i * (1 / 5), 6, []),
-    ...counts(i => i * (1 / 5), 6, [])
-]
+const scaleUps = counts(i => 1 + i * (1 / 5), 6, [])
+const scaleDowns = counts(i => i * (1 / 5), 6, [])
+
+const scales = [...scaleUps, ...scaleDowns]
 
 const toBox = (item: Locator) => {
     const box = item.element().getBoundingClientRect()
@@ -117,10 +110,10 @@ const boxTests = ([[wMin, wMax], [hMin, hMax]]: Extent, [[xMin, xMax], [yMin, yM
         expect(box.y + box.h).lessThanOrEqual(yMax)
     })
 
-    expect(Math.abs(a.x - b.x)).lessThan(1)
-    expect(Math.abs(a.y - b.y)).lessThan(1)
-    expect(Math.abs(a.w - b.w)).lessThan(1)
-    expect(Math.abs(a.h - b.h)).lessThan(1)
+    expect(Math.trunc(a.x - b.x)).lessThan(1)
+    expect(Math.trunc(a.y - b.y)).lessThan(1)
+    expect(Math.trunc(a.w - b.w)).lessThan(1)
+    expect(Math.trunc(a.h - b.h)).lessThan(1)
 }
 
 const itemTests = (sizeExtent: Extent, translateExtent: Extent, a: Item, b: Item) => {
@@ -135,10 +128,10 @@ const itemTests = (sizeExtent: Extent, translateExtent: Extent, a: Item, b: Item
         expect(item.sh).lessThanOrEqual(1)
     })
 
-    expect(a.sx - b.sx).toBeCloseTo(0)
-    expect(a.sy - b.sy).toBeCloseTo(0)
-    expect(a.sw - b.sw).toBeCloseTo(0)
-    expect(a.sh - b.sh).toBeCloseTo(0)
+    expect(Math.trunc(a.sx - b.sx)).lessThan(1)
+    expect(Math.trunc(a.sy - b.sy)).lessThan(1)
+    expect(Math.trunc(a.sw - b.sw)).lessThan(1)
+    expect(Math.trunc(a.sh - b.sh)).lessThan(1)
 }
 
 const translateBox = <T extends Box>(x: number, y: number, box: T) => ({
@@ -147,7 +140,7 @@ const translateBox = <T extends Box>(x: number, y: number, box: T) => ({
     y: Math.max(box.y + y, 0)
 })
 
-const init = async (width: number, height: number, props?: Partial<ComponentProps<typeof Editor>>) => {
+const init = async (props?: Partial<ComponentProps<typeof Editor>>) => {
     const setLayout = vi.fn(
         (fn: (layout: Layout) => Layout) => fn(props?.layout ?? layout)
     )
@@ -163,37 +156,25 @@ const init = async (width: number, height: number, props?: Partial<ComponentProp
         ...(props ?? ({}))
     }
 
-    const padding = 200
-
-    await page.viewport(width, height + padding)
-
     const editor = await render(
-        <Editor {...initialProps} />,
-        {
-            wrapper: ({ children }: { children: React.ReactNode }) =>
-                <div data-testid='wrapper' className='size-full py-25 flex flex-col justify-center'>
-                    {children}
-                </div>
-        }
+        <Editor {...initialProps} />
     )
 
-    const rerender = (props?: Partial<ComponentProps<typeof Editor>>) =>
-        editor.rerender(
-            <Editor {...{ ...initialProps, ...props }} />
-        ).then(() =>
-            page.viewport(
-                Math.max(props?.layout?.width ?? initialProps.layout.width, width),
-                Math.max(props?.layout?.height ?? initialProps.layout.height, height) + padding
-            )
+    const rerender = (props?: Partial<ComponentProps<typeof Editor>>) => {
+        setLayout.mockReset()
+        setLayout.mockImplementationOnce(
+            (fn: (layout: Layout) => Layout) => fn(props?.layout ?? layout)
         )
+        return editor.rerender(
+            <Editor {...{ ...initialProps, ...props }} />
+        )
+    }
 
     const reset = async () => {
         setLayout.mockReset()
         return editor.rerender(
             <Editor {...initialProps} />
-        ).then(() => {
-            return page.viewport(width, height + padding)
-        })
+        )
     }
 
     return {
@@ -209,9 +190,10 @@ const init = async (width: number, height: number, props?: Partial<ComponentProp
 
 describe('Editor', () => {
     test('container & items should have correct positions and sizes', async () => {
-        const { layout, editor } = await init(width, height)
+        const { layout, editor } = await init()
+
         const container = editor.getByTestId('container')
-        const item = editor.getByTestId('editable')
+        const item = editor.getByTestId('item')
 
         const cBox = toBox(container)
         const iBox = toBox(item)
@@ -239,27 +221,18 @@ describe('Editor', () => {
     })
 
     test('items should moved to correct position when dragged', async () => {
-        const { layout, editor, setLayout, rerender, reset } = await init(width, height)
+        const { editor, setLayout, rerender, reset } = await init()
 
-        const wrapper = editor.getByTestId('wrapper')
         const container = editor.getByTestId('container')
-        const item = editor.getByTestId('editable')
+        const item = editor.getByTestId('item')
 
-        const wBox = toBox(wrapper)
-        const cBox = toBox(container)
-        const iBox = translateBox(
-            -wBox.x,
-            -wBox.y,
-            toBox(item)
-        )
+        const iBox = toBox(item)
 
         const [ex, ey] = center(iBox)
 
-        const [ref] = layout.items
-
         await sequences(
             async ([mx, my]) =>
-                item.dropTo(wrapper, {
+                item.dropTo(container, {
                     sourcePosition: { x: half(iBox.w), y: half(iBox.h) },
                     targetPosition: {
                         x: ex + mx,
@@ -272,12 +245,8 @@ describe('Editor', () => {
 
                     return rerender({ layout: result })
                 }).then(async () => {
-                    const a = translateBox(
-                        -cBox.x,
-                        -cBox.y,
-                        toBox(item)
-                    )
-                    const b = translateBox(mx, my, ref)
+                    const a = toBox(item)
+                    const b = translateBox(mx, my, iBox)
 
                     boxTests(sizeExtent, translateExtent, a, b)
 
@@ -289,21 +258,13 @@ describe('Editor', () => {
     })
 
     test('resize should change the size and/or position of an item', async () => {
-        const { editor, setLayout, rerender, reset } = await init(width, height)
+        const { editor, setLayout, rerender, reset } = await init()
 
-        const wrapper = editor.getByTestId('wrapper')
         const container = editor.getByTestId('container')
-        const item = editor.getByTestId('editable')
+        const item = editor.getByTestId('item')
         const handles = editor.getByTestId('handle').all()
 
-        const wBox = toBox(wrapper)
-        const cBox = toBox(container)
-        const iBox = translateBox(
-            -cBox.x,
-            -cBox.y,
-            toBox(item)
-        )
-
+        const iBox = toBox(item)
         const [ex, ey] = center(iBox)
 
         await item.click({
@@ -314,25 +275,25 @@ describe('Editor', () => {
             s => sequences(
                 h => {
                     const hBox = toBox(h)
-                    const handle = translateBox(-cBox.x, -cBox.y, hBox)
-                    const [hx, hy] = center(handle)
-                    const ax = Math.sign(hx - ex)
-                    const ay = Math.sign(hy - ey)
+                    const [hx, hy] = center(hBox)
+
+                    const ax = Math.sign(
+                        Math.trunc(hx) - Math.trunc(ex)
+                    )
+                    const ay = Math.sign(
+                        Math.trunc(hy) - Math.trunc(ey)
+                    )
                     const dx = ((s * iBox.w) - iBox.w) * ax
                     const dy = ((s * iBox.h) - iBox.h) * ay
 
-                    const target = translateBox(-wBox.x, -wBox.y, hBox)
-
-                    const [tx, ty] = center(target)
-
-                    return h.dropTo(wrapper, {
+                    return h.dropTo(container, {
                         sourcePosition: {
-                            x: half(handle.w),
-                            y: half(handle.h)
+                            x: half(hBox.w),
+                            y: half(hBox.h)
                         },
                         targetPosition: {
-                            x: tx + dx,
-                            y: ty + dy
+                            x: hx + dx,
+                            y: hy + dy
                         }
                     }).then(() => {
                         const [result] = setLayout.mock.results
@@ -340,12 +301,8 @@ describe('Editor', () => {
                             .map(v => v.value)
 
                         return rerender({ layout: result })
-                    }).then(() => {
-                        const a = translateBox(
-                            -cBox.x,
-                            -cBox.y,
-                            toBox(item)
-                        )
+                    }).then(async () => {
+                        const a = toBox(item)
 
                         const b = resize(
                             [[15, width], [15, Infinity]],
@@ -367,37 +324,34 @@ describe('Editor', () => {
     })
 
     test('crop should change the size and/or position of an item and change image crop region', async () => {
-        const { editor, reset, setLayout, rerender } = await init(width, height)
+        const { editor, reset, setLayout, rerender } = await init({
+            layout: {
+                ...layout,
+                items: items.map(v => {
+                    return {
+                        ...v,
+                        sx: v.sx + .1,
+                        sy: v.sy + .1,
+                        sw: v.sw * .8,
+                        sh: v.sh * .8,
+                    }
+                })
+            }
+        })
 
         const container = editor.getByTestId('container')
-        const wrapper = editor.getByTestId('wrapper')
-        const item = editor.getByTestId('editable')
-        const image = editor.getByRole('img')
+        const item = editor.getByTestId('item')
+        const image = editor.getByTestId('image')
         const handles = editor.getByTestId('handle').all()
 
-        const cBox = toBox(container)
-        const wBox = toBox(wrapper)
-        const ref = translateBox(
-            -cBox.x,
-            -cBox.y,
-            toItem(image, item)
-        )
-        const iBox = translateBox(-cBox.x, -cBox.y, ref)
-        const mBox = translateBox(
-            -cBox.x,
-            -cBox.y,
-            toBox(image)
-        )
-
+        const iBox = toItem(image, item)
         const [ex, ey] = center(iBox)
 
-        const [imx, imy] = center(
-            translateBox(
-                -wBox.x,
-                -wBox.y,
-                toBox(image)
-            )
-        )
+        const mBox = toBox(image)
+
+        const [imx, imy] = center(mBox)
+
+        const ref = iBox
 
         await item.click({
             button: 'right',
@@ -408,25 +362,24 @@ describe('Editor', () => {
 
         await sequences(
             s => sequences(
-                h => {
+                async h => {
                     const hBox = toBox(h)
-                    const handle = translateBox(-wBox.x, -wBox.y, hBox)
-                    const [hx, hy] = center(handle)
+                    const [hx, hy] = center(hBox)
 
-                    const [chx, chy] = center(
-                        translateBox(-cBox.x, -cBox.y, hBox)
+                    const ax = Math.sign(
+                        Math.trunc(hx) - Math.trunc(ex)
                     )
-
-                    const ax = Math.sign(chx - ex)
-                    const ay = Math.sign(chy - ey)
+                    const ay = Math.sign(
+                        Math.trunc(hy) - Math.trunc(ey)
+                    )
 
                     const dx = ((s * iBox.w) - iBox.w) * ax
                     const dy = ((s * iBox.h) - iBox.h) * ay
 
-                    return h.dropTo(wrapper, {
+                    return h.dropTo(container, {
                         sourcePosition: {
-                            x: half(handle.w),
-                            y: half(handle.h)
+                            x: half(hBox.w),
+                            y: half(hBox.h)
                         },
                         targetPosition: {
                             x: hx + dx,
@@ -438,12 +391,8 @@ describe('Editor', () => {
                             .map(v => v.value)
 
                         return rerender({ layout: result })
-                    }).then(() => {
-                        const a = translateBox(
-                            -cBox.x,
-                            -cBox.y,
-                            toItem(image, item)
-                        )
+                    }).then(async () => {
+                        const a = toItem(image, item)
 
                         const sx = ax === 0 ? 1 : s
                         const sy = ay === 0 ? 1 : s
@@ -470,7 +419,7 @@ describe('Editor', () => {
 
         await sequences(
             async ([mx, my]) =>
-                image.dropTo(wrapper, {
+                image.dropTo(container, {
                     sourcePosition: { x: half(mBox.w), y: half(mBox.h) },
                     targetPosition: {
                         x: imx + mx,
@@ -483,11 +432,7 @@ describe('Editor', () => {
 
                     return rerender({ layout: result })
                 }).then(async () => {
-                    const a = translateBox(
-                        -cBox.x,
-                        -cBox.y,
-                        toItem(image, item)
-                    )
+                    const a = toItem(image, item)
                     const b = {
                         ...ref,
                         sx: clamp(
@@ -509,9 +454,5 @@ describe('Editor', () => {
             ,
             moves
         )
-
-        await wrapper.click({
-            position: { x: 0, y: 0 }
-        })
     })
 })

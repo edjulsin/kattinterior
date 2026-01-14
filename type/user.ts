@@ -2,12 +2,7 @@ export type User = {
     id: string,
     email: string,
     name: string,
-    avatar: {
-        id: string,
-        src: string,
-        width: number,
-        height: number
-    },
+    avatar: string,
     role: string,
     confirmed: boolean
 }

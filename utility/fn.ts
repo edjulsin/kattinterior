@@ -14,11 +14,11 @@ export const imageToItemScale = (image: Photo, item: Item) =>
 export const generateSizes = (aspectRatio: number, rws: number[], image: { width: number, height: number }) => {
     const vws = [384, 768, 1280]
     const rhs = rws.map(v => (1 / aspectRatio) * v)
-    const sizes = rws.map((w, i) => {
-        return [vws[i], Math.max(w / image.width, rhs[i] / image.height) * image.width]
-    })
     const scale = 1.5
-    return sizes.map(([vw, rw], i) => (i + 1) < rws.length ? `(max-width: ${vw}px) ${Math.ceil(rw * scale)}px` : `${Math.ceil(rw * scale)}px`).join(', ')
+    const sizes = rws.map((w, i) => {
+        return [vws[i], Math.min(Math.max(w / image.width, rhs[i] / image.height) * image.width * scale, image.width)]
+    })
+    return sizes.map(([vw, rw], i) => (i + 1) < rws.length ? `(max-width: ${vw}px) ${rw}px` : `${rw}px`).join(', ')
 }
 
 export const fileToUrl = (file: File | Blob): string => URL.createObjectURL(file)

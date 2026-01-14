@@ -2,8 +2,8 @@ import Bottom from '@/components/Bottom';
 import Image, { StaticImageData } from 'next/image';
 
 const Guide = (
-    { thumbnail: { src, alt, width, height }, title, description, contentTitle, contentList: [[headTitle, headDescription], ...contents], contactCopy }: {
-        thumbnail: { src: StaticImageData, alt: string, width: number, height: number },
+    { thumbnail: { src, alt }, title, description, contentTitle, contentList: [[headTitle, headDescription], ...contents], contactCopy }: {
+        thumbnail: { src: StaticImageData, alt: string },
         title: string,
         description: string[],
         contentTitle: string,
@@ -13,12 +13,10 @@ const Guide = (
     <>
         <section className='max-w-2xs md:max-w-sm xl:max-w-full grid grid-rows-[auto_auto_auto] xl:grid-rows-[1fr_auto] xl:grid-cols-[auto_1fr] justify-center items-center gap-10 xl:gap-y-0'>
             <Image
-                className='max-w-sm w-full aspect-[1_/_1.5] row-span-2 object-cover object-center rounded-tl-full rounded-tr-full'
+                className='max-w-sm w-full aspect-[1/1.5] row-span-2 object-cover object-center rounded-tl-full rounded-tr-full'
                 src={src}
                 alt={alt}
-                width={width}
-                height={height}
-                priority={true}
+                preload={true}
             />
             <div className='xl:max-w-xl flex flex-col gap-y-5'>
                 <h1 key={title} className='text-xl/relaxed md:text-2xl/relaxed xl:text-3xl/relaxed font-serif full-slide-from-bottom anim-delay-[300ms]'>{title}</h1>

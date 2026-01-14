@@ -57,8 +57,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/sanitize-html": "^2.16.0",
-    "@vitejs/plugin-react": "^5.1.1",
-    "@vitest/browser-playwright": "^4.0.14",
+    "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/browser": "^4.0.17",
+    "@vitest/browser-playwright": "^4.0.17",
     "eslint": "^9",
     "eslint-config-next": "15.1.7",
     "postcss": "^8.5.3",
@@ -67,8 +68,8 @@
     "supabase": "^2.65.7",
     "tailwindcss": "^4.1.4",
     "typescript": "^5",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.0.9",
+    "vite-tsconfig-paths": "^6.0.4",
+    "vitest": "^4.0.17",
     "vitest-browser-react": "^2.0.2"
   }
 }

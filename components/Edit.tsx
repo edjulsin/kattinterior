@@ -484,7 +484,7 @@ const RightHeader = ({ onPreview, published, onUnpublish, onPublish, menu, setMe
 							</span>
 							<span>Preview</span>
 						</DropdownMenu.Item>
-						<DropdownMenu.Separator className='h-[1px] my-0.5 bg-neutral-200 w-full' />
+						<DropdownMenu.Separator className='h-px my-0.5 bg-neutral-200 w-full' />
 						{
 							published
 								? <DropdownMenu.Item
@@ -1746,7 +1746,7 @@ const Edit = ({ project }: { project: Project }) => {
 	return (
 		<>
 			<section
-				className='min-h-[100dvh] size-full grid grid-rows-[auto_1fr_auto] place-items-center px-10'
+				className='min-h-dvh size-full grid grid-rows-[auto_1fr_auto] place-items-center px-10'
 				onClick={onClear}
 				onContextMenu={onClear}
 			>

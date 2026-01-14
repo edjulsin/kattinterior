@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import React from 'react'
-import Spinner from './Spinner'
 
 const Gallery = ({ heading, children, all }: { all: boolean, heading: string, children: React.ReactNode }) =>
     <section className='flex flex-col justify-center items-center gap-y-20 *:w-full'>
@@ -19,7 +18,7 @@ const Gallery = ({ heading, children, all }: { all: boolean, heading: string, ch
                 grid-flow-row-dense
                 md:grid-cols-2
                 xl:grid-cols-3
-                xl:[&>*]:row-span-4
+                xl:*:row-span-4
                 xl:[&>:nth-child(2)]:row-start-3
                 xl:[&>*:nth-child(3n+1)]:col-start-1
                 xl:[&>*:nth-child(3n+2)]:col-start-2

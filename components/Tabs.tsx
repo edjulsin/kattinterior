@@ -1,22 +1,21 @@
 'use client'
 
-import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const Tabs = ({ className }: { className?: string }) => {
+const Tabs = () => {
     const pathname = usePathname()
     return (
-        <ul className={clsx(className, 'grid grid-cols-2 items-center justify-center text-base font-semibold capitalize')}>
+        <ul className='*:w-full *:capitalize *:text-center flex gap-x-5 md:gap-x-10 items-center justify-center text-base font-bold capitalize'>
             <Link
-                className={clsx('text-center px-8 py-2 w-full capitalize opacity-50', { 'opacity-100': pathname === '/dashboard/projects' })}
-                href={'/dashboard/projects'}
+                className={pathname === '/dashboard/projects' ? 'opacity-100' : 'opacity-50'}
+                href='/dashboard/projects'
             >
                 projects
             </Link>
             <Link
-                className={clsx('text-center px-8 py-2 w-full capitalize opacity-50', { 'opacity-100': pathname === '/dashboard/contacts' })}
-                href={'/dashboard/contacts'}
+                className={pathname === '/dashboard/contacts' ? 'opacity-100' : 'opacity-50'}
+                href='/dashboard/contacts'
             >
                 contacts
             </Link>

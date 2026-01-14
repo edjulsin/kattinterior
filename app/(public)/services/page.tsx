@@ -71,12 +71,10 @@ const ServicesPage = async () =>
             '
         >
             <Image
-                className='rounded-tl-full rounded-tr-full w-full aspect-[2_/_3] max-w-md h-auto object-cover object-center'
+                className='rounded-tl-full rounded-tr-full w-full aspect-2/3 max-w-md h-auto object-cover object-center'
                 src={image1}
-                width={1080}
-                height={1350}
                 alt='Chaterina working in Gallery'
-                priority={true}
+                preload={true}
             />
             <div className='flex flex-col justify-center items-center gap-y-5 lg:items-baseline'>
                 <h1 className='font-serif text-base/loose md:text-lg/loose xl:text-xl/loose max-w-3xl slide-from-bottom anim-delay-[300ms]'>
@@ -115,19 +113,15 @@ const ServicesPage = async () =>
             >
                 <div className='col-span-2 col-start-1 row-start-1 row-span-2'>
                     <Image
-                        className='w-full aspect-[1_/_1.5] max-w-xs hidden md:block object-cover object-center'
+                        className='w-full aspect-[1/1.5] max-w-xs hidden md:block object-cover object-center'
                         src={image2}
-                        width={1080}
-                        height={1440}
                         alt='Chaterina working in Gallery'
                     />
                 </div>
                 <div className='parallax w-full col-span-2 col-start-2 row-start-2 row-span-2 rounded-tl-full rounded-tr-full'>
                     <Image
-                        className='z-10 aspect-[1_/_1.5] max-w-xs w-full object-cover object-center'
+                        className='z-10 aspect-[1/1.5] max-w-xs w-full object-cover object-center'
                         src={image3}
-                        width={1440}
-                        height={1080}
                         alt='Chaterina working in Gallery'
                     />
                 </div>
@@ -143,11 +137,9 @@ const ServicesPage = async () =>
         </section>
         <section className='flex flex-col xl:flex-row-reverse gap-y-10 justify-center items-center gap-x-10 max-w-2xs md:max-w-md xl:max-w-full'>
             <Image
-                className='w-full h-auto max-w-md xl:max-w-sm xl:aspect-[1_/_1.4] object-cover object-center'
+                className='w-full h-auto max-w-md xl:max-w-sm xl:aspect-[1/1.4] object-cover object-center'
                 src={image4}
                 alt='Beautifull custom wall decoration by Chaterina.'
-                width={1080}
-                height={1350}
             />
             <div className='flex flex-col justify-center gap-y-5 font-sans font-medium xl:max-w-md'>
                 <p className='text-base md:text-lg slide-from-bottom anim-delay-[100ms]'>

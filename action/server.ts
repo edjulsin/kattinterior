@@ -107,8 +107,23 @@ export const inviteByEmail = async (email: string) =>
 export const deleteMember = async (user: User) =>
     client().then(c =>
         getProfile(c).then(v =>
-            roles.includes(v.role)
-                ? deleteUser(user.id)
+            roles.includes(v.role) && v.id !== user.id
+                ? c.from('users').select('id, roles!inner(role)').eq('id', user.id).neq('id', v.id).limit(1).then(v =>
+                    v.error === null
+                        ? Promise.all(
+                            (v.data ?? ([])).map(v => {
+                                return {
+                                    id: v.id,
+                                    role: 'role' in v.roles ? v.roles.role : v.roles[0].role
+                                }
+                            }).filter(v =>
+                                v.role !== 'admin'
+                            ).map(v =>
+                                deleteUser(v.id)
+                            )
+                        )
+                        : Promise.reject(v.error)
+                )
                 : Promise.reject('You are not authorized.')
         )
     )

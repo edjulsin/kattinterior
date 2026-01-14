@@ -76,20 +76,12 @@ export const getUserByID = async (client: db, id: string) =>
                 : Promise.reject(v.error)
         )
 
-export const deleteUser = async (id: string) => {
-    const c = client()
-    return getUserByID(c, id).then(v =>
-        Promise.all(
-            v.filter(v => v.role !== 'admin').map(v =>
-                c.auth.admin.deleteUser(v.id).then(v =>
-                    v.error === null
-                        ? Promise.resolve(v.data)
-                        : Promise.reject(v.data)
-                )
-            )
-        )
+export const deleteUser = async (id: string) =>
+    client().auth.admin.deleteUser(id).then(v =>
+        v.error === null
+            ? Promise.resolve(v.data)
+            : Promise.reject(v.error)
     )
-}
 
 export const inviteUser = async (admin: string, email: string) => {
     const c = client()
@@ -110,12 +102,12 @@ export const inviteUser = async (admin: string, email: string) => {
                 })
             )
         } else {
-            return c.auth.admin.inviteUserByEmail(email, { data: { name: '', avatar: null } }).then(async v => {
+            return c.auth.admin.inviteUserByEmail(email, { data: { name: '', avatar: '' } }).then(async v => {
                 if(v.error === null && v.data.user.email) {
                     const user = {
                         id: v.data.user.id,
                         email: email,
-                        avatar: null,
+                        avatar: '',
                         name: '',
                         confirmed: false,
                         role: 'contributor'

@@ -20,24 +20,14 @@ const selectors = [
     '.parallax'
 ]
 
-
-const onIntersect = (entries: IntersectionObserverEntry[]) =>
-    entries.forEach(entry => {
-        const el = entry.target as HTMLElement
-        const intersecting = entry.isIntersecting ? 'true' : 'false'
-        const intersected = el.dataset.intersected === 'true' ? 'true' : intersecting
-
-        el.dataset.intersected = intersected
-        el.dataset.intersecting = intersecting
-    })
-
+const onIntersect = (entries: IntersectionObserverEntry[]) => { }
 
 const Intersector = ({ children }: { children?: React.ReactNode }) =>
     <Intersection
-        selectors={ selectors }
-        callback={ onIntersect }
+        selectors={selectors}
+        callback={onIntersect}
     >
-        { children ?? null }
+        {children ?? null}
     </Intersection>
 
 export default Intersector

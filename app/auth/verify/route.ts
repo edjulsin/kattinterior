@@ -34,7 +34,9 @@ export const GET = async (request: NextRequest) =>
     otp(request.url).then(otp =>
         verifyToken(otp).then(v =>
             Promise.all(
-                ([v.user?.id ?? '']).filter(v => v && ['signup', 'invite'].includes(otp.type)).map(confirmUser)
+                [v.user?.id ?? ''].filter(v =>
+                    v && ['signup', 'invite'].includes(otp.type)
+                ).map(confirmUser)
             )
         )
     ).then(

@@ -4,6 +4,7 @@ import Articles from '@/components/Articles'
 import Bottom from '@/components/Bottom'
 import Gallery from '@/components/Gallery'
 import Schema from '@/components/Schema'
+import Spinner from '@/components/Spinner'
 import pageMeta from '@/meta/page'
 import projectsSchema from '@/schemas/projectsSchema'
 import { Project } from '@/type/editor'
@@ -41,6 +42,7 @@ const ProjectsPage = async () => getPublishedProjects(0, count - 1).then(
                             index={i}
                             key={v.id}
                             project={v}
+                            loading={i < 3 ? 'eager' : 'lazy'}
                         />
                     )
                 }

@@ -23,9 +23,7 @@ const ResidentialPage = () =>
         <Guide
             thumbnail={{
                 src: image,
-                alt: 'Villa Arunika by Chaterina',
-                width: 1080,
-                height: 1440
+                alt: 'Villa Arunika by Chaterina'
             }}
             title='Design Packages'
             description={[

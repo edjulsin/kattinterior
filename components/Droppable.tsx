@@ -12,7 +12,7 @@ const Droppable = ({
     children: React.ReactNode,
     id?: string,
     className?: string,
-    onDrop: (files: File[]) => Promise<void>,
+    onDrop: (files: File[]) => any,
     noDragsEventBubbling?: boolean,
     noClick?: boolean,
     autoFocus?: boolean

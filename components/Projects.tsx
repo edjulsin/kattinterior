@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import { AccessibleIcon, DropdownMenu } from 'radix-ui'
 import { useCallback, useState } from 'react'
 import { createProject, getAllProjects, getDraftProjects, getFeaturedProjects, getNewestProjects, getOldestProjects, getPublishedProjects, getRecentProjects, searchProjects } from '@/action/client'
-import { debounce, formatISODate, getThumbnails } from '@/utility/fn'
+import { debounce, formatISODate, generateSizes, getThumbnails } from '@/utility/fn'
 import Loader from './Loader'
 import Message from './Message'
 import clsx from 'clsx'
@@ -115,9 +115,10 @@ const List = ({ projects }: { projects: Project[] }) => {
                                         <Image
                                             className='w-70 h-90 object-cover object-center'
                                             src={thumbnail.src}
+                                            alt={thumbnail.alt}
                                             width={thumbnail.width}
                                             height={thumbnail.height}
-                                            alt={thumbnail.alt}
+                                            sizes={generateSizes(280 / 360, [280], thumbnail)}
                                         />
                                         {
                                             project.featured
@@ -206,7 +207,7 @@ const Projects = ({ fetchCount, projects }: { fetchCount: number, projects: Proj
         }
     }
 
-    const onIntersecting = (entries: IntersectionObserverEntry[]) => {
+    const onIntersect = (entries: IntersectionObserverEntry[]) => {
         const intersects = entries.filter(v => v.isIntersecting)
 
         if(search) {
@@ -264,28 +265,28 @@ const Projects = ({ fetchCount, projects }: { fetchCount: number, projects: Proj
 
     return (
         <section className='w-full flex flex-col justify-center items-center text-base'>
-            <div className='z-50 sticky top-0 py-10 rounded-lg grid grid-cols-2 md:grid-cols-3 font-semibold size-full items-center justify-between text-sm md:text-base *:px-3 *:py-1.5'>
+            <header className='z-50 sticky top-15 flex justify-between items-center md:grid md:grid-cols-3 rounded-lg font-semibold size-full text-sm md:text-base *:px-3 *:py-1.5'>
                 <button
-                    className='flex bg-light dark:bg-dark outline-neutral-200 outline-1 justify-center items-center gap-x-1 cursor-pointer rounded-lg justify-self-start group hover:bg-amber-600 hover:text-light'
+                    className='flex bg-light dark:bg-dark outline-neutral-200 outline-1 justify-center items-center md:justify-self-start gap-x-1 cursor-pointer rounded-lg hover:bg-amber-600 hover:text-light'
                     onClick={action}
                 >
                     <span>New Project</span>
                     <span><PlusIcon /></span>
                 </button>
-                <div className='flex justify-center items-center bg-light dark:bg-dark rounded-xl justify-self-end md:justify-self-center outline-1 outline-neutral-200 focus-within:outline-amber-600 transition-colors'>
+                <div className='hidden md:flex justify-center md:justify-self-center items-center gap-x-2 bg-light dark:bg-dark rounded-xl outline-1 outline-neutral-200 focus-within:outline-amber-600 transition-colors'>
                     <MagnifyingGlassIcon className='text-gold-900' />
-                    <input value={search} onChange={e => onSearch(e.target.value)} className='max-h-6 max-w-30 size-full p-2 outline-1 outline-transparent' placeholder='Find projects...' />
+                    <input value={search} onChange={e => onSearch(e.target.value)} className='size-full min-w-3xs outline-1 outline-transparent' placeholder='Find projects...' />
                 </div>
-                <Filter filter={filter} onFilterChange={onFilterChange} className='hidden md:flex bg-light dark:bg-dark justify-self-end outline-1 outline-neutral-200 hover:bg-amber-600 hover:text-light' />
-            </div>
-            <section className='py-15 flex flex-col justify-center items-center gap-y-5'>
+                <Filter filter={filter} onFilterChange={onFilterChange} className='md:justify-self-end bg-light dark:bg-dark outline-1 outline-neutral-200 hover:bg-amber-600 hover:text-light' />
+            </header>
+            <section className='flex flex-col justify-center items-center gap-y-20 py-20'>
                 <List projects={filtered} />
                 {filtered.length === 0 && (!loader) ? <Message message={'No projects found'} /> : null}
                 {error ? <Message message='Database error' /> : null}
                 <Loader
                     key={(filter + search).length + result.length + data.length}
                     enabled={loader}
-                    callback={onIntersecting}
+                    callback={onIntersect}
                 />
             </section>
         </section>

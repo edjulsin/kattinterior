@@ -1,6 +1,6 @@
-# Katt Interior — Interior Design Portfolio & Blog Platform
+# Katt - Interior Design CMS
 
-Katt Interior is a portfolio and blogging platform built for an interior design studio, with a strong focus on visual storytelling, performance, and search engine visibility. The goal was to create a website that feels premium and image-driven while remaining fast, accessible, and easy to manage for non-technical users.
+Katt is a portfolio and CMS built for an interior design studio, with a strong focus on visual storytelling, performance, and search engine visibility. The goal was to create a website that feels premium and image-driven while remaining fast, accessible, and easy to manage for non-technical users.
 
 <p align='center'>
   <img src="./assets/screenshots/1.gif" alt="Katt Hero" style="width: 60%;">
@@ -16,7 +16,7 @@ The application is built with **Next.js (App Router)**, **TypeScript**, **Supaba
 
 ## Project Overview
 
-Katt Interior is a visual-first portfolio and blog platform built for an interior design studio. It combines Server-Side Rendering and Incremental Static Regeneration to deliver fast, SEO-friendly pages while handling large, high-resolution images efficiently.
+Katt is a visual-first portfolio and CMS built for an interior design studio. It combines Server-Side Rendering and Incremental Static Regeneration to deliver fast, SEO-friendly pages while handling large, high-resolution images efficiently.
 
 The platform includes a custom drag-and-drop editor designed for non-technical users, producing clean, semantic HTML for both performance and search engines. Authentication and role-based access are handled with Supabase and enforced through Row-Level Security, while the UI is built with accessible components (Radix UI) and styled using Tailwind CSS.
 
